@@ -52,7 +52,7 @@ git clone 'https://github.com/rit-git/ginza.git'
 #### 2. Download system.dic.tgz
 Download the latest core-dictionary archive from below link and extract dic file as 'system.dic' on project root.
 
-[Sudachi Release Page](https://github.com/WorksApplications/Sudachi/releases/download/v0.1.1/)
+[Sudachi Release Page](https://github.com/WorksApplications/Sudachi/releases/)
 #### 3. Run setup.sh
 ```
 ./setup.sh
@@ -61,7 +61,6 @@ Download the latest core-dictionary archive from below link and extract dic file
 If you have embedding_corpus/ and ud_japanese/ in your project directory, run below.
 ```
 shell/build.sh ginza 0.5.1 embedding_corpus/ ud_japanese/
-
 ```
 After a while, you will find pip installable archive.
 ```
