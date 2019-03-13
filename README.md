@@ -12,7 +12,7 @@ GiNZA NLP Library is distributed under the MIT License
 spaCy is the key framework of GiNZA.
 [LICENSE](https://github.com/explosion/spaCy/blob/master/LICENSE)
 
-### Sudachi and Sudachiy
+### Sudachi and SudachiPy
 SudachiPy gains much accuracy for Japanese Universal Dependency analysis tasks.
 [LICENSE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
 
