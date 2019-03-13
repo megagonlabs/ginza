@@ -1,0 +1,6 @@
+@ARTICLE{GiNZA NLP,
+   AUTHOR  = {Hiroshi, Mai and Masayuki},
+   TITLE   = {短単位品詞の用法曖昧性解決と依存関係ラベリングの同時学習},
+   YEAR    = {2019},
+   JOURNAL = {言語処理学会第25回年次大会}
+}
