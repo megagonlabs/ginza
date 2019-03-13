@@ -5,6 +5,17 @@ GiNZA is still beta version and pre-trained models are not included. We're almos
 
 Please see [GiNZA NLP git repository](https://github.com/rit-git/ginza.git) too.
 
+## License
+GiNZA NLP Library is distributed under the MIT License
+
+### spaCy
+spaCy is key framework of GiNZA.
+[LICENSE](https://github.com/explosion/spaCy/blob/master/LICENSE)
+
+### Sudachi and Sudachiy
+SudachiPy gains a lot accuracy for Japanese Universal Dependency analysis.
+[LICENSE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
+
 ## Runtime Environment
 This project is developed with python 3.6.8 (not python 3.7) and pip for it.
 
