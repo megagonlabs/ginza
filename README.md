@@ -29,7 +29,7 @@ The word embeddings from entire Japanese Wikipedia is 50MB.
 Coming soon!
 #### 2. Install
 ```
-pip install ja_ginza-x.x.x.tgz
+pip install ja_ginza_bccwj-x.x.x.tgz
 ```
 And then, you can delete downloaded archive.
 #### 3. Test
@@ -51,6 +51,8 @@ for sent in doc.sents:
 ### APIs
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
+### ja_ginza-0.5.2 (2019-03-22)
+Second beta version
 ### ja_ginza-0.5.0 (2019-03-13)
 First beta version
 
@@ -60,20 +62,16 @@ First beta version
 ```
 git clone 'https://github.com/rit-git/ginza.git'
 ```
-#### 2. Download system.dic.tgz
-Download the latest core-dictionary archive from below link and extract dic file as 'system.dic' on project root.
-
-[Sudachi Release Page](https://github.com/WorksApplications/Sudachi/releases/)
-#### 3. Run setup.sh
+#### 2. Run setup.sh
 ```
 ./setup.sh
 ```
 ### Training
-If you have embedding_corpus/ and ud_japanese/ in your project directory, run below.
+If you have embedding/, bccwj_ud/, and kwdlc/ in your project directory, run below.
 ```
-shell/build.sh ginza 0.5.1 embedding_corpus/ ud_japanese/
+shell/build.sh bccwj 0.5.3
 ```
 After a while, you will find pip installable archive.
 ```
-target/ja_ginza-0.5.1.tgz
+target/ja_ginza-0.5.3.tgz
 ```

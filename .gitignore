@@ -1,0 +1,14 @@
+/.idea/
+/bccwj*/
+/embedding*/
+/ja_ginza/resources/system_core.dic
+/kwdlc*/
+/models/
+/nopn*/
+/old/
+/target/
+/test/
+/log*
+__pycache__/
+*.pyc
+

@@ -1,0 +1,3 @@
+[submodule "sudachipy"]
+	path = sudachipy
+	url = https://github.com/WorksApplications/SudachiPy.git
