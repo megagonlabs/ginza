@@ -119,10 +119,13 @@ class SudachiTokenizer(object):
 
         with open(str(setting_path), "r", encoding="utf-8") as f:
             settings = json.load(f)
-        settings['systemDict'] = str(resources_path / settings['systemDict'])
-        settings['characterDefinitionFile'] = str(resources_path / settings['characterDefinitionFile'])
-        settings['oovProviderPlugin'][0]['charDef'] = str(resources_path / settings['oovProviderPlugin'][0]['charDef'])
-        settings['oovProviderPlugin'][0]['unkDef'] = str(resources_path / settings['oovProviderPlugin'][0]['unkDef'])
+        settings['systemDict'] = str(resources_path / settings.get('systemDict', 'system_core.dic'))
+        settings['characterDefinitionFile'] = str(resources_path / settings.get('characterDefinitionFile', 'char.def'))
+        if 'oovProviderPlugin' in settings:
+            for plugin in settings['oovProviderPlugin']:
+                if plugin['class'] == 'com.worksap.nlp.sudachi.MeCabOovProviderPlugin':
+                    plugin['charDef'] = str(resources_path / plugin.get('charDef', 'char.def'))
+                    plugin['unkDef'] = str(resources_path / plugin.get('unkDef', 'unk.def'))
 
         dict_ = dictionary.Dictionary(settings)
         self.tokenizer = dict_.create()

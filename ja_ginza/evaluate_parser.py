@@ -255,7 +255,7 @@ def is_correct_dep(g, r):
            g.dep_morph.offset >= r.dep_morph.offset and g.dep_morph.end <= r.dep_morph.end
 
 
-def evaluate_parse_result(stats, gold, result, morph_custom_condition, print_input=False, debug=True):
+def evaluate_parse_result(stats, gold, result, morph_custom_condition, print_input=False, debug=False):
 
     if print_input:
         print()
