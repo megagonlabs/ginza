@@ -17,6 +17,7 @@ from .sudachi_tokenizer import SUDACHI_DEFAULT_MODE
     disable_pipes=("disable pipes (csv)", "option", "d"),
     recreate_corrector=("recreate corrector", "flag", "c"),
     output_path=("output path", "option", "o", Path),
+    require_gpu=("enable require_gpu", "flag", "g"),
 )
 def main(
         corpus_type=None,
@@ -26,9 +27,12 @@ def main(
         disable_pipes='',
         recreate_corrector=False,
         output_path=None,
+        require_gpu=False,
         *lines,
 ):
-    spacy.prefer_gpu()
+    if require_gpu:
+        spacy.require_gpu()
+        print("GPU enabled", file=sys.stderr)
     nlp = load_model(model_path)
     if disable_pipes:
         print("disabling pipes: {}".format(disable_pipes), file=sys.stderr)

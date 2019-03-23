@@ -1,4 +1,3 @@
-/.idea/
 /bccwj*/
 /embedding*/
 /ja_ginza/resources/system_core.dic
@@ -6,6 +5,8 @@
 /models/
 /nopn*/
 /old/
+/submodules/
+/sudachipy/
 /target/
 /test/
 /log*
