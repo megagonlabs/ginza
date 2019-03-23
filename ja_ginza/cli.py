@@ -14,24 +14,25 @@ from .sudachi_tokenizer import SUDACHI_DEFAULT_MODE
     model_path=("model directory path", "option", "b", str),
     mode=("sudachi mode", "option", "m", str),
     use_sentence_separator=("enable sentence separator", "flag", "s"),
-    require_gpu=("enable require_gpu", "flag", "g"),
     disable_pipes=("disable pipes (csv)", "option", "d"),
     recreate_corrector=("recreate corrector", "flag", "c"),
     output_path=("output path", "option", "o", Path),
+    require_gpu=("enable require_gpu", "flag", "g"),
 )
 def main(
         corpus_type=None,
         model_path=None,
         mode=SUDACHI_DEFAULT_MODE,
         use_sentence_separator=False,
-        require_gpu=False,
         disable_pipes='',
         recreate_corrector=False,
         output_path=None,
+        require_gpu=False,
         *lines,
 ):
     if require_gpu:
         spacy.require_gpu()
+        print("GPU enabled", file=sys.stderr)
     nlp = load_model(model_path)
     if disable_pipes:
         print("disabling pipes: {}".format(disable_pipes), file=sys.stderr)

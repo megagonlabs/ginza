@@ -4,6 +4,7 @@ from __future__ import unicode_literals, print_function
 import datetime
 import plac
 import random
+import spacy
 from . import *
 from .bccwj_ud_corpus import convert_files
 from .corpus import *
@@ -20,9 +21,10 @@ from .parse_tree import rewrite_by_tokenizer
     mini_batch_size=("Number of mini batch size", "option", "m", int),
     max_epochs=("Number of max epochs (default=32)", "option", "p", int),
     online_sgd_max_epochs=("Number of online SGD max epochs (default=0)", "option", "s", int),
-    give_up_iter=("Number of parser training give-up iterations", "option", "g", int),
+    give_up_iter=("Number of parser training give-up iterations", "option", "u", int),
     evaluation_corpus_path=("Evaluation corpus path", "option", "e", Path),
     output_base_path=("Output base path (default=model_path)", "option", "o", Path),
+    require_gpu=("enable require_gpu", "flag", "g"),
 )
 def train_from_file(
         input_path,
@@ -37,7 +39,11 @@ def train_from_file(
         give_up_iter=3,
         evaluation_corpus_path=None,
         output_base_path=None,
+        require_gpu=False,
 ):
+    if require_gpu:
+        spacy.require_gpu()
+        print("GPU enabled", file=sys.stderr)
     if corpus_type == 'bccwj_ud':
         corpus = convert_files(input_path)
         if evaluation_corpus_path:

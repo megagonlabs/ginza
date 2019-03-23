@@ -4,6 +4,7 @@ from __future__ import unicode_literals, print_function
 import datetime
 import plac
 import random
+import spacy
 from . import *
 from .corpus import *
 from .evaluate_ner import convert_files, evaluate
@@ -16,9 +17,10 @@ from .evaluate_ner import convert_files, evaluate
     mini_batch_size=("Number of mini batch size", "option", "m", int),
     max_epochs=("Number of max epochs (default=32)", "option", "p", int),
     online_sgd_max_epochs=("Number of online SGD max epochs (default=0)", "option", "s", int),
-    give_up_iter=("Number of training give-up iterations", "option", "g", int),
+    give_up_iter=("Number of training give-up iterations", "option", "u", int),
     evaluation_corpus_path=("Evaluation corpus path", "option", "e", Path),
     output_base_path=("Output base path (default=model_path)", "option", "o", Path),
+    require_gpu=("enable require_gpu", "flag", "g"),
 )
 def train_parser_from_file(
         input_json_path,
@@ -31,7 +33,11 @@ def train_parser_from_file(
         give_up_iter=3,
         evaluation_corpus_path=None,
         output_base_path=None,
+        require_gpu=False,
 ):
+    if require_gpu:
+        spacy.require_gpu()
+        print("GPU enabled", file=sys.stderr)
     corpus = convert_files(input_json_path)
     if evaluation_corpus_path:
         evaluation_gold = convert_files(evaluation_corpus_path)

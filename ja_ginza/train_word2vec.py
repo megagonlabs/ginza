@@ -5,6 +5,7 @@ import plac
 from pathlib import Path
 import pickle
 import sys
+import spacy
 from gensim.models import Word2Vec
 from . import Japanese, create_model_path
 from .corpus import sentence_iter
@@ -21,10 +22,11 @@ from .bccwj_ud_corpus import read_bccwj_ud
     vocab_size=("Vocab size (default=100000)", "option", "s", int),
     min_count=("Min count (default=5)", "option", "c", int),
     window=("Context window size (default=7)", "option", "w", int),
-    negative=("Number of negative samples (default=5)", "option", "g", int),
+    negative=("Number of negative samples (default=5)", "option", "p", int),
     n_workers=("Number of workers (default=8)", "option", "k", int),
     epochs=("Epochs (default=2)", "option", "e", int),
     output_dir=("Output directory (default='.')", "option", "o", Path),
+    require_gpu=("enable require_gpu", "flag", "g"),
 )
 def train_word2vec_from_file(
         corpus_type='sudachi_b',
@@ -39,8 +41,12 @@ def train_word2vec_from_file(
         n_workers=8,
         epochs=2,
         output_dir=Path('.'),
+        require_gpu=False,
         input_path=[],
 ):
+    if require_gpu:
+        spacy.require_gpu()
+        print("GPU enabled", file=sys.stderr)
     if corpus_type == 'sudachi_a':
         corpus_reader = read_sudachi_a
     elif corpus_type == 'sudachi_b':
