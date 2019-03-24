@@ -4,21 +4,27 @@ from __future__ import unicode_literals, print_function
 import json
 import os
 from pathlib import Path
-import plac
 import sys
+import plac
+import spacy
 from . import *
 
 
 @plac.annotations(
     model_path=("Model directory path", "option", "b", Path),
+    require_gpu=("enable require_gpu", "flag", "g"),
 )
 def evaluate_from_file(
         input_json_path,
         model_path=None,
+        require_gpu=False,
         print_stats=True,
         nlp=None,
 ):
     corpus = convert_files(input_json_path)
+    if require_gpu:
+        spacy.require_gpu()
+        print("GPU enabled", file=sys.stderr)
     return evaluate(corpus, model_path, print_stats, nlp)
 
 

@@ -2,8 +2,9 @@
 from __future__ import unicode_literals, print_function
 
 from pathlib import Path
-import plac
 import sys
+import plac
+import spacy
 from .bccwj_ud_corpus import convert_files
 from . import *
 from .parse_tree import create_parsed_sentences, rewrite_by_tokenizer
@@ -15,6 +16,7 @@ from .parse_tree import create_parsed_sentences, rewrite_by_tokenizer
     parse_result_path=("Parse result path", "option", "p", Path),
     keep_gold_tokens=("Never rewrite gold corpus", "flag", "x"),
     evaluate_all_combinations=("Evaluate all combinations", "flag", "a"),
+    require_gpu=("enable require_gpu", "flag", "g"),
 )
 def evaluate_from_file(
         path,
@@ -23,9 +25,13 @@ def evaluate_from_file(
         parse_result_path=None,
         keep_gold_tokens=False,
         evaluate_all_combinations=False,
+        require_gpu=False,
         print_file=sys.stdout,
         nlp=None,
 ):
+    if require_gpu:
+        spacy.require_gpu()
+        print("GPU enabled", file=sys.stderr)
     parse_results = None
     if corpus_type == 'bccwj_ud':
         gold = convert_files(path)
