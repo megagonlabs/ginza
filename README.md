@@ -3,7 +3,7 @@ GiNZA - An Open Source NLP Library for Japanese Universal Dependencies using spa
 
 GiNZA is still beta version and pre-trained models are not included. We're almost ready to release a formal version with full features. Please keep waiting.
 
-Please see [GiNZA NLP git repository](https://github.com/rit-git/ginza.git) too.
+Please see [GiNZA NLP git repository](https://github.com/megagonlabs/ginza.git) too.
 
 ## License
 GiNZA NLP Library is distributed under the MIT License
