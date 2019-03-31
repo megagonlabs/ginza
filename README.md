@@ -1,21 +1,22 @@
 # GiNZA
-GiNZA - An Open Source NLP Library for Japanese Universal Dependencies using spaCy and SudachiPy
+GiNZA - An Open Source Japanese NLP Library based on Universal Dependencies
 
-Please see [GiNZA NLP git repository](https://github.com/megagonlabs/ginza.git) too.
+[git repository](https://github.com/megagonlabs/ginza.git)
 
 ## License
-GiNZA NLP Library is distributed under the MIT License
+GiNZA NLP Library is distributed under [The MIT License](https://github.com/megagonlabs/LICENSE)
 
 ### spaCy
 spaCy is the key framework of GiNZA.
-[LICENSE](https://github.com/explosion/spaCy/blob/master/LICENSE)
+[spaCy LICENSE PAGE](https://github.com/explosion/spaCy/blob/master/LICENSE)
 
 ### Sudachi and SudachiPy
 SudachiPy provides high accuracies for tokenization and pos tagging.
-[LICENSE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
+[Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
+[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
 
 ## Runtime Environment
-This project is developed with python 3.6.8 (not python 3.7) and pip for it.
+This project is developed with ython 3.7 and pip for it.
 
 The footprint of this project is about 250MB.
 Sudachi dictionary is 200MB.
@@ -37,7 +38,7 @@ Run following line and input some Japanese text + Enter, then you can see the pa
 ```
 python -m spacy.lang.ja_ginza.cli
 ```
-### Simple example
+### Coding example
 Following steps shows dependency parsing results with sentence boundary 'EOS'.
 ```
 import spacy
@@ -55,12 +56,12 @@ Please see [spaCy API documents](https://spacy.io/api/).
 First release version
 
 ## Development Environment
-### Set up
+### Development set up
 #### 1. Clone from github
 ```
 git clone --recursive 'https://github.com/megagonlabs/ginza.git'
 ```
-#### 2. Run setup.sh
+#### 2. Run ./setup.sh
 For normal environment:
 ```
 ./setup.sh
@@ -70,7 +71,7 @@ For GPU environment(cuda92):
 ./setup_cuda92.sh
 ```
 ### Training
-If you have nopn_embedding/, nopn/, and kwdlc/ in your project directory, run below.
+Prepare nopn_embedding/, nopn/, and kwdlc/ in your project directory, then run below.
 ```
 shell/build.sh nopn 1.0.1
 ```
