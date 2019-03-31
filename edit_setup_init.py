@@ -5,7 +5,7 @@ from ja_ginza import Japanese
 
 def main():
     edit_map = {
-        """    requirements = [parent_package + ">=" + meta['spacy_version']]""":
+        """    requirements = [parent_package + meta['spacy_version']]""":
             """    requirements = [parent_package + "==" + (meta['spacy_version'][2:] if meta['spacy_version'].startswith('>=') else meta['spacy_version'])]""",
         "        packages=[model_name],":
             "        packages = [model_name, 'spacy.lang.{}','sudachipy'],".format(Japanese.lang),

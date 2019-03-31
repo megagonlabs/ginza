@@ -63,6 +63,7 @@ def main(
     else:
         output = sys.stdout
 
+    line = '<init>'
     try:
         if corpus_type:
             if corpus_type == 'bccwj_ud':
@@ -85,6 +86,9 @@ def main(
         pass
     except KeyboardInterrupt:
         pass
+    except Exception as e:
+        print(e, file=sys.stderr)
+        print('exception raised while analyzing the line:', line, file=sys.stderr)
     finally:
         output.close()
 

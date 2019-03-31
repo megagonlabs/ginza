@@ -1,23 +1,22 @@
-# GiNZA NLP BETA
-GiNZA - An Open Source NLP Library for Japanese Universal Dependencies using spaCy and SudachiPy
+# GiNZA
+GiNZA - An Open Source Japanese NLP Library based on Universal Dependencies
 
-GiNZA is still beta version and pre-trained models are not included. We're almost ready to release a formal version with full features. Please keep waiting.
-
-Please see [GiNZA NLP git repository](https://github.com/megagonlabs/ginza.git) too.
+[git repository](https://github.com/megagonlabs/ginza.git)
 
 ## License
-GiNZA NLP Library is distributed under the MIT License
+GiNZA NLP Library is distributed under [The MIT License](https://github.com/megagonlabs/LICENSE)
 
 ### spaCy
 spaCy is the key framework of GiNZA.
-[LICENSE](https://github.com/explosion/spaCy/blob/master/LICENSE)
+[spaCy LICENSE PAGE](https://github.com/explosion/spaCy/blob/master/LICENSE)
 
 ### Sudachi and SudachiPy
-SudachiPy gains much accuracy for Japanese Universal Dependency analysis tasks.
-[LICENSE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
+SudachiPy provides high accuracies for tokenization and pos tagging.
+[Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
+[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
 
 ## Runtime Environment
-This project is developed with python 3.6.8 (not python 3.7) and pip for it.
+This project is developed with ython 3.7 and pip for it.
 
 The footprint of this project is about 250MB.
 Sudachi dictionary is 200MB.
@@ -25,19 +24,21 @@ The word embeddings from entire Japanese Wikipedia is 50MB.
 
 (Please see Development Environment section located on bottom too)
 ### Runtime set up
-#### 1. Download GiNZA pip archive
-Coming soon!
-#### 2. Install
+#### 1. Install GiNZA
+Run following line
 ```
-pip install ja_ginza_bccwj-x.x.x.tgz
+pip install ginza
 ```
-And then, you can delete downloaded archive.
-#### 3. Test
-Run following line and input some Japanese text + Enter, then you can see the parsed results.
+or download pip install archive and specify it as below.
+```
+pip install ja_ginza_nopn-1.0.0.tar.gz
+```
+#### 2. Test
+Run following line and input some Japanese text + Enter, then you can see the parsed results with conll format.
 ```
 python -m spacy.lang.ja_ginza.cli
 ```
-### Simple example
+### Coding example
 Following steps shows dependency parsing results with sentence boundary 'EOS'.
 ```
 import spacy
@@ -45,33 +46,38 @@ nlp = spacy.load('ja_ginza')
 doc = nlp('依存構造解析の実験を行っています。')
 for sent in doc.sents:
     for token in sent:
-        print(token.i, token.orth_, token.pos_, token.dep_, token.head.i)
+        print(token.i, token.orth_, token.lemma_, token.pos_, token.dep_, token.head.i)
     print('EOS')
 ```
 ### APIs
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
-### ja_ginza-0.5.2 (2019-03-22)
-Second beta version
-### ja_ginza-0.5.0 (2019-03-13)
-First beta version
+### ja_ginza_nopn-1.0.0 (2019-04-01)
+First release version
 
 ## Development Environment
-### Set up
+### Development set up
 #### 1. Clone from github
 ```
-git clone 'https://github.com/rit-git/ginza.git'
+git clone --recursive 'https://github.com/megagonlabs/ginza.git'
 ```
-#### 2. Run setup.sh
+#### 2. Run ./setup.sh
+For normal environment:
 ```
 ./setup.sh
 ```
+For GPU environment(cuda92):
+```
+./setup_cuda92.sh
+```
 ### Training
-If you have embedding/, bccwj_ud/, and kwdlc/ in your project directory, run below.
+Prepare nopn_embedding/, nopn/, and kwdlc/ in your project directory, then run below.
 ```
-shell/build.sh bccwj 0.5.3
+shell/build.sh nopn 1.0.1
 ```
+You can speed up training and analyze process by adding -g option if GPUs available.
+
 After a while, you will find pip installable archive.
 ```
-target/ja_ginza-0.5.3.tgz
+target/ja_ginza_nopn-1.0.1.tgz
 ```
