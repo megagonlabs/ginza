@@ -4,7 +4,7 @@ GiNZA - An Open Source Japanese NLP Library based on Universal Dependencies
 [git repository](https://github.com/megagonlabs/ginza.git)
 
 ## License
-GiNZA NLP Library is distributed under [The MIT License](https://github.com/megagonlabs/LICENSE)
+GiNZA NLP Library is distributed under [The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE)
 
 ### spaCy
 spaCy is the key framework of GiNZA.
@@ -12,11 +12,11 @@ spaCy is the key framework of GiNZA.
 
 ### Sudachi and SudachiPy
 SudachiPy provides high accuracies for tokenization and pos tagging.
-[Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
-[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
+[Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
+[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
 ## Runtime Environment
-This project is developed with ython 3.7 and pip for it.
+This project is developed with Python 3.7 and pip for it.
 
 The footprint of this project is about 250MB.
 Sudachi dictionary is 200MB.
@@ -52,7 +52,8 @@ for sent in doc.sents:
 ### APIs
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
-### ja_ginza_nopn-1.0.0 (2019-04-01)
+### version 1.0
+#### ja_ginza_nopn-1.0.0 (2019-04-01)
 First release version
 
 ## Development Environment

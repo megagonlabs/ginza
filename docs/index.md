@@ -1,19 +1,24 @@
 # GiNZA
-GiNZA - Universal Dependenciesに基づくオープンソース日本語NLPライブラリ
+[GiNZA](https://github.com/megagonlabs/ginza.git) - Universal Dependenciesに基づくオープンソース日本語NLPライブラリ
 
-[git repository](https://github.com/megagonlabs/ginza.git)
+[NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf)
+
+論文発表資料(coming soon)
+
 
 ## ライセンス
-GiNZAは[The MIT License](https://github.com/megagonlabs/LICENSE)のもとで利用できます。
+GiNZAは[The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE)の許諾のもとで利用できます。
 
 ### spaCy
 GiNZAはspaCyをNLP Frameworkとして使用しています。
+
 [spaCy LICENSE PAGE](https://github.com/explosion/spaCy/blob/master/LICENSE)
 
 ### SudachiおよびSudachiPy
 GiNZAはトークン化（形態素解析）処理にSudachiPyを使用することで、高い解析精度を得ています。
-[Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
-[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt)
+
+[Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
+[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE-2.0.txt)
 
 ## 実行環境
 このプロジェクトは Python 3.7 および、対応する pip 環境で動作検証を行っています。
@@ -49,9 +54,10 @@ for sent in doc.sents:
     print('EOS')
 ```
 ### API
-解析方法の詳細は[spaCy API documents](https://spacy.io/api/)でご確認ください。
-## リリース
-### ja_ginza_nopn-1.0.0 (2019-04-01)
+詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
+## リリース履歴
+### version 1.0
+#### ja_ginza_nopn-1.0.0 (2019-04-01)
 初回リリース
 
 ## 開発環境
@@ -74,9 +80,9 @@ nopn_embedding/, nopn/, kwdlc/ のそれぞれのディレクトを用意して�
 ```
 shell/build.sh nopn 1.0.1
 ```
-GPU環境の場合は-gオプションを追加することで訓練と解析を高速化できる。
+GPU環境の場合は-gオプションを追加することで訓練と解析を高速化できます。
 
-訓練が終了すると次のpipインストールアーカイブが作成される。
+訓練が終了すると次のpipインストールアーカイブが作成されます。
 ```
 target/ja_ginza_nopn-1.0.1.tgz
 ```
