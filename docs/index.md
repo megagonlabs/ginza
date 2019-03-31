@@ -1,10 +1,8 @@
-# GiNZA
-[GiNZA](https://github.com/megagonlabs/ginza.git) - Universal Dependenciesに基づくオープンソース日本語NLPライブラリ
+# GiNZAホーム
 
 [NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf)
 
 論文発表資料(coming soon)
-
 
 ## ライセンス
 GiNZAは[The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE)の許諾のもとで利用できます。
