@@ -1,4 +1,4 @@
 plac<1.0.0,>=0.9.6
 gensim>=3.6.0
 msgpack==0.5.6
-spacy==2.0.17
+spacy==2.1.3
