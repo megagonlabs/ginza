@@ -82,7 +82,7 @@ class Japanese(Language):
 
 def load_model(model_path):
     if model_path is None:
-        model_path = '{}_bccwj'.format(Japanese.lang)
+        model_path = '{}_nopn'.format(Japanese.lang)
         print("Loading model '%s'" % model_path, file=sys.stderr)
         return spacy.load(model_path)
     else:
