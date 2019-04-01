@@ -30,12 +30,12 @@ GiNZAはトークン化（形態素解析）処理にSudachiPyを使用するこ
 #### 1. GiNZA NLPライブラリと日本語Universal Dependenciesモデルのインストール
 最新版をインストールするにはコンソールで次のコマンドを実行します。
 ```
-pip install ginza
+pip install "https://github.com/megagonlabs/ginza/releases/download/v1.0.0/ja_ginza_nopn-1.0.0.tgz"
 ```
 pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
 次のように直接指定することもできます。
 ```
-pip install ja_ginza_nopn-1.0.0.tar.gz
+pip install ja_ginza_nopn-1.0.0.tgz
 ```
 #### 2. 試し方
 コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、conll形式で解析結果が出力されます。
