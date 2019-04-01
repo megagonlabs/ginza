@@ -1,10 +1,10 @@
-# GiNZA
-GiNZA - An Open Source Japanese NLP Library based on Universal Dependencies
-
-[git repository](https://github.com/megagonlabs/ginza.git)
+# GiNZA NLP Library
+An Open Source Japanese NLP Library based on Universal Dependencies
 
 ## License
-GiNZA NLP Library is distributed under [The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE)
+GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under
+[The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE).
+You must agree and follow The MIT License to use GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models.
 
 ### spaCy
 spaCy is the key framework of GiNZA.
@@ -13,7 +13,7 @@ spaCy is the key framework of GiNZA.
 ### Sudachi and SudachiPy
 SudachiPy provides high accuracies for tokenization and pos tagging.
 [Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
-[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
+[SudachiPy LICENSE PAGE](https://githb.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
 ## Runtime Environment
 This project is developed with Python 3.7 and pip for it.
@@ -24,12 +24,13 @@ The word embeddings from entire Japanese Wikipedia is 50MB.
 
 (Please see Development Environment section located on bottom too)
 ### Runtime set up
-#### 1. Install GiNZA
+#### 1. Install GiNZA NLP Library with Japanese Universal Dependencies Model
 Run following line
 ```
 pip install ginza
 ```
-or download pip install archive and specify it as below.
+or download pip install archive from [release page](https://github.com/megagonlabs/ginza/releases) and
+specify it as below.
 ```
 pip install ja_ginza_nopn-1.0.0.tar.gz
 ```
