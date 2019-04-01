@@ -1,8 +1,7 @@
 # GiNZAホーム
 
-[NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf)
-
-論文発表資料(coming soon)
+[NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf),
+[論文発表資料](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-138927873)
 
 ## ライセンス
 GiNZAは[The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE)の許諾のもとで利用できます。
@@ -31,7 +30,7 @@ GiNZAはトークン化（形態素解析）処理にSudachiPyを使用するこ
 ```
 pip install ginza
 ```
-pipインストールアーカイブをダウンロードして次のように指定することもできます。
+pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、次のように直接指定することもできます。
 ```
 pip install ja_ginza_nopn-1.0.0.tar.gz
 ```
