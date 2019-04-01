@@ -74,6 +74,7 @@ For GPU environment(cuda92):
 ```
 ### Training
 Prepare nopn_embedding/, nopn/, and kwdlc/ in your project directory, then run below.
+(We're preparing the descriptions of training environment. Coming soon.)
 ```
 shell/build.sh nopn 1.0.1
 ```

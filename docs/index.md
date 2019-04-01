@@ -55,7 +55,7 @@ for sent in doc.sents:
 ```
 ### API
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
-## リリース履歴
+## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 1.0
 #### ja_ginza_nopn-1.0.0 (2019-04-01)
 初回リリース
@@ -77,6 +77,7 @@ GPU環境(cuda92)はこちらを実行。
 ```
 ### 訓練の実行
 nopn_embedding/, nopn/, kwdlc/ のそれぞれのディレクトを用意して次のコマンドを実行。
+(※ディレクトリ構成など詳細は追って公開します)
 ```
 shell/build.sh nopn 1.0.1
 ```
