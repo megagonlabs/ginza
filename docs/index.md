@@ -1,7 +1,7 @@
 # GiNZAの公開ページ
 
 [NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf),
-[論文発表資料](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-138927873)
+[論文発表資料](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-139011245)
 
 ## ライセンス
 GiNZA NLPライブラリおよびGiNZA日本語Universal Dependenciesモデルは
