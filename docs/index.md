@@ -1,10 +1,12 @@
-# GiNZAホーム
+# GiNZAの公開ページ
 
 [NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf),
 [論文発表資料](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-138927873)
 
 ## ライセンス
-GiNZAは[The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE)の許諾のもとで利用できます。
+GiNZA NLPライブラリおよびGiNZA日本語Universal Dependenciesモデルは
+[The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE)のもとで公開されています。
+利用にはThe MIT Licenseに合意し、規約を遵守する必要があります。
 
 ### spaCy
 GiNZAはspaCyをNLP Frameworkとして使用しています。
@@ -25,12 +27,13 @@ GiNZAはトークン化（形態素解析）処理にSudachiPyを使用するこ
 
 [(開発環境についての詳細はこちら)](#development-environment)
 ### 実行環境のセットアップ
-#### 1. GiNZAのインストール
+#### 1. GiNZA NLPライブラリと日本語Universal Dependenciesモデルのインストール
 最新版をインストールするにはコンソールで次のコマンドを実行します。
 ```
 pip install ginza
 ```
-pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、次のように直接指定することもできます。
+pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
+次のように直接指定することもできます。
 ```
 pip install ja_ginza_nopn-1.0.0.tar.gz
 ```
