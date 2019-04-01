@@ -27,12 +27,12 @@ The word embeddings from entire Japanese Wikipedia is 50MB.
 #### 1. Install GiNZA NLP Library with Japanese Universal Dependencies Model
 Run following line
 ```
-pip install ginza
+pip install "https://github.com/megagonlabs/ginza/releases/download/v1.0.0/ja_ginza_nopn-1.0.0.tgz"
 ```
 or download pip install archive from [release page](https://github.com/megagonlabs/ginza/releases) and
 specify it as below.
 ```
-pip install ja_ginza_nopn-1.0.0.tar.gz
+pip install ja_ginza_nopn-1.0.0.tgz
 ```
 #### 2. Test
 Run following line and input some Japanese text + Enter, then you can see the parsed results with conll format.
