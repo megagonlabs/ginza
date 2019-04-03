@@ -13,7 +13,7 @@ spaCy is the key framework of GiNZA.
 ### Sudachi and SudachiPy
 SudachiPy provides high accuracies for tokenization and pos tagging.
 [Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
-[SudachiPy LICENSE PAGE](https://githb.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
+[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
 ## Runtime Environment
 This project is developed with Python 3.7 and pip for it.
