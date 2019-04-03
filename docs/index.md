@@ -17,7 +17,7 @@ GiNZAはspaCyをNLP Frameworkとして使用しています。
 GiNZAはトークン化（形態素解析）処理にSudachiPyを使用することで、高い解析精度を得ています。
 
 [Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
-[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE-2.0.txt)
+[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
 ## 実行環境
 このプロジェクトは Python 3.7 および、対応する pip 環境で動作検証を行っています。
