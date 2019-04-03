@@ -43,7 +43,7 @@ python -m spacy.lang.ja_ginza.cli
 Following steps shows dependency parsing results with sentence boundary 'EOS'.
 ```
 import spacy
-nlp = spacy.load('ja_ginza')
+nlp = spacy.load('ja_ginza_nopn')
 doc = nlp('依存構造解析の実験を行っています。')
 for sent in doc.sents:
     for token in sent:
