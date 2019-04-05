@@ -127,7 +127,7 @@ def token_line(token, np_tokens):
         token.pos_,
         token._.pos_detail.replace(',*', '').replace(',', '-'),
         'NumType=Card' if token.pos_ == 'NUM' else '_',
-        token.head.i + 1,
+        0 if token.head.i == token.i else token.head.i + 1,
         token.dep_.lower() if token.dep_ else '_',
         '_',
         info if info else '_',
