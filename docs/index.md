@@ -20,7 +20,7 @@ GiNZAはトークン化（形態素解析）処理にSudachiPyを使用するこ
 [SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
 ## 実行環境
-このプロジェクトは Python 3.7 および、対応する pip 環境で動作検証を行っています。
+このプロジェクトは Python 3.6以上（および対応するpip）で動作検証を行っています。
 
 プロジェクトが専有する容量はおよそ250MBです。
 そのうち、Sudachi辞書が200MB、日本語Wikipedia全体から得た単語分散表現が50MBを占めます。
@@ -30,15 +30,15 @@ GiNZAはトークン化（形態素解析）処理にSudachiPyを使用するこ
 #### 1. GiNZA NLPライブラリと日本語Universal Dependenciesモデルのインストール
 最新版をインストールするにはコンソールで次のコマンドを実行します。
 ```
-pip install "https://github.com/megagonlabs/ginza/releases/download/v1.0.1/ja_ginza_nopn-1.0.1.tgz"
+pip install "https://github.com/megagonlabs/ginza/releases/download/v1.0.1/ja_ginza_nopn-1.0.2.tgz"
 ```
 pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
 次のように直接指定することもできます。
 ```
-pip install ja_ginza_nopn-1.0.1.tgz
+pip install ja_ginza_nopn-1.0.2.tgz
 ```
 #### 2. 試し方
-コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、conll形式で解析結果が出力されます。
+コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、conllu形式で解析結果が出力されます。
 ```
 python -m spacy.lang.ja_ginza.cli
 ```
@@ -57,6 +57,8 @@ for sent in doc.sents:
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 1.0
+#### ja_ginza_nopn-1.0.2 (2019-04-07)
+conllu形式に合致するようcli出力のroot依存元インデックスを0に変更
 #### ja_ginza_nopn-1.0.1 (2019-04-02)
 新元号『令和』をsystem_core.dicに追加
 #### ja_ginza_nopn-1.0.0 (2019-04-01)
@@ -81,11 +83,11 @@ GPU環境(cuda92)はこちらを実行。
 nopn_embedding/, nopn/, kwdlc/ のそれぞれのディレクトを用意して次のコマンドを実行。
 (※ディレクトリ構成など詳細は追って公開します)
 ```
-shell/build.sh nopn 1.0.1
+shell/build.sh nopn 1.0.2
 ```
 GPU環境の場合は-gオプションを追加することで訓練と解析を高速化できます。
 
 訓練が終了すると次のpipインストールアーカイブが作成されます。
 ```
-target/ja_ginza_nopn-1.0.1.tgz
+target/ja_ginza_nopn-1.0.2.tgz
 ```

@@ -1,5 +1,5 @@
 # GiNZA NLP Library
-An Open Source Japanese NLP Library based on Universal Dependencies
+An Open Source Japanese NLP Library, based on Universal Dependencies
 
 ## License
 GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under
@@ -27,15 +27,15 @@ The word embeddings from entire Japanese Wikipedia is 50MB.
 #### 1. Install GiNZA NLP Library with Japanese Universal Dependencies Model
 Run following line
 ```
-pip install "https://github.com/megagonlabs/ginza/releases/download/v1.0.1/ja_ginza_nopn-1.0.1.tgz"
+pip install "https://github.com/megagonlabs/ginza/releases/download/v1.0.1/ja_ginza_nopn-1.0.2.tgz"
 ```
 or download pip install archive from [release page](https://github.com/megagonlabs/ginza/releases) and
 specify it as below.
 ```
-pip install ja_ginza_nopn-1.0.1.tgz
+pip install ja_ginza_nopn-1.0.2.tgz
 ```
 #### 2. Test
-Run following line and input some Japanese text + Enter, then you can see the parsed results with conll format.
+Run following line and input some Japanese text + Enter, then you can see the parsed results with conllu format.
 ```
 python -m spacy.lang.ja_ginza.cli
 ```
@@ -54,6 +54,8 @@ for sent in doc.sents:
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
 ### version 1.0
+#### ja_ginza_nopn-1.0.2 (2019-04-07)
+Set depending token index of root as 0 to meet with conllu format definitions
 #### ja_ginza_nopn-1.0.1 (2019-04-02)
 Add new Japanese era 'reiwa' to system_core.dic.
 #### ja_ginza_nopn-1.0.0 (2019-04-01)
@@ -78,11 +80,11 @@ For GPU environment(cuda92):
 Prepare nopn_embedding/, nopn/, and kwdlc/ in your project directory, then run below.
 (We're preparing the descriptions of training environment. Coming soon.)
 ```
-shell/build.sh nopn 1.0.1
+shell/build.sh nopn 1.0.2
 ```
 You can speed up training and analyze process by adding -g option if GPUs available.
 
 After a while, you will find pip installable archive.
 ```
-target/ja_ginza_nopn-1.0.1.tgz
+target/ja_ginza_nopn-1.0.2.tgz
 ```
