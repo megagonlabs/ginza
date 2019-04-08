@@ -27,7 +27,7 @@ The word embeddings from entire Japanese Wikipedia is 50MB.
 #### 1. Install GiNZA NLP Library with Japanese Universal Dependencies Model
 Run following line
 ```
-pip install "https://github.com/megagonlabs/ginza/releases/download/v1.0.1/ja_ginza_nopn-1.0.2.tgz"
+pip install "https://github.com/megagonlabs/ginza/releases/download/v1.0.2/ja_ginza_nopn-1.0.2.tgz"
 ```
 or download pip install archive from [release page](https://github.com/megagonlabs/ginza/releases) and
 specify it as below.
