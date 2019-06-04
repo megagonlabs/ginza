@@ -8,9 +8,9 @@ from spacy.language import Language
 from spacy.tokens import Token
 from spacy.util import get_model_meta
 from spacy.vocab import Vocab
-from .sudachi_tokenizer import SudachiTokenizer, LANG_NAME, TAG_MAP, SUDACHI_DEFAULT_MODE
+from .sudachi_tokenizer import SudachiTokenizer, LANG_NAME, TAG_MAP
 from .parse_tree import correct_dep
-from .syntax_iterators import SYNTAX_ITERATORS, noun_chunks
+from .syntax_iterators import SYNTAX_ITERATORS
 
 __all__ = [
     'Japanese',
@@ -104,7 +104,7 @@ def create_model_path(output_dir, model_name, model_version):
 
 class JapaneseCorrector:
     def __init__(self, nlp=None):
-        self.rewrite_ne_as_proper_noun = False
+        pass
 
     def __call__(self, doc):
-        return correct_dep(doc, self.rewrite_ne_as_proper_noun)
+        return correct_dep(doc)

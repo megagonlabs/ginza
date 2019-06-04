@@ -42,7 +42,7 @@ def train_word2vec_from_file(
         epochs=2,
         output_dir=Path('.'),
         require_gpu=False,
-        input_path=[],
+        input_path=None,
 ):
     if require_gpu:
         spacy.require_gpu()

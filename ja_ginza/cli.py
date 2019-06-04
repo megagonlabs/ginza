@@ -2,10 +2,10 @@
 import plac
 import spacy
 from sudachipy.tokenizer import Tokenizer as OriginalTokenizer
-from . import *
+from . import load_model, JapaneseCorrector
 from .bccwj_ud_corpus import convert_files
 from .corpus import *
-from .parse_tree import ParsedSentence
+from .parse_tree import ex_attr, ParsedSentence
 from .sudachi_tokenizer import SUDACHI_DEFAULT_MODE
 
 
@@ -63,7 +63,6 @@ def main(
     else:
         output = sys.stdout
 
-    line = '<init>'
     try:
         if corpus_type:
             if corpus_type == 'bccwj_ud':
@@ -86,9 +85,9 @@ def main(
         pass
     except KeyboardInterrupt:
         pass
-    except Exception as e:
-        print(e, file=sys.stderr)
-        print('exception raised while analyzing the line:', line, file=sys.stderr)
+#    except Exception as e:
+#        print(e, file=sys.stderr)
+#        print('exception raised while analyzing the line:', line, file=sys.stderr)
     finally:
         output.close()
 
@@ -125,7 +124,7 @@ def token_line(token, np_tokens):
         token.orth_,
         token.lemma_,
         token.pos_,
-        token._.pos_detail.replace(',*', '').replace(',', '-'),
+        ex_attr(token).pos_detail.replace(',*', '').replace(',', '-'),
         'NumType=Card' if token.pos_ == 'NUM' else '_',
         0 if token.head.i == token.i else token.head.i + 1,
         token.dep_.lower() if token.dep_ else '_',

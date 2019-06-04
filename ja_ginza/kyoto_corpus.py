@@ -175,7 +175,8 @@ def convert_file(_path):
             base = m.group(3)
             if base == '*':
                 base = surface
-            pos = m.group(4) + ',' + m.group(5)
+            pos = m.group(4)
+            pos_detail = m.group(4) + ',' + m.group(5)
             if m.group(6) == '*':
                 inflection = None
             else:
@@ -183,10 +184,12 @@ def convert_file(_path):
 
             morph = Morph(
                 len(sentence_morphs),
+                len(sentence),
                 surface,
                 base,
                 pos,
                 pos,
+                pos_detail,
                 inflection,
                 False,
             )

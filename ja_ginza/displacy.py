@@ -65,7 +65,7 @@ def main(
 
     if corpus_type:
         if corpus_type == 'bccwj_ud':
-            doc = correct_dep(convert_files(lines)[0].to_doc(nlp.vocab, True), False)
+            doc = correct_dep(convert_files(lines)[0].to_doc(nlp.vocab, True))
             print('Displaying first sentence with result and raw_result:', doc.text, file=sys.stderr)
             result = nlp(doc.text)
             with nlp.disable_pipes('JapaneseCorrector'):
