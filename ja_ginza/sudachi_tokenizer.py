@@ -39,7 +39,7 @@ TAG_MAP = {
     "形状詞,タリ,*,*": {POS: ADJ},
     "形状詞,助動詞語幹,*,*": {POS: ADJ},
     "形容詞,一般,*,*": {POS: ADJ},
-    "形容詞,非自立可能,*,*": {POS: ADJ},
+    "形容詞,非自立可能,*,*": {POS: ADJ},  # All the root tokens are ADJ
 
     "助詞,格助詞,*,*": {POS: ADP},
     "助詞,係助詞,*,*": {POS: ADP},
@@ -54,14 +54,14 @@ TAG_MAP = {
     "接尾辞,形状詞的,*,*": {POS: NOUN},
     "接尾辞,形容詞的,*,*": {POS: NOUN},
     "接尾辞,動詞的,*,*": {POS: NOUN},
-    "接尾辞,名詞的,サ変可能,*": {POS: NOUN},
+    "接尾辞,名詞的,サ変可能,*": {POS: NOUN},  # All the root tokens are NOUN
     "接尾辞,名詞的,一般,*": {POS: NOUN},
     "接尾辞,名詞的,助数詞,*": {POS: NOUN},
-    "接尾辞,名詞的,副詞可能,*": {POS: NOUN},
+    "接尾辞,名詞的,副詞可能,*": {POS: NOUN},  # All the root tokens are NOUN
 
     "代名詞,*,*,*": {POS: PRON},
     "動詞,一般,*,*": {POS: VERB},
-    "動詞,非自立可能,*,*": {POS: VERB},
+    "動詞,非自立可能,*,*": {POS: VERB},  # All the root tokens are VERB except the tokens lemma is '為る' and POS is AUX
     "副詞,*,*,*": {POS: ADV},
 
     "補助記号,ＡＡ,一般,*": {POS: SYM},  # text art
@@ -82,13 +82,13 @@ TAG_MAP = {
     "名詞,助動詞語幹,*,*": {POS: AUX},
     "名詞,数詞,*,*": {POS: NUM},  # includes Chinese numerals
 
-    "名詞,普通名詞,サ変可能,*": {POS: VERB},
+    "名詞,普通名詞,サ変可能,*": {POS: VERB},  # ADJ=3349 and VERB=3411 for root
 
-    "名詞,普通名詞,サ変形状詞可能,*": {POS: VERB},
+    "名詞,普通名詞,サ変形状詞可能,*": {POS: VERB},  # ADJ=40 and NOUN=30 for root
     "名詞,普通名詞,一般,*": {POS: NOUN},
-    "名詞,普通名詞,形状詞可能,*": {POS: ADJ},
-    "名詞,普通名詞,助数詞可能,*": {POS: NUM},
-    "名詞,普通名詞,副詞可能,*": {POS: ADV},
+    "名詞,普通名詞,形状詞可能,*": {POS: ADJ},  # ADJ=404 and NOUN=161 for root
+    "名詞,普通名詞,助数詞可能,*": {POS: NOUN},  # All the root tokens are NOUN
+    "名詞,普通名詞,副詞可能,*": {POS: NOUN},  # All the root tokens are NOUN
 
     "連体詞,*,*,*": {POS: DET},
 }
