@@ -5,11 +5,12 @@ import sys
 import spacy
 from spacy.attrs import LANG
 from spacy.language import Language
+from spacy.tokens import Doc
 from spacy.tokens import Token
 from spacy.util import get_model_meta
 from spacy.vocab import Vocab
 from .sudachi_tokenizer import SudachiTokenizer, LANG_NAME, TAG_MAP
-from .parse_tree import correct_dep
+from .parse_tree import correct_dep, set_bunsetu_bi_type
 from .syntax_iterators import SYNTAX_ITERATORS
 
 __all__ = [
@@ -23,6 +24,10 @@ __all__ = [
 
 Language.factories['JapaneseCorrector'] = lambda nlp, **cfg: JapaneseCorrector(nlp)
 
+if not Doc.get_extension('bunsetu_bi_label'):
+    Doc.set_extension('bunsetu_bi_label', default=None)
+if not Doc.get_extension('bunsetu_position_type'):
+    Doc.set_extension('bunsetu_position_type', default=None)
 if not Token.get_extension('pos_detail'):
     Token.set_extension('pos_detail', default='')
 if not Token.get_extension('inf'):
@@ -107,4 +112,6 @@ class JapaneseCorrector:
         pass
 
     def __call__(self, doc):
-        return correct_dep(doc)
+        correct_dep(doc)
+        set_bunsetu_bi_type(doc)
+        return doc

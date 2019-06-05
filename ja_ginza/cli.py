@@ -107,13 +107,17 @@ def print_result(line, nlp, print_origin, file=sys.stdout):
         np_tokens[chunk.start] = 'NP_B'
         for i in range(chunk.start + 1, chunk.end):
             np_tokens[i] = 'NP_I'
+    bunsetu_bi = ex_attr(doc).bunsetu_bi_label if doc.has_extension('bunsetu_bi_label') else None
+    position_type = ex_attr(doc).bunsetu_position_type if doc.has_extension('bunsetu_position_type') else None
     for token in doc:
-        print(token_line(token, np_tokens), file=file)
+        print(token_line(token, np_tokens, bunsetu_bi, position_type), file=file)
     print(file=file)
 
 
-def token_line(token, np_tokens):
+def token_line(token, np_tokens, bunsetu_bi, position_type):
     info = '|'.join(filter(lambda s: s, [
+        '' if bunsetu_bi is None else 'BunsetuBILabel={}'.format(bunsetu_bi[token.i]),
+        '' if position_type is None else 'BunsetuPositionType={}'.format(position_type[token.i]),
         '' if token.whitespace_ else 'SpaceAfter=No',
         np_tokens.get(token.i, ''),
         '' if not token.ent_type else 'NE={}_{}'.format(token.ent_type_, token.ent_iob_),

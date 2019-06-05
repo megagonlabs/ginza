@@ -21,7 +21,6 @@ SUDACHI_DEFAULT_MODE = 'C'
 SUDACHI_DEFAULT_SPLITMODE = OriginalTokenizer.SplitMode.C
 
 
-# TODO should be refactored to ensure Japanese UD's tag translation rules
 TAG_MAP = {
     # Universal Dependencies Mapping (internal git)
     # https://github.com/mynlp/udjapanese/blob/master/UDJapaneseBCCWJ/unidic_to_udpos_mapping/bccwj_pos_suw_rule.json
@@ -162,6 +161,7 @@ class SudachiTokenizer(object):
             for token, (morph, spaces) in zip(doc, morph_spaces):
                 tag = ",".join(morph.part_of_speech()[0:4])
                 token.tag_ = tag
+                # TODO separate lexical rules to resource files
                 if morph.normalized_form() == '為る' and tag == '動詞,非自立可能,*,*':
                     token.pos_ = 'AUX'
                 ex_attr(token).pos_detail = ",".join(morph.part_of_speech()[0:4])
