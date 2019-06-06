@@ -56,13 +56,18 @@ for sent in doc.sents:
 ### API
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
+### version 1.1
+#### ja_ginza_nopn-1.1.0-alpha1 (2019-05-31)
+- カスタムフィールドの追加: Doc.\_.bunsetu_bi_label and Doc.\_.bunsetu_position_type
+- spaCy v2.1で導入されたretokenizerを適用
+- Obsoleted: JapaneseCorrector.rewrite_ne_as_proper_noun
 ### version 1.0
 #### ja_ginza_nopn-1.0.2 (2019-04-07)
-conllu形式に合致するようcli出力のroot依存元インデックスを0に変更
+- conllu形式に合致するようcli出力のroot依存元インデックスを0に変更
 #### ja_ginza_nopn-1.0.1 (2019-04-02)
-新元号『令和』をsystem_core.dicに追加
+- 新元号『令和』をsystem_core.dicに追加
 #### ja_ginza_nopn-1.0.0 (2019-04-01)
-初回リリース
+- 初回リリース
 
 ## 開発環境
 ### 開発環境のセットアップ

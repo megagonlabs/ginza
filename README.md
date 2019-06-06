@@ -16,7 +16,7 @@ SudachiPy provides high accuracies for tokenization and pos tagging.
 [SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
 ## Runtime Environment
-This project is developed with Python 3.7 and pip for it.
+This project is developed with Python>=3.6 and pip for it.
 
 The footprint of this project is about 250MB.
 Sudachi dictionary is 200MB.
@@ -53,13 +53,18 @@ for sent in doc.sents:
 ### APIs
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
+### version 1.1
+#### ja_ginza_nopn-1.1.0-alpha1 (2019-05-31)
+- Add custom fields: Doc.\_.bunsetu_bi_label and Doc.\_.bunsetu_position_type
+- Use new retokenize API (spaCy v2.1)
+- Obsoleted: JapaneseCorrector.rewrite_ne_as_proper_noun
 ### version 1.0
 #### ja_ginza_nopn-1.0.2 (2019-04-07)
-Set depending token index of root as 0 to meet with conllu format definitions
+- Set depending token index of root as 0 to meet with conllu format definitions
 #### ja_ginza_nopn-1.0.1 (2019-04-02)
-Add new Japanese era 'reiwa' to system_core.dic.
+- Add new Japanese era 'reiwa' to system_core.dic.
 #### ja_ginza_nopn-1.0.0 (2019-04-01)
-First release version
+- First release version
 
 ## Development Environment
 ### Development set up
