@@ -431,18 +431,22 @@ def trailing_spaces(token):
         return None
 
 
+def _set_tag(token, tag):
+    lemma = token.lemma_
+    token.tag_ = tag  # work around: lemma_ must be set after tag_
+    token.lemma_ = lemma
+
+
 def correct_dep(doc):
     with doc.retokenize() as retokenizer:
-        for i in reversed(range(len(doc))):
+        for i in range(len(doc)):
             token = doc[i]
             label = token.dep_
             p = label.find('_as_')
             if p >= 0:
                 tag = label[p + 4:]
                 if len(tag) > 0:
-                    lemma = token.lemma_
-                    token.tag_ = tag  # work around: lemma_ must be set after tag_ (spaCy's behavior)
-                    token.lemma_ = lemma
+                    _set_tag(token, tag)
                 token.dep_ = label[0:p]
             elif label.startswith('as_'):
                 tag = label[3:]
@@ -450,19 +454,26 @@ def correct_dep(doc):
                 if head.i + 1 == token.i:
                     pos_detail = '\t'.join([ex_attr(head).pos_detail, ex_attr(token).pos_detail])
                     inf = '\t'.join([ex_attr(head).inf, ex_attr(token).inf])
-                    retokenizer.merge(doc[head.i:token.i + 1], attrs={'TAG': tag})
-                    token = doc[head.i]
-                    ex_attr(token).pos_detail = pos_detail
-                    ex_attr(token).inf = inf
+                    try:
+                        retokenizer.merge(doc[head.i:token.i + 1], attrs={'TAG': tag})
+                        token = doc[head.i]
+                        ex_attr(token).pos_detail = pos_detail
+                        ex_attr(token).inf = inf
+                    except ValueError:
+                        _set_tag(token, tag)
                 elif head.i - 1 == token.i:
                     pos_detail = '\t'.join([ex_attr(token).pos_detail, ex_attr(head).pos_detail])
                     inf = '\t'.join([ex_attr(token).inf, ex_attr(head).inf])
-                    retokenizer.merge(doc[token.i:head.i + 1], attrs={'TAG': tag})
-                    token = doc[token.i]
-                    ex_attr(token).pos_detail = pos_detail
-                    ex_attr(token).inf = inf
+                    try:
+                        retokenizer.merge(doc[token.i:head.i + 1], attrs={'TAG': tag})
+                        token = doc[token.i]
+                        ex_attr(token).pos_detail = pos_detail
+                        ex_attr(token).inf = inf
+                    except ValueError:
+                        _set_tag(token, tag)
                 else:
-                    retokenizer.merge(doc[token.i:token.i + 1], attrs={'TAG': tag})
+                    _set_tag(token, tag)
+
 
 FUNC_POS = {
     'AUX', 'ADP', 'SCONJ', 'CCONJ', 'PART',
@@ -512,7 +523,7 @@ def set_bunsetu_bi_type(doc):
     head = None
     for t in doc:
         if continuous[t.i] is None:
-            if head is None or t.pos_ in {'VERB', 'ADJ', 'ADV', 'INTJ',}:
+            if head is None or t.pos_ in {'VERB', 'ADJ', 'ADV', 'INTJ'}:
                 head = t.i
             continuous[t.i] = head
         else:

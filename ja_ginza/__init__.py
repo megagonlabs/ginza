@@ -10,12 +10,11 @@ from spacy.tokens import Token
 from spacy.util import get_model_meta
 from spacy.vocab import Vocab
 from .sudachi_tokenizer import SudachiTokenizer, LANG_NAME, TAG_MAP
-from .parse_tree import correct_dep, set_bunsetu_bi_type
+from .japanese_corrector import JapaneseCorrector
 from .syntax_iterators import SYNTAX_ITERATORS
 
 __all__ = [
     'Japanese',
-    'JapaneseCorrector',
     'load_model',
     'save_model',
     'create_model_path',
@@ -105,13 +104,3 @@ def save_model(model_path, nlp):
 
 def create_model_path(output_dir, model_name, model_version):
     return output_dir / '{}_{}-{}'.format(Japanese.lang, model_name, model_version)
-
-
-class JapaneseCorrector:
-    def __init__(self, nlp=None):
-        pass
-
-    def __call__(self, doc):
-        correct_dep(doc)
-        set_bunsetu_bi_type(doc)
-        return doc

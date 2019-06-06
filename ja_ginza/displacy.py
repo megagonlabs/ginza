@@ -5,7 +5,7 @@ import time
 import webbrowser
 from spacy import displacy
 from sudachipy.tokenizer import Tokenizer as OriginalTokenizer
-from . import *
+from . import load_model, JapaneseCorrector
 from .bccwj_ud_corpus import convert_files
 from .corpus import *
 from .parse_tree import correct_dep
