@@ -54,7 +54,9 @@ for sent in doc.sents:
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
 ### version 1.1
-#### ja_ginza_nopn-1.1.1-alpha2 (2019-06-07)
+#### ja_gsd-1.1.2-alpha3 (2019-06-07)
+- Improve POS disambiguation rule for NOUN root token
+#### ja_gsd-1.1.1-alpha2 (2019-06-07)
 - Refactoring with Entry Points
 - package structure is changed entirely (codes were separated to ginza/ and ginza/_util)
 

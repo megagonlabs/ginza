@@ -78,9 +78,9 @@ TAG_MAP = {
     "名詞,助動詞語幹,*,*": {POS: AUX},
     "名詞,数詞,*,*": {POS: NUM},  # includes Chinese numerals
 
-    "名詞,普通名詞,サ変可能,*": {POS: VERB},  # ADJ=3349 and VERB=3411 for root
+    "名詞,普通名詞,サ変可能,*": {POS: NOUN},  # ADJ=3349 and VERB=3411 for root
 
-    "名詞,普通名詞,サ変形状詞可能,*": {POS: VERB},  # ADJ=40 and NOUN=30 for root
+    "名詞,普通名詞,サ変形状詞可能,*": {POS: NOUN},  # ADJ=40 and NOUN=30 for root
     "名詞,普通名詞,一般,*": {POS: NOUN},
     "名詞,普通名詞,形状詞可能,*": {POS: ADJ},  # ADJ=404 and NOUN=161 for root
     "名詞,普通名詞,助数詞可能,*": {POS: NOUN},  # All the root tokens are NOUN
@@ -152,12 +152,22 @@ class SudachiTokenizer(object):
         words = [m.surface() for m, spaces in morph_spaces]
         spaces = [space for m, space in morph_spaces]
         doc = Doc(self.nlp.vocab, words=words, spaces=spaces)
+        next_tag = ",".join(morph_spaces[0][0].part_of_speech()[0:4]) if len(doc) else ''
         for token, (morph, spaces) in zip(doc, morph_spaces):
-            tag = ",".join(morph.part_of_speech()[0:4])
+            tag = next_tag
+            next_tag = ",".join(morph_spaces[token.i + 1][0].part_of_speech()[0:4]) if token.i < len(doc) - 1 else ''
             token.tag_ = tag
             # TODO separate lexical rules to resource files
             if morph.normalized_form() == '為る' and tag == '動詞,非自立可能,*,*':
-                token.pos_ = 'AUX'
+                token.tag_ = 'AUX'
+            elif tag == '名詞,普通名詞,サ変可能,*':
+                if next_tag == '動詞,非自立可能,*,*':
+                    token.tag_ = 'VERB'
+            elif tag == '名詞,普通名詞,サ変形状詞可能,*':
+                if next_tag == '動詞,非自立可能,*,*':
+                    token.tag_ = 'VERB'
+                elif next_tag == '助動詞,*,*,*' or next_tag.find('形状詞') >= 0:
+                    token.tag_ = 'ADJ'
             token._.pos_detail = ",".join(morph.part_of_speech()[0:4])
             token._.inf = ",".join(morph.part_of_speech()[4:])
             token.lemma_ = morph.normalized_form()  # work around: lemma_ must be set after tag_

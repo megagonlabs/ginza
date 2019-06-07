@@ -57,6 +57,8 @@ for sent in doc.sents:
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 1.1
+#### ja_gsd-1.1.2-alpha3 (2019-06-07)
+- 可能性品詞（名詞系ルートトークン）の曖昧性解消ルールの改良
 #### ja_gsd-1.1.1-alpha2 (2019-06-07)
 - Entry Pointsを使用する形でリファクタリング
 - パッケージ全体の構成を変更（コードをginza/とginza_util/に分離）
