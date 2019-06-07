@@ -6,7 +6,7 @@ import sys
 import plac
 import spacy
 from .bccwj_ud_corpus import convert_files
-from . import *
+from ginza import *
 from .parse_tree import create_parsed_sentences, rewrite_by_tokenizer
 
 

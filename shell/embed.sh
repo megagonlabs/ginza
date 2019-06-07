@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-mkdir models
 set -eu
-lang_name=ja_ginza
+lang_name=ja
 model_name=$1
 model_version=$2
-log=log.$1-$2
+log=log/log.${model_name}-${model_version}
 model_dir=models/${lang_name}_${model_name}-${model_version}
-python -m ja_ginza.train_word2vec -n ${model_name} -v ${model_version} ${@:3} -o models/ nopn_embedding/ &>> $log
+embed_corpus=corpus/${model_name}/embed
+mkdir -p model_dir
+python -m ginza_util.train_word2vec -n ${model_name} -v ${model_version} ${@:3} -o models/ ${embed_corus} &>> $log

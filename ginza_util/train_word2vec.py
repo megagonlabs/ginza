@@ -7,9 +7,9 @@ import pickle
 import sys
 import spacy
 from gensim.models import Word2Vec
-from . import Japanese, create_model_path
+from ginza import Japanese
+from ginza.sudachi_tokenizer import read_sudachi_a, read_sudachi_b, read_sudachi_c
 from .corpus import sentence_iter
-from .sudachi_tokenizer import read_sudachi_a, read_sudachi_b, read_sudachi_c
 from .bccwj_ud_corpus import read_bccwj_ud
 
 

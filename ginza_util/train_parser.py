@@ -5,7 +5,7 @@ import datetime
 import plac
 import random
 import spacy
-from . import *
+from ginza import *
 from .bccwj_ud_corpus import convert_files
 from .corpus import *
 from .evaluate_parser import evaluate

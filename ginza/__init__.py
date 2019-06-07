@@ -1,23 +1,18 @@
 # encoding: utf8
 from __future__ import unicode_literals, print_function
 
-import sys
-import spacy
 from spacy.attrs import LANG
 from spacy.language import Language
 from spacy.tokens import Doc
 from spacy.tokens import Token
 from spacy.util import get_model_meta
 from spacy.vocab import Vocab
-from .sudachi_tokenizer import SudachiTokenizer, LANG_NAME, TAG_MAP
+from .sudachi_tokenizer import SudachiTokenizer, TAG_MAP
 from .japanese_corrector import JapaneseCorrector
 from .syntax_iterators import SYNTAX_ITERATORS
 
 __all__ = [
     'Japanese',
-    'load_model',
-    'save_model',
-    'create_model_path',
 ]
 
 
@@ -35,7 +30,7 @@ if not Token.get_extension('inf'):
 
 class JapaneseDefaults(Language.Defaults):
     lex_attr_getters = dict(Language.Defaults.lex_attr_getters)
-    lex_attr_getters[LANG] = lambda text: LANG_NAME
+    lex_attr_getters[LANG] = lambda text: 'ja'
 
     tag_map = TAG_MAP
     syntax_iterators = SYNTAX_ITERATORS  # TODO not works for spaCy 2.0.12, see work around in JapaneseCorrector
@@ -60,7 +55,7 @@ class JapaneseDefaults(Language.Defaults):
 
 
 class Japanese(Language):
-    lang = LANG_NAME
+    lang = 'ja'
     Defaults = JapaneseDefaults
     Tokenizer = SudachiTokenizer
 
@@ -82,25 +77,3 @@ class Japanese(Language):
 
     def make_doc(self, text):
         return self.tokenizer(text)
-
-
-def load_model(model_path):
-    if model_path is None:
-        model_path = '{}_nopn'.format(Japanese.lang)
-        print("Loading model '%s'" % model_path, file=sys.stderr)
-        return spacy.load(model_path)
-    else:
-        print("Loading model '%s'" % model_path, file=sys.stderr)
-        return Japanese().load(model_path)
-
-
-def save_model(model_path, nlp):
-    if model_path is not None:
-        if not model_path.exists():
-            model_path.mkdir(parents=True)
-        nlp.to_disk(str(model_path))
-        print("Saved to", model_path)
-
-
-def create_model_path(output_dir, model_name, model_version):
-    return output_dir / '{}_{}-{}'.format(Japanese.lang, model_name, model_version)

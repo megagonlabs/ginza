@@ -7,7 +7,7 @@ from pathlib import Path
 import sys
 import plac
 import spacy
-from . import *
+from ginza import *
 
 
 @plac.annotations(

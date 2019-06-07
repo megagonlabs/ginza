@@ -5,11 +5,11 @@ import time
 import webbrowser
 from spacy import displacy
 from sudachipy.tokenizer import Tokenizer as OriginalTokenizer
-from . import load_model, JapaneseCorrector
+from ginza.japanese_corrector import JapaneseCorrector
 from .bccwj_ud_corpus import convert_files
 from .corpus import *
 from .parse_tree import correct_dep
-from .sudachi_tokenizer import SUDACHI_DEFAULT_MODE
+from ginza.sudachi_tokenizer import SUDACHI_DEFAULT_MODE
 
 
 @plac.annotations(

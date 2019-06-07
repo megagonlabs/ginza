@@ -9,13 +9,10 @@ import sys
 from spacy.morphology import POS_IDS
 from spacy.symbols import *
 from spacy.tokens import Doc
-from .parse_tree import ex_attr, ParsedSentence
 
 from sudachipy import config
 from sudachipy import dictionary
 from sudachipy.tokenizer import Tokenizer as OriginalTokenizer
-
-LANG_NAME = 'ja_ginza'
 
 SUDACHI_DEFAULT_MODE = 'C'
 SUDACHI_DEFAULT_SPLITMODE = OriginalTokenizer.SplitMode.C
@@ -132,44 +129,41 @@ class SudachiTokenizer(object):
         self.use_sentence_separator = True
 
     def __call__(self, text):
-        if isinstance(text, ParsedSentence):
-            return text.to_doc(self.nlp.vocab)
-        else:
-            result = self.tokenizer.tokenize(self.mode, text)
-            morph_spaces = []
-            last_morph = None
-            for m in result:
-                if m.surface():
-                    if m.part_of_speech()[0] == '空白':
-                        if last_morph:
-                            morph_spaces.append((last_morph, True))
-                            last_morph = None
-                        else:
-                            morph_spaces.append((m, True))
-                    elif last_morph:
-                        morph_spaces.append((last_morph, False))
-                        last_morph = m
+        result = self.tokenizer.tokenize(self.mode, text)
+        morph_spaces = []
+        last_morph = None
+        for m in result:
+            if m.surface():
+                if m.part_of_speech()[0] == '空白':
+                    if last_morph:
+                        morph_spaces.append((last_morph, True))
+                        last_morph = None
                     else:
-                        last_morph = m
-            if last_morph:
-                morph_spaces.append((last_morph, False))
+                        morph_spaces.append((m, True))
+                elif last_morph:
+                    morph_spaces.append((last_morph, False))
+                    last_morph = m
+                else:
+                    last_morph = m
+        if last_morph:
+            morph_spaces.append((last_morph, False))
 
-            # the last space is removed by JapaneseReviser at the final stage of pipeline
-            words = [m.surface() for m, spaces in morph_spaces]
-            spaces = [space for m, space in morph_spaces]
-            doc = Doc(self.nlp.vocab, words=words, spaces=spaces)
-            for token, (morph, spaces) in zip(doc, morph_spaces):
-                tag = ",".join(morph.part_of_speech()[0:4])
-                token.tag_ = tag
-                # TODO separate lexical rules to resource files
-                if morph.normalized_form() == '為る' and tag == '動詞,非自立可能,*,*':
-                    token.pos_ = 'AUX'
-                ex_attr(token).pos_detail = ",".join(morph.part_of_speech()[0:4])
-                ex_attr(token).inf = ",".join(morph.part_of_speech()[4:])
-                token.lemma_ = morph.normalized_form()  # work around: lemma_ must be set after tag_
-            if self.use_sentence_separator:
-                separate_sentences(doc)
-            return doc
+        # the last space is removed by JapaneseReviser at the final stage of pipeline
+        words = [m.surface() for m, spaces in morph_spaces]
+        spaces = [space for m, space in morph_spaces]
+        doc = Doc(self.nlp.vocab, words=words, spaces=spaces)
+        for token, (morph, spaces) in zip(doc, morph_spaces):
+            tag = ",".join(morph.part_of_speech()[0:4])
+            token.tag_ = tag
+            # TODO separate lexical rules to resource files
+            if morph.normalized_form() == '為る' and tag == '動詞,非自立可能,*,*':
+                token.pos_ = 'AUX'
+            token._.pos_detail = ",".join(morph.part_of_speech()[0:4])
+            token._.inf = ",".join(morph.part_of_speech()[4:])
+            token.lemma_ = morph.normalized_form()  # work around: lemma_ must be set after tag_
+        if self.use_sentence_separator:
+            separate_sentences(doc)
+        return doc
 
     # add dummy methods for to_bytes, from_bytes, to_disk and from_disk to
     # allow serialization (see #1557)
