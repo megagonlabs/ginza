@@ -54,7 +54,14 @@ for sent in doc.sents:
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
 ### version 1.1
-#### ja_ginza_nopn-1.1.0-alpha1 (2019-05-31)
+#### ja_ginza_nopn-1.1.1-alpha2 (2019-06-07)
+- Refactoring with Entry Points
+- package structure is changed entirely (codes were separated to ginza/ and ginza/_util)
+
+TODO:
+- refactor train_*.py to fit for spaCy's standard training methods
+- disambiguate POS of root token by referring POSs of following tokens
+#### ja_ginza_gsd-1.1.0-alpha1 (2019-05-31)
 - Add custom fields: Doc.\_.bunsetu_bi_label and Doc.\_.bunsetu_position_type
 - Use new retokenize API (spaCy v2.1)
 - Obsoleted: JapaneseCorrector.rewrite_ne_as_proper_noun

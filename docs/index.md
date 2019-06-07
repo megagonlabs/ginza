@@ -57,7 +57,14 @@ for sent in doc.sents:
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 1.1
-#### ja_ginza_nopn-1.1.0-alpha1 (2019-05-31)
+#### ja_gsd-1.1.1-alpha2 (2019-06-07)
+- Entry Pointsを使用する形でリファクタリング
+- パッケージ全体の構成を変更（コードをginza/とginza_util/に分離）
+
+TODO:
+- refactor train_*.py to fit for spaCy's standard training methods
+- disambiguate POS of root token by referring POSs of following tokens
+#### ja_ginza_gsd-1.1.0-alpha1 (2019-05-31)
 - カスタムフィールドの追加: Doc.\_.bunsetu_bi_label and Doc.\_.bunsetu_position_type
 - spaCy v2.1で導入されたretokenizerを適用
 - Obsoleted: JapaneseCorrector.rewrite_ne_as_proper_noun
