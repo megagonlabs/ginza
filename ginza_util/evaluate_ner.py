@@ -7,7 +7,6 @@ from pathlib import Path
 import sys
 import plac
 import spacy
-from ginza import *
 
 
 @plac.annotations(
@@ -35,7 +34,7 @@ def evaluate(
         nlp=None,
 ):
     if not nlp:
-        nlp = load_model(model_path)
+        nlp = spacy.load(model_path)
         nlp.tokenizer.use_sentence_separator = False
 
     stats = Stats()

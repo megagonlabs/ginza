@@ -2,11 +2,11 @@
 import plac
 import spacy
 from sudachipy.tokenizer import Tokenizer as OriginalTokenizer
-from . import load_model, JapaneseCorrector
+from ginza.japanese_corrector import JapaneseCorrector
 from .bccwj_ud_corpus import convert_files
 from .corpus import *
-from .parse_tree import ex_attr, ParsedSentence
-from .sudachi_tokenizer import SUDACHI_DEFAULT_MODE
+from .parse_tree import ParsedSentence
+from ginza.sudachi_tokenizer import SUDACHI_DEFAULT_MODE
 
 
 @plac.annotations(
@@ -33,7 +33,7 @@ def main(
     if require_gpu:
         spacy.require_gpu()
         print("GPU enabled", file=sys.stderr)
-    nlp = load_model(model_path)
+    nlp = spacy.load(model_path)
     if disable_pipes:
         print("disabling pipes: {}".format(disable_pipes), file=sys.stderr)
         nlp.disable_pipes(disable_pipes)
@@ -107,17 +107,17 @@ def print_result(line, nlp, print_origin, file=sys.stdout):
         np_tokens[chunk.start] = 'NP_B'
         for i in range(chunk.start + 1, chunk.end):
             np_tokens[i] = 'NP_I'
-    bunsetu_bi = ex_attr(doc).bunsetu_bi_label if doc.has_extension('bunsetu_bi_label') else None
-    position_type = ex_attr(doc).bunsetu_position_type if doc.has_extension('bunsetu_position_type') else None
     for token in doc:
-        print(token_line(token, np_tokens, bunsetu_bi, position_type), file=file)
+        print(token_line(token, np_tokens), file=file)
     print(file=file)
 
 
-def token_line(token, np_tokens, bunsetu_bi, position_type):
+def token_line(token, np_tokens):
+    bunsetu_bi = token._.bunsetu_bi_label
+    position_type = token._.bunsetu_position_type
     info = '|'.join(filter(lambda s: s, [
-        '' if bunsetu_bi is None else 'BunsetuBILabel={}'.format(bunsetu_bi[token.i]),
-        '' if position_type is None else 'BunsetuPositionType={}'.format(position_type[token.i]),
+        '' if bunsetu_bi else 'BunsetuBILabel={}'.format(bunsetu_bi),
+        '' if position_type is None else 'BunsetuPositionType={}'.format(position_type),
         '' if token.whitespace_ else 'SpaceAfter=No',
         np_tokens.get(token.i, ''),
         '' if not token.ent_type else 'NE={}_{}'.format(token.ent_type_, token.ent_iob_),
@@ -128,7 +128,7 @@ def token_line(token, np_tokens, bunsetu_bi, position_type):
         token.orth_,
         token.lemma_,
         token.pos_,
-        ex_attr(token).pos_detail.replace(',*', '').replace(',', '-'),
+        token.tag_.replace(',*', '').replace(',', '-'),
         'NumType=Card' if token.pos_ == 'NUM' else '_',
         0 if token.head.i == token.i else token.head.i + 1,
         token.dep_.lower() if token.dep_ else '_',

@@ -88,7 +88,7 @@ def convert_lines(_path, lines):
             if dep_morph_id == -1:
                 dep_morph_id = morph_id
             dep_label = m.group(8)
-            pos_detail = m.group(5)
+            tag = m.group(5)
 
             trailing_space = 'SpaceAfter=No' not in m.group(10).split('|')
 
@@ -98,8 +98,7 @@ def convert_lines(_path, lines):
                 surface,
                 base,
                 pos,
-                pos,
-                pos_detail,
+                tag,
                 '',
                 trailing_space,
             )

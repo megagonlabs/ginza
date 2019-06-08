@@ -188,7 +188,6 @@ def convert_file(_path):
                 surface,
                 base,
                 pos,
-                pos,
                 pos_detail,
                 inflection,
                 False,

@@ -11,6 +11,7 @@ from ginza import Japanese
 from ginza.sudachi_tokenizer import read_sudachi_a, read_sudachi_b, read_sudachi_c
 from .corpus import sentence_iter
 from .bccwj_ud_corpus import read_bccwj_ud
+from .util import create_model_path
 
 
 @plac.annotations(

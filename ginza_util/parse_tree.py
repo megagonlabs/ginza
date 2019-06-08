@@ -14,14 +14,13 @@ __all__ = [
 
 
 class Morph:
-    def __init__(self, _id, _offset, _surface, _lemma, _pos, _tag, _pos_detail, _inf, _trailing_space):
+    def __init__(self, _id, _offset, _surface, _lemma, _pos, _tag, _inf, _trailing_space):
         self.id = _id
         self.offset = _offset
         self.surface = _surface
         self.lemma = _lemma
         self.pos = _pos
         self.tag = _tag
-        self.pos_detail = _pos_detail
         self.inf = _inf
         self.trailing_space = _trailing_space
         self.dep_morph = None
@@ -33,7 +32,7 @@ class Morph:
                 self.surface,
                 self.lemma,
                 self.pos,
-                self.pos_detail.replace(',*', '').replace(',', '_'),
+                self.tag.replace(',*', '').replace(',', '_'),
                 self.inf.replace('*,*', '').replace(',', '_'),
             )
         else:
@@ -41,7 +40,7 @@ class Morph:
                 self.surface,
                 self.lemma,
                 self.pos,
-                self.pos_detail.replace(',*', '').replace(',', '_'),
+                self.tag.replace(',*', '').replace(',', '_'),
                 self.inf.replace('*,*', '').replace(',', '_'),
                 self.dep_label,
                 self.dep_morph.id - self.id,
@@ -70,7 +69,6 @@ def create_parsed_sentences(doc, separate_sentences=True):
                     t.lemma_,
                     t.pos_,
                     t.tag_,
-                    ex_attr(t).pos_detail,
                     ex_attr(t).inf,
                     t.whitespace_,
                 ) for i, t in enumerate(doc[begin:end])]
@@ -88,7 +86,6 @@ def create_parsed_sentences(doc, separate_sentences=True):
             t.lemma_,
             t.pos_,
             t.tag_,
-            ex_attr(t).pos_detail,
             ex_attr(t).inf,
             t.whitespace_,
         ) for i, t in enumerate(doc[begin:])]
@@ -122,7 +119,6 @@ class ParsedSentence(str):
                 m.lemma,
                 m.pos,
                 m.tag,
-                m.pos_detail,
                 m.inf,
                 m.trailing_space,
             ) for m in self.morphs
@@ -149,8 +145,8 @@ class ParsedSentence(str):
         spaces = [morph.trailing_space for morph in self.morphs]
         doc = Doc(vocab, words=words, spaces=spaces)
         for token, morph in zip(doc, self.morphs):
-            token.tag_ = morph.pos
-            ex_attr(token).pos_detail = morph.pos_detail
+            token.tag_ = morph.tag
+            token.pos_ = morph.pos
             ex_attr(token).inf = morph.inf
             token.lemma_ = morph.lemma  # work around: lemma_ must be set after tag_ (spaCy's bug)
             if is_parsed and morph.dep_label:
@@ -197,7 +193,6 @@ class ParsedSentence(str):
         origin.lemma = t.lemma_
         origin.pos = t.pos_
         origin.tag = t.tag_
-        origin.pos_detail = ex_attr(t).pos_detail
         origin.inf = ex_attr(t).inf
         origin.trailing_space = t.whitespace_
         if origin_pos != origin.pos:
@@ -213,7 +208,6 @@ class ParsedSentence(str):
                 t.lemma_,
                 t.pos_,
                 t.tag_,
-                ex_attr(t).pos_detail,
                 ex_attr(t).inf,
                 t.whitespace_,
             ) for i, t in enumerate(tokens[1:])
@@ -264,7 +258,6 @@ class ParsedSentence(str):
         origin.lemma = replacing_token.lemma_
         origin.pos = replacing_token.pos_
         origin.tag = replacing_token.tag_
-        origin.pos_detail = ex_attr(replacing_token).pos_detail
         origin.inf = ex_attr(replacing_token).inf
         origin.trailing_space = replacing_token.whitespace_
         origin.dep_morph = self.morphs[dep_outer_id]
@@ -289,8 +282,8 @@ def _print(_prefix, _morphs, _tokens):
         _prefix,
         len(_morphs),
         len(_tokens),
-        ','.join([m.pos_detail for m in _morphs]),
-        ','.join([ex_attr(t).pos_detail for t in _tokens]),
+        ','.join([m.pos for m in _morphs]),
+        ','.join([t.tag_ for t in _tokens]),
         ','.join([m.surface for m in _morphs]),
         ','.join([t.orth_ for t in _tokens]))
     )
@@ -299,7 +292,7 @@ def _print(_prefix, _morphs, _tokens):
 def rewrite_by_tokenizer(corpus, nlp, file=None, debug=False):
     eq = 0
     eq_pos = 0
-    eq_pos_detail = 0
+    eq_tag = 0
     fragmentation = 0
     unification = 0
     difference = 0
@@ -344,26 +337,26 @@ def rewrite_by_tokenizer(corpus, nlp, file=None, debug=False):
                     align_from_g = None
                 elif g_offset == t_offset:
                     if debug:
-                        pos_detail = g.pos_detail.replace(
+                        tag = g.tag.replace(
                                 '-',
                                 ','
                             ).replace(
                                 '.*',
                                 ''
-                            ) == ex_attr(t).pos_detail.replace(
+                            ) == t.tag_.replace(
                                 '.*',
                                 ''
                             )
                         _print(
-                            '==' if pos_detail else '=',
+                            '==' if tag else '=',
                             gold.morphs[index_g:index_g + 1],
                             tokens[index_t:index_t+1]
                         )
                         eq += 1
                         if g.pos == t.pos_:
                             eq_pos += 1
-                        if pos_detail:
-                            eq_pos_detail += 1
+                        if tag:
+                            eq_tag += 1
                     gold.rewrite_with_tokens(index_g, tokens[index_t:index_t + 1])
                 else:
                     if debug:
@@ -400,7 +393,7 @@ def rewrite_by_tokenizer(corpus, nlp, file=None, debug=False):
                 )
             )
         for m in gold.morphs:
-            if m.pos_detail.find('可能') >= 0 and m.dep_label.find('as_') == -1:
+            if m.tag.find('可能') >= 0 and m.dep_label.find('as_') == -1:
                 m.dep_label = '{}_as_{}'.format(m.dep_label, m.pos)
             elif m.id == m.dep_morph.id and m.dep_label.find('as_') < 0:
                 m.dep_label = '{}_as_'.format(m.dep_label)
@@ -408,7 +401,7 @@ def rewrite_by_tokenizer(corpus, nlp, file=None, debug=False):
     if debug:
         print('eq={}'.format(eq), file=file)
         print('eq_pos={}'.format(eq_pos), file=file)
-        print('eq_pos_detail={}'.format(eq_pos_detail), file=file)
+        print('eq_tag={}'.format(eq_tag), file=file)
         print('fragmentation={}'.format(fragmentation), file=file)
         print('unification={}'.format(unification), file=file)
         print('difference={}'.format(difference), file=file)

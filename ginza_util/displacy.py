@@ -3,12 +3,13 @@ import plac
 import threading
 import time
 import webbrowser
+import spacy
 from spacy import displacy
 from sudachipy.tokenizer import Tokenizer as OriginalTokenizer
 from ginza.japanese_corrector import JapaneseCorrector
 from .bccwj_ud_corpus import convert_files
 from .corpus import *
-from .parse_tree import correct_dep
+from ginza.japanese_corrector import correct_dep
 from ginza.sudachi_tokenizer import SUDACHI_DEFAULT_MODE
 
 
@@ -33,7 +34,7 @@ def main(
         browser_command=None,
         *lines,
 ):
-    nlp = load_model(model_path)
+    nlp = spacy.load(model_path)
     if disable_pipes:
         print("disabling pipes: {}".format(disable_pipes), file=sys.stderr)
         nlp.disable_pipes(disable_pipes)

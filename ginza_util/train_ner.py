@@ -5,7 +5,6 @@ import datetime
 import plac
 import random
 import spacy
-from ginza import *
 from .corpus import *
 from .evaluate_ner import convert_files, evaluate
 
@@ -72,7 +71,7 @@ def train(
     if model_path is None:
         raise Exception('model_path must be specified')
 
-    nlp = load_model(model_path)
+    nlp = spacy.load(model_path)
     nlp.tokenizer.use_sentence_separator = False
 
     if excluding_labels:
@@ -197,7 +196,7 @@ def train(
             best = stats
             best_model = nlp
             skipped_iter = 0
-            save_model(output_path, nlp)
+            nlp.to_disk(output_path)
             if batch_size > 1 and itn == max_epochs:
                 batch_size = 1
                 max_epochs = itn + online_sgd_max_epochs

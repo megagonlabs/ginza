@@ -1,5 +1,5 @@
 # encoding: utf8
-from ja_ginza import Japanese
+from ginza import Japanese
 
 
 def create_model_path(output_dir, model_name, model_version):
