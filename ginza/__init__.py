@@ -18,14 +18,12 @@ __all__ = [
 
 Language.factories['JapaneseCorrector'] = lambda nlp, **cfg: JapaneseCorrector(nlp)
 
-if not Doc.get_extension('bunsetu_bi_label'):
-    Doc.set_extension('bunsetu_bi_label', default=None)
-if not Doc.get_extension('bunsetu_position_type'):
-    Doc.set_extension('bunsetu_position_type', default=None)
-if not Token.get_extension('pos_detail'):
-    Token.set_extension('pos_detail', default='')
 if not Token.get_extension('inf'):
     Token.set_extension('inf', default='')
+if not Token.get_extension('bunsetu_bi_label'):
+    Token.set_extension('bunsetu_bi_label', default='')
+if not Token.get_extension('bunsetu_position_type'):
+    Token.set_extension('bunsetu_position_type', default='')
 
 
 class JapaneseDefaults(Language.Defaults):

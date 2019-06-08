@@ -57,6 +57,9 @@ for sent in doc.sents:
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 1.1
+#### ja_gsd-1.2.0-alpha4 (2019-06-08)
+- 詳細品詞情報がtoken.tag_に保存されるよう改良（token._.pos_detailは廃止）
+- doc.\_.(bunsetu_bi_label|bunsetu_position_type) を token.\_.(bunsetu_bi_label|bunsetu_position_type) に移動
 #### ja_gsd-1.1.2-alpha3 (2019-06-07)
 - 可能性品詞（名詞系ルートトークン）の曖昧性解消ルールの改良
 #### ja_gsd-1.1.1-alpha2 (2019-06-07)

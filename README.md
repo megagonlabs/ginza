@@ -54,6 +54,9 @@ for sent in doc.sents:
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
 ### version 1.1
+#### ja_gsd-1.2.0-alpha4 (2019-06-08)
+- Set detailed part-of-speech information to token.tag_ (and removing token._.pos_detail)
+- Move doc.\_.(bunsetu_bi_label|bunsetu_position_type) to token.\_.(bunsetu_bi_label|bunsetu_position_type)
 #### ja_gsd-1.1.2-alpha3 (2019-06-07)
 - Improve POS disambiguation rule for NOUN root token
 #### ja_gsd-1.1.1-alpha2 (2019-06-07)

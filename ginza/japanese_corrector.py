@@ -22,12 +22,6 @@ class JapaneseCorrector:
         return doc
 
 
-def _set_tag(token, tag):
-    lemma = token.lemma_
-    token.tag_ = tag  # work around: lemma_ must be set after tag_
-    token.lemma_ = lemma
-
-
 def correct_dep(doc):
     with doc.retokenize() as retokenizer:
         for i in range(len(doc)):
@@ -35,35 +29,33 @@ def correct_dep(doc):
             label = token.dep_
             p = label.find('_as_')
             if p >= 0:
-                tag = label[p + 4:]
-                if len(tag) > 0:
-                    _set_tag(token, tag)
+                corrected_pos = label[p + 4:]
+                if len(corrected_pos) > 0:
+                    token.pos_ = corrected_pos
                 token.dep_ = label[0:p]
             elif label.startswith('as_'):
-                tag = label[3:]
+                corrected_pos = label[3:]
                 head = token.head
                 if head.i + 1 == token.i:
-                    pos_detail = '\t'.join([ex_attr(head).pos_detail, ex_attr(token).pos_detail])
-                    inf = '\t'.join([ex_attr(head).inf, ex_attr(token).inf])
+                    tag = '+'.join([head.tag_, token.tag_])
+                    inf = '+'.join([ex_attr(head).inf, ex_attr(token).inf])
                     try:
-                        retokenizer.merge(doc[head.i:token.i + 1], attrs={'TAG': tag})
+                        retokenizer.merge(doc[head.i:token.i + 1], attrs={'POS': corrected_pos, 'TAG': tag})
                         token = doc[head.i]
-                        ex_attr(token).pos_detail = pos_detail
                         ex_attr(token).inf = inf
                     except ValueError:
-                        _set_tag(token, tag)
+                        token.pos_ = corrected_pos
                 elif head.i - 1 == token.i:
-                    pos_detail = '\t'.join([ex_attr(token).pos_detail, ex_attr(head).pos_detail])
-                    inf = '\t'.join([ex_attr(token).inf, ex_attr(head).inf])
+                    tag = '+'.join([token.tag_, head.tag_])
+                    inf = '+'.join([ex_attr(token).inf, ex_attr(head).inf])
                     try:
-                        retokenizer.merge(doc[token.i:head.i + 1], attrs={'TAG': tag})
+                        retokenizer.merge(doc[token.i:head.i + 1], attrs={'POS': corrected_pos, 'TAG': tag})
                         token = doc[token.i]
-                        ex_attr(token).pos_detail = pos_detail
                         ex_attr(token).inf = inf
                     except ValueError:
-                        _set_tag(token, tag)
+                        token.pos_ = corrected_pos
                 else:
-                    _set_tag(token, tag)
+                    token.pos_ = corrected_pos
 
 
 FUNC_POS = {
@@ -90,7 +82,7 @@ def set_bunsetu_bi_type(doc):
         ) and (
                 t.pos_ in FUNC_POS or
                 t.dep_ in FUNC_DEP or
-                t.dep_ == 'punct' and ex_attr(t).pos_detail.find('括弧開') < 0  # except open parenthesis
+                t.dep_ == 'punct' and t.tag_.find('括弧開') < 0  # except open parenthesis
         ):
             if head < t.head.i:
                 head = t.head.i
@@ -105,7 +97,7 @@ def set_bunsetu_bi_type(doc):
         if head is not None and continuous[t.i] is None and head == t.head.i and(t.dep_ in {
             'compound', 'nummod', 'amod', 'aux',
         } or (
-            t.dep_ == 'punct' and ex_attr(t).pos_detail.find('括弧開') >= 0  # open parenthesis
+            t.dep_ == 'punct' and t.tag_.find('括弧開') >= 0  # open parenthesis
         )):
             continuous[t.i] = head
         else:
@@ -151,9 +143,10 @@ def set_bunsetu_bi_type(doc):
     # print(continuous)
     '''
 
-    ex_attr(doc).bunsetu_bi_label = ['B'] + [
+    for t, bi in zip(doc, ['B'] + [
         'I' if continuous[i - 1] == continuous[i] else 'B' for i in range(1, len(continuous))
-    ]
+    ]):
+        ex_attr(t).bunsetu_bi_label = bi
 
     position_type = [
         'ROOT' if t.i == t.head.i else
@@ -162,9 +155,13 @@ def set_bunsetu_bi_type(doc):
         'CONT' for t, c in zip(doc, continuous)
     ]
     prev_c = None
-    for t, p, c in zip(reversed(doc), reversed(position_type), reversed(continuous)):
-        if p == 'FUNC':
+    for t, pt, c in zip(reversed(doc), reversed(position_type), reversed(continuous)):
+        if pt == 'FUNC':
             if prev_c is None or prev_c != c:
-                position_type[t.i] = 'SYN_HEAD'
+                ex_attr(t).bunsetu_position_type = 'SYN_HEAD'
                 prev_c = c
-    ex_attr(doc).bunsetu_position_type = position_type
+            else:
+                ex_attr(t).bunsetu_position_type = pt
+        else:
+            ex_attr(t).bunsetu_position_type = pt
+            prev_c = None

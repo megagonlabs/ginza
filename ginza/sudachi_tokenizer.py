@@ -159,16 +159,15 @@ class SudachiTokenizer(object):
             token.tag_ = tag
             # TODO separate lexical rules to resource files
             if morph.normalized_form() == '為る' and tag == '動詞,非自立可能,*,*':
-                token.tag_ = 'AUX'
+                token.pos_ = 'AUX'
             elif tag == '名詞,普通名詞,サ変可能,*':
                 if next_tag == '動詞,非自立可能,*,*':
-                    token.tag_ = 'VERB'
+                    token.pos_ = 'VERB'
             elif tag == '名詞,普通名詞,サ変形状詞可能,*':
                 if next_tag == '動詞,非自立可能,*,*':
-                    token.tag_ = 'VERB'
+                    token.pos_ = 'VERB'
                 elif next_tag == '助動詞,*,*,*' or next_tag.find('形状詞') >= 0:
-                    token.tag_ = 'ADJ'
-            token._.pos_detail = ",".join(morph.part_of_speech()[0:4])
+                    token.pos_ = 'ADJ'
             token._.inf = ",".join(morph.part_of_speech()[4:])
             token.lemma_ = morph.normalized_form()  # work around: lemma_ must be set after tag_
         if self.use_sentence_separator:
