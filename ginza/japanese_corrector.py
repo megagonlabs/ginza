@@ -22,6 +22,20 @@ class JapaneseCorrector:
         return doc
 
 
+def merge_range(doc, token):
+    if token.i == token.head.i:
+        return None
+    else:
+        for i in range(token.i + 1, token.head.i) if token.i < token.head.i else range(token.head.i + 1, token.i):
+            t = doc[i]
+            if t.head.i < token.i or token.head.i < t.head.i or not t.dep == token.dep:
+                return None
+        head = token.head
+        while token.i <= head.head.i <= token.head.i:
+            head = head.head
+        return (token.i, token.head.i + 1, head) if token.i < token.head.i else (token.head.i, token.i + 1, head)
+
+
 def correct_dep(doc):
     with doc.retokenize() as retokenizer:
         for i in range(len(doc)):
@@ -29,33 +43,26 @@ def correct_dep(doc):
             label = token.dep_
             p = label.find('_as_')
             if p >= 0:
-                corrected_pos = label[p + 4:]
+                corrected_pos = label[p + 4:].upper()  # TODO remove upper() when training bug fixed
                 if len(corrected_pos) > 0:
                     token.pos_ = corrected_pos
                 token.dep_ = label[0:p]
             elif label.startswith('as_'):
-                corrected_pos = label[3:]
-                head = token.head
-                if head.i + 1 == token.i:
-                    tag = '+'.join([head.tag_, token.tag_])
-                    inf = '+'.join([ex_attr(head).inf, ex_attr(token).inf])
+                corrected_pos = label[3:].upper()  # TODO same to above
+                m = merge_range(doc, token)
+                if m is not None:
+                    begin, end, head = m
+                    tag = head.tag_
+                    inf = ex_attr(head).inf
                     try:
-                        retokenizer.merge(doc[head.i:token.i + 1], attrs={'POS': corrected_pos, 'TAG': tag})
-                        token = doc[head.i]
-                        ex_attr(token).inf = inf
+                        retokenizer.merge(doc[begin:begin + 2], attrs={'POS': corrected_pos, 'TAG': tag})
+                        ex_attr(doc[begin]).inf = inf
+                        continue
                     except ValueError:
-                        token.pos_ = corrected_pos
-                elif head.i - 1 == token.i:
-                    tag = '+'.join([token.tag_, head.tag_])
-                    inf = '+'.join([ex_attr(token).inf, ex_attr(head).inf])
-                    try:
-                        retokenizer.merge(doc[token.i:head.i + 1], attrs={'POS': corrected_pos, 'TAG': tag})
-                        token = doc[token.i]
-                        ex_attr(token).inf = inf
-                    except ValueError:
-                        token.pos_ = corrected_pos
-                else:
-                    token.pos_ = corrected_pos
+                        pass
+                token.head.pos_ = corrected_pos
+                token.pos_ = corrected_pos
+                token.dep_ = 'dep'
 
 
 FUNC_POS = {
