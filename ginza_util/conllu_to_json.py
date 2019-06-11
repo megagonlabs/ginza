@@ -6,6 +6,10 @@ import re
 import sys
 import os
 
+import plac
+
+from spacy.syntax.nonproj import is_nonproj_tree, contains_cycle
+
 
 SID_PATTERN = re.compile(
     r'^# sent_id = (.+)$'
@@ -18,7 +22,7 @@ TOKEN_PATTERN = re.compile(
 )
 
 
-def read_bccwj_ud(_path, file, yield_document=False):
+def read_conllu(_path, file, yield_document=False):
     sentences = convert_lines(_path, file.readlines())
     for sentence in sentences:
         if not yield_document:
@@ -75,37 +79,39 @@ def convert_lines(_path, lines):
 
             token_id = int(m.group(1)) - 1
             orth = m.group(2)
-            lemma = m.group(3)
-            if lemma == '*':
-                lemma = orth
             pos = m.group(4)
             tag = m.group(5)
             head_id = int(m.group(7)) - 1
-            if head_id == -1:
+            if head_id < 0:
                 head_id = token_id
             dep = m.group(8)
             tokens.append({
                 'id': token_id,
                 'dep': dep + '_as_' + pos if tag.endswith('可能') else dep,
-                'head': head_id,
+                'head': head_id - token_id,
                 'tag': tag,
-                'orth': lemma,
+                'orth': orth,
             })
 
         elif state == 'ios' and line == '':
             if len(tokens) == 0:
                 error_line(state, _path, line_index, sentence_id, sentence, line)
                 return []
-
-            docs.append({
-                'id': sentence_id,
-                'paragraphs': [{
-                    'raw': sentence,
-                    'sentences': [{
-                        'tokens': tokens,
+            heads = [t['id'] + t['head'] for t in tokens]
+            if is_nonproj_tree(heads) or contains_cycle(heads):
+                print('Skipping non-projective or cyclic sentence:', sentence_id, sentence, [
+                    (t['id'], t['id'] + t['head'], t['orth']) for t in tokens
+                ], file=sys.stderr)
+            else:
+                docs.append({
+                    'id': sentence_id,
+                    'paragraphs': [{
+                        'raw': sentence,
+                        'sentences': [{
+                            'tokens': tokens,
+                        }],
                     }],
-                }],
-            })
+                })
 
             sentence_id = None
             sentence = ""
@@ -146,18 +152,22 @@ def convert_files(path):
     return path_sentences
 
 
-def print_jsonl(doc, file=sys.stdout):
-    json.dump(doc, file, ensure_ascii=False)
+def print_json(docs, n_sents, file=sys.stdout):
+    json.dump(docs, file, ensure_ascii=False, indent=1)
     print(file=file)
 
 
-def main():
-    if len(sys.argv) > 1:
-        for doc in convert_files(sys.argv[1:]):
-            print_jsonl(doc)
+@plac.annotations(
+    input_path=("Input path", "positional", None, str),
+    n_sents=("Number of sentences per doc", "option", "n", int),
+    lang=("Language (default='ja')", "option", "l", str),
+)
+def main(input_path='-', n_sents=10, lang='ja'):
+    out = sys.stdout
+    if input_path == '-':
+        print_json(list(read_conllu('-', sys.stdin)), n_sents, out)
     else:
-        for doc in read_bccwj_ud('-', sys.stdin):
-            print_jsonl(doc)
+        print_json(list(convert_files(input_path)), n_sents, out)
 
 
 if __name__ == "__main__":
