@@ -43,12 +43,12 @@ def correct_dep(doc):
             label = token.dep_
             p = label.find('_as_')
             if p >= 0:
-                corrected_pos = label[p + 4:].upper()  # TODO remove upper() when training bug fixed
+                corrected_pos = label[p + 4:]
                 if len(corrected_pos) > 0:
                     token.pos_ = corrected_pos
                 token.dep_ = label[0:p]
             elif label.startswith('as_'):
-                corrected_pos = label[3:].upper()  # TODO same to above
+                corrected_pos = label[3:]
                 m = merge_range(doc, token)
                 if m is not None:
                     begin, end, head = m

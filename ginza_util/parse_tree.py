@@ -199,7 +199,7 @@ class ParsedSentence(str):
             origin.dep_label = '{}_as_{}'.format(origin.dep_label, origin_pos)
         if len(tokens) == 1:
             return
-        label = 'as_{}'.format(origin.pos.lower())
+        label = 'as_{}'.format(origin.pos)
         others = [
             Morph(
                 rewriting_morph_index + i + 1,
