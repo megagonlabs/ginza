@@ -104,9 +104,9 @@ def separate_sentences(doc):
                     next_token.sent_start = True
 
 
-def morph_tag(morph):
+def morph_tag(tag_array):
     return "-".join([
-        p for p in morph.part_of_speech()[0:4] if p != '*'
+        p for p in tag_array if p != '*'
     ])
 
 
@@ -158,10 +158,10 @@ class SudachiTokenizer(object):
         words = [m.surface() for m, spaces in morph_spaces]
         spaces = [space for m, space in morph_spaces]
         doc = Doc(self.nlp.vocab, words=words, spaces=spaces)
-        next_tag = morph_tag(morph_spaces[0][0]) if len(doc) else ''
+        next_tag = morph_tag(morph_spaces[0][0].part_of_speech()[0:4]) if len(doc) else ''
         for token, (morph, spaces) in zip(doc, morph_spaces):
             tag = next_tag
-            next_tag = morph_tag(morph_spaces[token.i + 1][0]) if token.i < len(doc) - 1 else ''
+            next_tag = morph_tag(morph_spaces[token.i + 1][0].part_of_speech()[0:4]) if token.i < len(doc) - 1 else ''
             token.tag_ = tag
             # TODO separate lexical rules to resource files
             if morph.normalized_form() == '為る' and tag == '動詞-非自立可能':
@@ -174,7 +174,7 @@ class SudachiTokenizer(object):
                     token.pos_ = 'VERB'
                 elif next_tag == '助動詞' or next_tag.find('形状詞') >= 0:
                     token.pos_ = 'ADJ'
-            token._.inf = ",".join(morph.part_of_speech()[4:])
+            token._.inf = morph_tag(morph.part_of_speech()[4:])
             token.lemma_ = morph.normalized_form()  # work around: lemma_ must be set after tag_
         if self.use_sentence_separator:
             separate_sentences(doc)
