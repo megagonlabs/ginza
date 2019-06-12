@@ -22,22 +22,11 @@ TOKEN_PATTERN = re.compile(
 )
 
 
-def read_conllu(_path, file, yield_document=False):
-    sentences = convert_lines(_path, file.readlines())
-    for sentence in sentences:
-        if not yield_document:
-            yield sentence
-    if yield_document:
-        return sentences
-
-
-def convert_file(_path):
-    with open(str(_path), 'r') as file:
-        return convert_lines(_path, file.readlines())
-
-
-def convert_lines(_path, lines):
-    docs = []
+def convert_lines(path, lines, paragraph_id_regex, n_sents):
+    paragraphs = []
+    raw = ''
+    sentences = []
+    paragraph_id = None
     sentence_id = None
     sentence = ''
     tokens = []
@@ -56,25 +45,41 @@ def convert_lines(_path, lines):
         if state == 'sid':
             m = SID_PATTERN.match(line)
             if m is None:
-                error_line(state, _path, line_index, sentence_id, sentence, line)
+                error_line(state, path, line_index, sentence_id, sentence, line)
                 return []
 
             sentence_id = m.group(1)
+            m = re.match(paragraph_id_regex, sentence_id)
+            if m:
+                new_paragraph_id = m.group(1)
+            else:
+                new_paragraph_id = ''
+            if paragraph_id is None or paragraph_id != new_paragraph_id:
+                paragraph_id = new_paragraph_id
+                if sentences:
+                    paragraphs.append({
+                        'raw': raw,
+                        'sentences': sentences,
+                    })
+                    raw = ''
+                    sentences = []
+
             state = 'text'
 
         elif state == 'text':
             m = TEXT_PATTERN.match(line)
             if m is None:
-                error_line(state, _path, line_index, sentence_id, sentence, line)
+                error_line(state, path, line_index, sentence_id, sentence, line)
                 return []
 
             sentence = m.group(1)
+            raw += sentence
             state = 'ios'
 
         elif state == 'ios' and line != '':
             m = TOKEN_PATTERN.match(line)
             if m is None:
-                error_line(state, _path, line_index, sentence_id, sentence, line)
+                error_line(state, path, line_index, sentence_id, sentence, line)
                 return []
 
             token_id = int(m.group(1)) - 1
@@ -95,23 +100,24 @@ def convert_lines(_path, lines):
 
         elif state == 'ios' and line == '':
             if len(tokens) == 0:
-                error_line(state, _path, line_index, sentence_id, sentence, line)
+                error_line(state, path, line_index, sentence_id, sentence, line)
                 return []
             heads = [t['id'] + t['head'] for t in tokens]
-            if is_nonproj_tree(heads) or contains_cycle(heads):
-                print('Skipping non-projective or cyclic sentence:', sentence_id, sentence, [
-                    (t['id'], t['id'] + t['head'], t['orth']) for t in tokens
-                ], file=sys.stderr)
+            if is_nonproj_tree(heads):
+                print(file=sys.stderr)
+                print('skip(non-projective):', path, sentence_id, file=sys.stderr)
+            elif contains_cycle(heads):
+                print(file=sys.stderr)
+                print('skip(cyclic)', path, sentence_id, file=sys.stderr)
             else:
-                docs.append({
-                    'id': sentence_id,
-                    'paragraphs': [{
-                        'raw': sentence,
-                        'sentences': [{
-                            'tokens': tokens,
-                        }],
-                    }],
-                })
+                sentences.append({'tokens': tokens})
+                if len(sentences) >= n_sents:
+                    paragraphs.append({
+                        'raw': raw,
+                        'sentences': sentences,
+                    })
+                    raw = ''
+                    sentences = []
 
             sentence_id = None
             sentence = ""
@@ -119,57 +125,69 @@ def convert_lines(_path, lines):
             state = 'sid'
 
         else:
-            error_line(state, _path, line_index, sentence_id, sentence, line)
+            error_line(state, path, line_index, sentence_id, sentence, line)
             return []
 
     if state != 'sid':
-        error_line(state, _path, len(lines), sentence_id, sentence, '<END OF FILE>')
+        error_line(state, path, len(lines), sentence_id, sentence, '<END OF FILE>')
         return []
 
-    return docs
+    if sentences:
+        paragraphs.append({
+            'raw': raw,
+            'sentences': sentences,
+        })
+
+    return paragraphs
 
 
-def convert_files(path):
-    path_sentences = []
+def convert_files(path, paragraph_id_regex, n_sents):
+    docs = []
 
     if type(path) == list:
         print('targets: {}'.format(str(path)), file=sys.stderr)
         for p in path:
-            path_sentences += convert_files(p)
+            docs += convert_files(p, paragraph_id_regex, n_sents)
         print(file=sys.stderr, flush=True)
-        return path_sentences
+        return docs
 
     if os.path.isdir(path):
         print('loading {}'.format(str(path)), file=sys.stderr)
         for sub_path in os.listdir(path):
-            path_sentences += convert_files(os.path.join(path, sub_path))
+            docs += convert_files(os.path.join(path, sub_path), paragraph_id_regex, n_sents)
         print(file=sys.stderr)
     else:
-        path_sentences += convert_file(path)
+        if path == '-':
+            lines = sys.stdin.readlines()
+        else:
+            with open(str(path), 'r') as file:
+                lines = file.readlines()
+        paragraphs = convert_lines(path, lines, paragraph_id_regex, n_sents)
+        docs.append({
+            'id': str(path),
+            'paragraphs': paragraphs,
+        })
         print('.'.format(str(path)), end='', file=sys.stderr)
 
     sys.stderr.flush()
-    return path_sentences
+    return docs
 
 
-def print_json(docs, n_sents, file=sys.stdout):
+def print_json(docs, file=sys.stdout):
     json.dump(docs, file, ensure_ascii=False, indent=1)
     print(file=file)
 
 
 @plac.annotations(
     input_path=("Input path", "positional", None, str),
-    n_sents=("Number of sentences per doc", "option", "n", int),
+    paragraph_id_regex=("Regex pattern for paragraph_id (default=r'')", 'option', 'p', str),
+    n_sents=("Number of sentences per paragraph (default=10)", "option", "n", int),
     lang=("Language (default='ja')", "option", "l", str),
 )
-def main(input_path='-', n_sents=10, lang='ja'):
+def main(input_path='-', paragraph_id_regex=r'^(.*)[\-:][^\-:]*$', n_sents=10, lang='ja'):
     out = sys.stdout
-    if input_path == '-':
-        print_json(list(read_conllu('-', sys.stdin)), n_sents, out)
-    else:
-        print_json(list(convert_files(input_path)), n_sents, out)
+    print_json(convert_files(input_path, paragraph_id_regex, n_sents), out)
 
 
-if __name__ == "__main__":
-    # execute only if run as a script
-    main()
+if __name__ == '__main__':
+    plac.call(main)
