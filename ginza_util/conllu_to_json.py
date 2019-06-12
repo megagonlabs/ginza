@@ -380,14 +380,13 @@ def print_json(docs, file=sys.stdout):
 
 @plac.annotations(
     input_path=("Input path", "positional", None, str),
-    retokenize_gold=("Retokenize", "flag", "r"),
+    retokenize_lang=("Retokenize", "option", "r", str),
     paragraph_id_regex=("Regex pattern for paragraph_id (default=r'')", 'option', 'p', str),
     n_sents=("Number of sentences per paragraph (default=10)", "option", "n", int),
 )
-def main(input_path='-', retokenize_gold=False, paragraph_id_regex=r'^(.*)[\-:][^\-:]*$', n_sents=10):
-    if retokenize_gold:
-        ja = get_lang_class("ja")
-        tokenizer = ja()
+def main(input_path='-', retokenize_lang='ja', paragraph_id_regex=r'^(.*)[\-:][^\-:]*$', n_sents=10):
+    if retokenize_lang:
+        tokenizer = get_lang_class(retokenize_lang)()
     else:
         tokenizer = None
     out = sys.stdout
