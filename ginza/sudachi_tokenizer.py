@@ -145,7 +145,7 @@ class SudachiTokenizer(object):
                         morph_spaces.append((last_morph, True))
                         last_morph = None
                     else:
-                        morph_spaces.append((m, True))
+                        morph_spaces.append((m, False))
                 elif last_morph:
                     morph_spaces.append((last_morph, False))
                     last_morph = m
