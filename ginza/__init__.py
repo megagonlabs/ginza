@@ -3,7 +3,6 @@ from __future__ import unicode_literals, print_function
 
 from spacy.attrs import LANG
 from spacy.language import Language
-from spacy.tokens import Doc
 from spacy.tokens import Token
 from spacy.util import get_model_meta
 from spacy.vocab import Vocab
