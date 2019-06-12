@@ -22,71 +22,71 @@ TAG_MAP = {
     # Universal Dependencies Mapping (internal git)
     # https://github.com/mynlp/udjapanese/blob/master/UDJapaneseBCCWJ/unidic_to_udpos_mapping/bccwj_pos_suw_rule.json
 
-    "記号,一般,*,*": {POS: SYM},
-    "記号,文字,*,*": {POS: SYM},
+    "記号-一般": {POS: SYM},
+    "記号-文字": {POS: SYM},
 
-    "感動詞,フィラー,*,*": {POS: INTJ},
-    "感動詞,一般,*,*": {POS: INTJ},
+    "感動詞-フィラー": {POS: INTJ},
+    "感動詞-一般": {POS: INTJ},
 
     # spaces should be treated as token.whitespace_
-    "空白,*,*,*": {POS: SPACE},
+    "空白": {POS: SPACE},
 
-    "形状詞,一般,*,*": {POS: ADJ},
-    "形状詞,タリ,*,*": {POS: ADJ},
-    "形状詞,助動詞語幹,*,*": {POS: ADJ},
-    "形容詞,一般,*,*": {POS: ADJ},
-    "形容詞,非自立可能,*,*": {POS: ADJ},  # All the root tokens are ADJ
+    "形状詞-一般": {POS: ADJ},
+    "形状詞-タリ": {POS: ADJ},
+    "形状詞-助動詞語幹": {POS: ADJ},
+    "形容詞-一般": {POS: ADJ},
+    "形容詞-非自立可能": {POS: ADJ},  # All the root tokens are ADJ
 
-    "助詞,格助詞,*,*": {POS: ADP},
-    "助詞,係助詞,*,*": {POS: ADP},
-    "助詞,終助詞,*,*": {POS: PART},
-    "助詞,準体助詞,*,*": {POS: SCONJ},
-    "助詞,接続助詞,*,*": {POS: CCONJ},
-    "助詞,副助詞,*,*": {POS: ADP},
-    "助動詞,*,*,*": {POS: AUX},
-    "接続詞,*,*,*": {POS: SCONJ},
+    "助詞-格助詞": {POS: ADP},
+    "助詞-係助詞": {POS: ADP},
+    "助詞-終助詞": {POS: PART},
+    "助詞-準体助詞": {POS: SCONJ},
+    "助詞-接続助詞": {POS: CCONJ},
+    "助詞-副助詞": {POS: ADP},
+    "助動詞": {POS: AUX},
+    "接続詞": {POS: SCONJ},
 
-    "接頭辞,*,*,*": {POS: NOUN},
-    "接尾辞,形状詞的,*,*": {POS: NOUN},
-    "接尾辞,形容詞的,*,*": {POS: NOUN},
-    "接尾辞,動詞的,*,*": {POS: NOUN},
-    "接尾辞,名詞的,サ変可能,*": {POS: NOUN},  # All the root tokens are NOUN
-    "接尾辞,名詞的,一般,*": {POS: NOUN},
-    "接尾辞,名詞的,助数詞,*": {POS: NOUN},
-    "接尾辞,名詞的,副詞可能,*": {POS: NOUN},  # All the root tokens are NOUN
+    "接頭辞": {POS: NOUN},
+    "接尾辞-形状詞的": {POS: NOUN},
+    "接尾辞-形容詞的": {POS: NOUN},
+    "接尾辞-動詞的": {POS: NOUN},
+    "接尾辞-名詞的-サ変可能": {POS: NOUN},  # All the root tokens are NOUN
+    "接尾辞-名詞的-一般": {POS: NOUN},
+    "接尾辞-名詞的-助数詞": {POS: NOUN},
+    "接尾辞-名詞的-副詞可能": {POS: NOUN},  # All the root tokens are NOUN
 
-    "代名詞,*,*,*": {POS: PRON},
-    "動詞,一般,*,*": {POS: VERB},
-    "動詞,非自立可能,*,*": {POS: VERB},  # All the root tokens are VERB except the tokens lemma is '為る' and POS is AUX
-    "副詞,*,*,*": {POS: ADV},
+    "代名詞": {POS: PRON},
+    "動詞-一般": {POS: VERB},
+    "動詞-非自立可能": {POS: VERB},  # All the root tokens are VERB except the tokens lemma is '為る' and POS is AUX
+    "副詞": {POS: ADV},
 
-    "補助記号,ＡＡ,一般,*": {POS: SYM},  # text art
-    "補助記号,ＡＡ,顔文字,*": {POS: SYM},  # kaomoji
-    "補助記号,一般,*,*": {POS: PUNCT},
-    "補助記号,括弧開,*,*": {POS: PUNCT},  # open bracket
-    "補助記号,括弧閉,*,*": {POS: PUNCT},  # close bracket
-    "補助記号,句点,*,*": {POS: PUNCT},  # period or other EOS marker
-    "補助記号,読点,*,*": {POS: PUNCT},  # comma
+    "補助記号-ＡＡ-一般": {POS: SYM},  # text art
+    "補助記号-ＡＡ-顔文字": {POS: SYM},  # kaomoji
+    "補助記号-一般": {POS: PUNCT},
+    "補助記号-括弧開": {POS: PUNCT},  # open bracket
+    "補助記号-括弧閉": {POS: PUNCT},  # close bracket
+    "補助記号-句点": {POS: PUNCT},  # period or other EOS marker
+    "補助記号-読点": {POS: PUNCT},  # comma
 
-    "名詞,固有名詞,一般,*": {POS: PROPN},  # general proper noun
-    "名詞,固有名詞,人名,一般": {POS: PROPN},  # person's name
-    "名詞,固有名詞,人名,姓": {POS: PROPN},  # surname
-    "名詞,固有名詞,人名,名": {POS: PROPN},  # first name
-    "名詞,固有名詞,地名,一般": {POS: PROPN},  # place name
-    "名詞,固有名詞,地名,国": {POS: PROPN},  # country name
+    "名詞-固有名詞-一般": {POS: PROPN},  # general proper noun
+    "名詞-固有名詞-人名-一般": {POS: PROPN},  # person's name
+    "名詞-固有名詞-人名-姓": {POS: PROPN},  # surname
+    "名詞-固有名詞-人名-名": {POS: PROPN},  # first name
+    "名詞-固有名詞-地名-一般": {POS: PROPN},  # place name
+    "名詞-固有名詞-地名-国": {POS: PROPN},  # country name
 
-    "名詞,助動詞語幹,*,*": {POS: AUX},
-    "名詞,数詞,*,*": {POS: NUM},  # includes Chinese numerals
+    "名詞-助動詞語幹": {POS: AUX},
+    "名詞-数詞": {POS: NUM},  # includes Chinese numerals
 
-    "名詞,普通名詞,サ変可能,*": {POS: NOUN},  # ADJ=3349 and VERB=3411 for root
+    "名詞-普通名詞-サ変可能": {POS: NOUN},  # ADJ=3349 and VERB=3411 for root
 
-    "名詞,普通名詞,サ変形状詞可能,*": {POS: NOUN},  # ADJ=40 and NOUN=30 for root
-    "名詞,普通名詞,一般,*": {POS: NOUN},
-    "名詞,普通名詞,形状詞可能,*": {POS: ADJ},  # ADJ=404 and NOUN=161 for root
-    "名詞,普通名詞,助数詞可能,*": {POS: NOUN},  # All the root tokens are NOUN
-    "名詞,普通名詞,副詞可能,*": {POS: NOUN},  # All the root tokens are NOUN
+    "名詞-普通名詞-サ変形状詞可能": {POS: NOUN},  # ADJ=40 and NOUN=30 for root
+    "名詞-普通名詞-一般": {POS: NOUN},
+    "名詞-普通名詞-形状詞可能": {POS: ADJ},  # ADJ=404 and NOUN=161 for root
+    "名詞-普通名詞-助数詞可能": {POS: NOUN},  # All the root tokens are NOUN
+    "名詞-普通名詞-副詞可能": {POS: NOUN},  # All the root tokens are NOUN
 
-    "連体詞,*,*,*": {POS: DET},
+    "連体詞": {POS: DET},
 }
 TAG_MAP.update(
     # add pos names as tags too
@@ -98,10 +98,16 @@ TAG_MAP.update(
 def separate_sentences(doc):
     for i, token in enumerate(doc[:-2]):
         if token.tag_:
-            if token.tag_ == "補助記号,句点,*,*":
+            if token.tag_ == "補助記号-句点":
                 next_token = doc[i+1]
                 if next_token.tag_ != token.tag_:
                     next_token.sent_start = True
+
+
+def morph_tag(morph):
+    return "-".join([
+        p for p in morph.part_of_speech()[0:4] if p != '*'
+    ])
 
 
 class SudachiTokenizer(object):
@@ -152,21 +158,21 @@ class SudachiTokenizer(object):
         words = [m.surface() for m, spaces in morph_spaces]
         spaces = [space for m, space in morph_spaces]
         doc = Doc(self.nlp.vocab, words=words, spaces=spaces)
-        next_tag = ",".join(morph_spaces[0][0].part_of_speech()[0:4]) if len(doc) else ''
+        next_tag = morph_tag(morph_spaces[0][0]) if len(doc) else ''
         for token, (morph, spaces) in zip(doc, morph_spaces):
             tag = next_tag
-            next_tag = ",".join(morph_spaces[token.i + 1][0].part_of_speech()[0:4]) if token.i < len(doc) - 1 else ''
+            next_tag = morph_tag(morph_spaces[token.i + 1][0]) if token.i < len(doc) - 1 else ''
             token.tag_ = tag
             # TODO separate lexical rules to resource files
-            if morph.normalized_form() == '為る' and tag == '動詞,非自立可能,*,*':
+            if morph.normalized_form() == '為る' and tag == '動詞-非自立可能':
                 token.pos_ = 'AUX'
-            elif tag == '名詞,普通名詞,サ変可能,*':
-                if next_tag == '動詞,非自立可能,*,*':
+            elif tag == '名詞-普通名詞-サ変可能':
+                if next_tag == '動詞-非自立可能':
                     token.pos_ = 'VERB'
-            elif tag == '名詞,普通名詞,サ変形状詞可能,*':
-                if next_tag == '動詞,非自立可能,*,*':
+            elif tag == '名詞-普通名詞-サ変形状詞可能':
+                if next_tag == '動詞-非自立可能':
                     token.pos_ = 'VERB'
-                elif next_tag == '助動詞,*,*,*' or next_tag.find('形状詞') >= 0:
+                elif next_tag == '助動詞' or next_tag.find('形状詞') >= 0:
                     token.pos_ = 'ADJ'
             token._.inf = ",".join(morph.part_of_speech()[4:])
             token.lemma_ = morph.normalized_form()  # work around: lemma_ must be set after tag_
