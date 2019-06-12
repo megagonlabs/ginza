@@ -38,12 +38,11 @@ def main(
         print("disabling pipes: {}".format(disable_pipes), file=sys.stderr)
         nlp.disable_pipes(disable_pipes)
         print("using : {}".format(nlp.pipe_names), file=sys.stderr)
-    else:
-        # to ensure reflect local changes of corrector
-        if recreate_corrector and 'JapaneseCorrector' in nlp.pipe_names:
+    if recreate_corrector:
+        if 'JapaneseCorrector' in nlp.pipe_names:
             nlp.remove_pipe('JapaneseCorrector')
-            corrector = JapaneseCorrector(nlp)
-            nlp.add_pipe(corrector, last=True)
+        corrector = JapaneseCorrector(nlp)
+        nlp.add_pipe(corrector, last=True)
 
     if mode == 'A':
         nlp.tokenizer.mode = OriginalTokenizer.SplitMode.A
@@ -116,8 +115,8 @@ def token_line(token, np_tokens):
     bunsetu_bi = token._.bunsetu_bi_label
     position_type = token._.bunsetu_position_type
     info = '|'.join(filter(lambda s: s, [
-        '' if bunsetu_bi else 'BunsetuBILabel={}'.format(bunsetu_bi),
-        '' if position_type is None else 'BunsetuPositionType={}'.format(position_type),
+        '' if not bunsetu_bi else 'BunsetuBILabel={}'.format(bunsetu_bi),
+        '' if not position_type else 'BunsetuPositionType={}'.format(position_type),
         '' if token.whitespace_ else 'SpaceAfter=No',
         np_tokens.get(token.i, ''),
         '' if not token.ent_type else 'NE={}_{}'.format(token.ent_type_, token.ent_iob_),
