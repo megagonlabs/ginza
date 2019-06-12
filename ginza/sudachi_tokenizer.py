@@ -174,7 +174,7 @@ class SudachiTokenizer(object):
                     token.pos_ = 'VERB'
                 elif next_tag == '助動詞' or next_tag.find('形状詞') >= 0:
                     token.pos_ = 'ADJ'
-            token._.inf = morph_tag(morph.part_of_speech()[4:])
+            token._.inf = ','.join(morph.part_of_speech()[4:])
             token.lemma_ = morph.normalized_form()  # work around: lemma_ must be set after tag_
         if self.use_sentence_separator:
             separate_sentences(doc)
