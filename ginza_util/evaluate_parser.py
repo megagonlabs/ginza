@@ -42,6 +42,10 @@ def evaluate_from_file(
         nlp = spacy.load(model_path)
         nlp.tokenizer.use_sentence_separator = False
 
+    if 'JapaneseCorrector' not in nlp.pipe_names:
+        corrector = nlp.create_pipe('JapaneseCorrector')
+        nlp.add_pipe(corrector, last=True)
+
     rewritten = [g.clone() for g in gold]
     if not keep_gold_tokens:
         print('Rewriting gold corpus with tokenizer', file=sys.stderr)
