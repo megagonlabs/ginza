@@ -34,7 +34,9 @@ def rewrite_with_tokens(gold_tokens, rewriting_gold_index, tokens):
     g['pos'] = t.pos_
     g['tag'] = t.tag_
     g['whitespace'] = t.whitespace_ != ''
-    g['dep'] = g['dep'] if g_pos == t.pos_ else '{}_as_{}'.format(g['dep'], g_pos)
+    if not g['dep'].startswith('as_'):
+        dep = g['dep'].split('_as_')[0]
+        g['dep'] = dep if g_pos == t.pos_ else '{}_as_{}'.format(dep, g_pos)
     if len(tokens) == 1:
         return
     label = 'as_{}'.format(g_pos)
@@ -79,15 +81,19 @@ def unify_range(gold_tokens, start, end, replacing_token):
     elif start < dep_outer_id < end:
         dep_outer_id = start
 
-    origin = gold_tokens[start]
-    origin['orth'] = replacing_token.orth_
-    origin['lemma'] = replacing_token.lemma_
-    origin['pos'] = replacing_token.pos_
-    origin['tag'] = replacing_token.tag_
-    origin['inf'] = ex_attr(replacing_token).inf
-    origin['whitespace'] = replacing_token.whitespace_ != ''
-    origin['head'] = dep_outer_id - start
-    origin['dep'] = dep_outer_label if head_pos == origin['pos'] else '{}_as_{}'.format(dep_outer_label, head_pos)
+    g = gold_tokens[start]
+    g['orth'] = replacing_token.orth_
+    g['lemma'] = replacing_token.lemma_
+    g['pos'] = replacing_token.pos_
+    g['tag'] = replacing_token.tag_
+    g['inf'] = ex_attr(replacing_token).inf
+    g['whitespace'] = replacing_token.whitespace_ != ''
+    g['head'] = dep_outer_id - start
+    if dep_outer_label.startswith('as_'):
+        g['dep'] = dep_outer_label
+    else:
+        dep = dep_outer_label.split('_as_')[0]
+        g['dep'] = dep if head_pos == g['pos'] else '{}_as_{}'.format(dep, head_pos)
 
     for g in gold_tokens:
         if g['id'] <= start and end <= g['id'] + g['head']:
@@ -289,7 +295,7 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
                 'lemma': lemma,
                 'pos': pos,
                 'tag': tag,
-                'dep': dep + '_as_' + pos if tag.endswith('可能') else dep,
+                'dep': dep,
                 'head': head_id - token_id,
                 'whitespace': whitespace,
             })

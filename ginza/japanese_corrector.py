@@ -41,7 +41,7 @@ def correct_dep(doc):
         for i in range(len(doc)):
             token = doc[i]
             label = token.dep_
-            p = label.find('_as_')
+            p = label.rfind('_as_')
             if p >= 0:
                 corrected_pos = label[p + 4:]
                 if len(corrected_pos) > 0:
