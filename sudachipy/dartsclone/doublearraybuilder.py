@@ -1,5 +1,5 @@
-import copy
-import sys
+from io import BytesIO
+
 from . import dawgbuilder
 from . import doublearraybuilderunit
 
@@ -34,10 +34,12 @@ class DoubleArrayBuilder(object):
             self.build_from_key_set_header(key_set)
 
     def copy(self):
-        buffer = []
+        buf = BytesIO()
         for u in self.units:
-            buffer.append(u.unit)
-        return buffer
+            buf.write(u.unit.to_bytes(4, byteorder='little', signed=False))
+            # buf.write_int(u.unit, 'int', signed=False)
+        buf.seek(0)
+        return buf
 
     def clear(self):
         self.units = []
@@ -55,8 +57,9 @@ class DoubleArrayBuilder(object):
         dawg_builder.init()
         for i in range(key_set.size()):
             dawg_builder.insert(key_set.get_key(i), key_set.get_value(i))
-            if (self.progress_function is not None):
-                self.progress_function.accept(i + 1, key_set.size() + 1)
+            if self.progress_function is not None:
+                # self.progress_function.accept(i + 1, key_set.size() + 1)
+                self.progress_function(i + 1, key_set.size() + 1)
         dawg_builder.finish()
 
     def build_from_dawg_header(self, dawg):
@@ -204,7 +207,8 @@ class DoubleArrayBuilder(object):
                 if value is -1:
                     value = key_set.get_value(i)
                 if self.progress_function is not None:
-                    self.progress_function.accept(i + 1, key_set.size() + 1)
+                    # self.progress_function.accept(i + 1, key_set.size() + 1)
+                    self.progress_function(i + 1, key_set.size() + 1)
 
             if len(self.labels) is 0:
                 self.labels.append(label)
@@ -291,9 +295,9 @@ class DoubleArrayBuilder(object):
             self.units.append(doublearraybuilderunit.DoubleArrayBuilderUnit())
 
         if dest_num_blocks > self.NUM_EXTRA_BLOCKS:
-            for id in range(src_num_units, dest_num_units):
-                self.get_extras(id).is_used = False
-                self.get_extras(id).is_fixed = False
+            for id_ in range(src_num_units, dest_num_units):
+                self.get_extras(id_).is_used = False
+                self.get_extras(id_).is_fixed = False
 
         for i in range(src_num_units + 1, dest_num_units):
             self.get_extras(i - 1).next = i
@@ -332,10 +336,10 @@ class DoubleArrayBuilder(object):
                 break
             offset += 1
 
-        for id in range(begin, end):
-            if not self.get_extras(id).is_fixed:
-                self.reserve_id(id)
-                self.units[id].set_label(id ^ unused_offset)
+        for id_ in range(begin, end):
+            if not self.get_extras(id_).is_fixed:
+                self.reserve_id(id_)
+                self.units[id_].set_label(id_ ^ unused_offset)
 
     def byte_to_u_int(self, b):
         return int.from_bytes(b, 'little', signed=False)

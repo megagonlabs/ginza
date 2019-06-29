@@ -40,10 +40,10 @@ class Tokenizer:
             has_words = True if iterator else False
             for word_id, end in iterator:
                 n = latticenode.LatticeNode(self.lexicon,
-                                                    self.lexicon.get_left_id(word_id),
-                                                    self.lexicon.get_right_id(word_id),
-                                                    self.lexicon.get_cost(word_id),
-                                                    word_id)
+                                            self.lexicon.get_left_id(word_id),
+                                            self.lexicon.get_right_id(word_id),
+                                            self.lexicon.get_cost(word_id),
+                                            word_id)
                 self.lattice.insert(i, end, n)
 
             # OOV

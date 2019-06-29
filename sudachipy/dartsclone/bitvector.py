@@ -12,16 +12,15 @@ class BitVector(object):
     def rank(self, id):
         unit_id = int(id / self.UNIT_SIZE)
         return self.ranks[unit_id] \
-            + self.pop_count(self.units[unit_id] &
-                             (~0 >> (self.UNIT_SIZE - (id % self.UNIT_SIZE) - 1)))
+            + self.pop_count(self.units[unit_id] & (~0 >> (self.UNIT_SIZE - (id % self.UNIT_SIZE) - 1)))
 
     def set(self, id, bit):
         if bit:
             self.units[int(id / self.UNIT_SIZE)] \
-                    = self.units[int(id / self.UNIT_SIZE)] | 1 << (id % self.UNIT_SIZE)
+                = self.units[int(id / self.UNIT_SIZE)] | 1 << (id % self.UNIT_SIZE)
         else:
             self.units[int(id / self.UNIT_SIZE)] \
-                    = self.units[int(id / self.UNIT_SIZE)] & ~(1 << (id % self.UNIT_SIZE))
+                = self.units[int(id / self.UNIT_SIZE)] & ~(1 << (id % self.UNIT_SIZE))
 
     def is_empty(self):
         return len(self.units) is 0
@@ -55,4 +54,3 @@ class BitVector(object):
         unit += unit >> 8
         unit += unit >> 16
         return unit & 0xFF
-

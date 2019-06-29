@@ -22,8 +22,15 @@ class CategoryType(Enum):
     def get_id(self):
         return self.id
 
-    def get_type(self, id):
+    def get_type(self, id_):
         for type_ in CategoryType.values():
-            if type_.get_id() is id:
+            if type_.get_id() is id_:
                 return type_
         return None
+
+    @staticmethod
+    def get(str_):
+        try:
+            return CategoryType[str_]
+        except KeyError:
+            return None

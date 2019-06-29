@@ -1,5 +1,6 @@
 from . import lexicon
 
+
 class LexiconSet(lexicon.Lexicon):
     def __init__(self, system_lexicon):
 
@@ -46,9 +47,19 @@ class LexiconSet(lexicon.Lexicon):
     def get_word_id(self, word_id):
         return 0x0FFFFFFF & word_id
 
+    def get_word_id1(self, headword, pos_id, reading_form):
+        for dic_id in range(len(self.lexicons)):
+            wid = self.lexicons[dic_id].get_word_id(headword, pos_id, reading_form)
+            if wid <= 0:
+                return self.build_word_id(dic_id, wid)
+        return self.lexicons[0].get_word_id(headword, pos_id, reading_form)
+
     def build_word_id(self, dict_id, word_id):
         if word_id > 0x0FFFFFFF:
             raise AttributeError("word ID is too large: ", word_id)
         if dict_id > 0xF:
             raise AttributeError("dictionary ID is too large: ", dict_id)
         return dict_id << 28 | word_id
+
+    def size(self):
+        return sum([lex.size() for lex in self.lexicons])

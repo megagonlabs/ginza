@@ -1,5 +1,6 @@
 import struct
 
+
 class WordIdTable(object):
     def __init__(self, bytes_, offset):
         self.bytes = bytes_

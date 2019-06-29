@@ -1,9 +1,10 @@
 from sudachipy import latticenode
 from sudachipy.dictionarylib import wordinfo
 
+
 class SimpleOovPlugin:
     def set_up(self, grammar):
-        oov_pos_strings =[ "補助記号", "一般", "*", "*", "*", "*" ]
+        oov_pos_strings = ["補助記号", "一般", "*", "*", "*", "*"]
         self.left_id = 5968
         self.right_id = 5968
         self.cost = 3857

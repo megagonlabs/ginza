@@ -1,8 +1,7 @@
 import mmap
-import sys
 
-from . import keyset
 from . import doublearraybuilder
+from . import keyset
 
 
 class DoubleArray(object):
@@ -29,8 +28,8 @@ class DoubleArray(object):
         self.buffer = None
         self.size = 0
 
-    def size(self):
-        return self.size
+    # def size(self):
+    #     return self.size
 
     def total_size(self):
         return 4 * self.size
@@ -39,7 +38,11 @@ class DoubleArray(object):
         key_set = keyset.KeySet(keys, values)
         builder = doublearraybuilder.DoubleArrayBuilder(progress_function)
         builder.build(key_set)
-        self.array = builder.copy()
+        self.buffer = builder.copy()
+        bytes_ = self.buffer.getvalue()
+        self.array = [
+            int.from_bytes(bytes_[4 * i: 4 * i + 4], byteorder='little')
+            for i in range(len(bytes_) // 4)]
         self.size = len(self.array)
         # for i, binary in enumerate(self.array):
         #     print("{0:03d}".format(i), "{0:032b}".format(binary), file=sys.stderr)
@@ -52,7 +55,7 @@ class DoubleArray(object):
         self.array = self.buffer.as_int_buffer()
         self.size = self.array.capacity()
 
-    def save(output_file):
+    def save(self, output_file):
         pass
 
     def exact_match_search(self, key):

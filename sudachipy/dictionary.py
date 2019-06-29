@@ -3,23 +3,20 @@ import os.path
 
 from . import config
 from . import dictionarylib
-from . import tokenizer
 from . import plugin
+from . import tokenizer
+from .dictionarylib.dictionaryversion import DictionaryVersion
 
 
 class Dictionary:
-    def __init__(self, settings, path=None):
+    def __init__(self, settings):
         self.grammar = None
         self.lexicon = None
         self.input_text_plugins = []
         self.oov_provider_plugins = []
         self.path_rewrite_plugins = []
         self.buffers = []
-
-        if path is None:
-            pass
-
-        self.buffers = []
+        self.header = None
 
         self.read_system_dictionary(os.path.join(config.RESOURCEDIR, settings["systemDict"]))
         """
@@ -62,11 +59,10 @@ class Dictionary:
         self.buffers.append(bytes_)
 
         offset = 0
-        self.header = dictionarylib.dictionaryheader.DictionaryHeader(bytes_, offset)
-        SYSTEM_DICT_VERSION = 0x7366d3f18bd111e7
-        if self.header.version != SYSTEM_DICT_VERSION:
+        self.header = dictionarylib.dictionaryheader.DictionaryHeader.from_bytes(bytes_, offset)
+        if self.header.version != DictionaryVersion.SYSTEM_DICT_VERSION:
             raise Exception("invalid system dictionary")
-        offset += self.header.storage_size
+        offset += self.header.storage_size()
 
         self.grammar = dictionarylib.grammar.Grammar(bytes_, offset)
         offset += self.grammar.get_storage_size()
@@ -79,8 +75,8 @@ class Dictionary:
         self.buffers.append(bytes_)
 
         user_lexicon = dictionarylib.doublearraylexicon.DoubleArrayLexicon(bytes_, 0)
-        tokenizer = tokenizer.JapaneseTokenizer(self.grammar, self.lexicon, self.input_text_plugins, self.oov_provider_plugins, [])
-        user_lexicon.calclate_cost(tokenizer)
+        tokenizer_ = tokenizer.JapaneseTokenizer(self.grammar, self.lexicon, self.input_text_plugins, self.oov_provider_plugins, [])
+        user_lexicon.calclate_cost(tokenizer_)
         self.lexicon.append(user_lexicon)
 
     def read_character_definition(self, filename):

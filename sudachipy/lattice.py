@@ -1,5 +1,5 @@
-from . import latticenode
 from . import dictionarylib
+from . import latticenode
 
 
 class Lattice:
@@ -100,6 +100,6 @@ class Lattice:
                 index += 1
                 for l_node in self.end_lists[r_node.begin]:
                     cost = l_node.total_cost + \
-                           self.grammar.get_connect_cost(l_node.right_id, r_node.left_id)
+                        self.grammar.get_connect_cost(l_node.right_id, r_node.left_id)
                     print("{} ".format(cost), file=output, end="")
                 print(file=output)

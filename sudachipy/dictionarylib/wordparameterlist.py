@@ -16,7 +16,7 @@ class WordParameterList(object):
 
     def get_left_id(self, word_id):
         self.bytes.seek(self.offset + self.ELEMENT_SIZE * word_id)
-        return int.from_bytes(self.bytes.read(2), 'little')
+        return int.from_bytes(self.bytes.read(2), 'little', signed=True)
 
     def get_right_id(self, word_id):
         self.bytes.seek(self.offset + self.ELEMENT_SIZE * word_id + 2)

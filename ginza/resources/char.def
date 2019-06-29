@@ -34,7 +34,7 @@ CYRILLIC        1 1 0
 
 # SPACE
 0x0020 SPACE  # DO NOT REMOVE THIS LINE, 0x0020 is reserved for SPACE
-0x000D SPACE
+0x00D0 SPACE
 0x0009 SPACE
 0x000B SPACE
 0x000A SPACE
@@ -49,12 +49,8 @@ CYRILLIC        1 1 0
 0x007B..0x007E SYMBOL   #{|}~
 
 # Latin
-0x00A1..0x00BF SYMBOL # Latin 1 #¡->¿
-0x00C0..0x00D6 ALPHA  # Latin 1 #À->Ö
-0x00D7         SYMBOL # Latin 1 #×
-0x00D8..0x00F6 ALPHA  # Latin 1 #Ø->ö
-0x00F7         SYMBOL # Latin 1 #÷
-0x00F8..0x00FF ALPHA  # Latin 1 #ø->ÿ
+0x00A1..0x00BF SYMBOL # Latin 1 #¡->ß
+0x00C0..0x00FF ALPHA  # Latin 1 #À->ÿ
 0x0100..0x017F ALPHA  # Latin Extended A
 0x0180..0x0236 ALPHA  # Latin Extended B
 0x1E00..0x1EF9 ALPHA  # Latin Extended Additional
@@ -93,7 +89,7 @@ CYRILLIC        1 1 0
 # KANJI
 0x2E80..0x2EF3  KANJI # CJK Raidcals Supplement
 0x2F00..0x2FD5  KANJI
-0x3005          KANJI NOOOVBOW
+0x3005          KANJI
 0x3007          KANJI
 0x3400..0x4DB5  KANJI # CJK Unified Ideographs Extention
 #0x4E00..0x9FA5  KANJI
@@ -119,7 +115,7 @@ CYRILLIC        1 1 0
 0x5104 KANJINUMERIC KANJI
 0x5146 KANJINUMERIC KANJI
 
-# ZENKAKU
+# ZENKAKU 
 0xFF10..0xFF19 NUMERIC
 0xFF21..0xFF3A ALPHA
 0xFF41..0xFF5A ALPHA
@@ -158,10 +154,7 @@ CYRILLIC        1 1 0
 0xFE30..0xFE4F  SYMBOL # CJK Compatibility Forms
 0xFE50..0xFE6B  SYMBOL # Small Form Variants
 
-# added 2006/3/13
+# added 2006/3/13 
 0x3007 SYMBOL KANJINUMERIC
-
-# added 2018/11/30
-0x309b..0x309c HIRAGANA KATAKANA # voiced/semi-voiced sound marks
 
 # END OF TABLE

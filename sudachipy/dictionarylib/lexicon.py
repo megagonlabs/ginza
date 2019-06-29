@@ -13,3 +13,6 @@ class Lexicon(object):
 
     def get_word_info(self, word_id):
         pass
+
+    def size(self):
+        pass

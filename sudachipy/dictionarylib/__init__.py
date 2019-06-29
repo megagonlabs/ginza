@@ -4,3 +4,4 @@ from . import categorytype
 from . import lexiconset
 from . import doublearraylexicon
 from . import dictionaryheader
+from . import dictionaryversion

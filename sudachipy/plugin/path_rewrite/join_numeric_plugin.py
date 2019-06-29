@@ -1,5 +1,6 @@
-from .path_rewrite_plugin import PathRewritePlugin
 from sudachipy.dictionarylib.categorytype import CategoryType
+
+from .path_rewrite_plugin import PathRewritePlugin
 
 
 class JoinNumericPlugin(PathRewritePlugin):

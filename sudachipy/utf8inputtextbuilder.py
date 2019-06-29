@@ -1,4 +1,5 @@
 import copy
+
 from . import utf8inputtext
 
 
@@ -24,7 +25,7 @@ class UTF8InputTextBuilder:
         if end > len(self.modified_text):
             end = len(self.modified_text)
 
-        self.modified_text = self.modified_text.replace(self.modified_text[begin:end], str_, 1)
+        self.modified_text = str_.join([self.modified_text[:begin], self.modified_text[end:]])
 
         offset = self.text_offsets[begin]
         length = len(str_)
@@ -52,7 +53,7 @@ class UTF8InputTextBuilder:
         j = 0
         for i in range(len(self.modified_text)):
             # 注: サロゲートペア文字は考慮していない
-            for k in range(self.utf8_byte_length(ord(self.modified_text[i]))):
+            for _ in range(self.utf8_byte_length(ord(self.modified_text[i]))):
                 byte_indexes[j] = i
                 offsets[j] = self.text_offsets[i]
                 j += 1
@@ -79,13 +80,13 @@ class UTF8InputTextBuilder:
         char_category_continuities = []
         i = 0
         while i < len(char_categories):
-            next = i + self.get_char_category_continuous_length(char_categories, i)
+            next_ = i + self.get_char_category_continuous_length(char_categories, i)
             length = 0
-            for j in range(i, next):
+            for j in range(i, next_):
                 length += self.utf8_byte_length(ord(text[j]))
             for k in range(length, 0, -1):
                 char_category_continuities.append(k)
-            i = next
+            i = next_
         return char_category_continuities
 
     def get_char_category_continuous_length(self, char_categories, offset):

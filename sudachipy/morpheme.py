@@ -17,6 +17,10 @@ class Morpheme:
         wi = self.get_word_info()
         return self.list.grammar.get_part_of_speech_string(wi.pos_id)
 
+    def part_of_speech_id(self):
+        wi = self.get_word_info()
+        return wi.pos_id
+
     def dictionary_form(self):
         wi = self.get_word_info()
         return wi.dictionary_form

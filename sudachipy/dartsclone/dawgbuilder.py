@@ -1,5 +1,5 @@
 import copy
-import sys
+
 from . import bitvector
 
 
@@ -32,8 +32,8 @@ class DAWGBuilder(object):
 
         def __str__(self):
             return "child: %d, sibling: %d, label: %c, is_state: %d, has_sibling: %d" % (
-                    self.child, self.sibling, self.label, int(self.is_state), int(self.has_sibling)
-                    )
+                self.child, self.sibling, self.label, int(self.is_state), int(self.has_sibling)
+            )
 
     class Unit(object):
         def __init__(self):
@@ -123,11 +123,11 @@ class DAWGBuilder(object):
         if len(key) is 0:
             raise AttributeError("zero-length key")
 
-        id = 0
+        id_ = 0
         key_pos = 0
 
         while key_pos <= len(key):
-            child_id = self.nodes[id].child
+            child_id = self.nodes[id_].child
             if child_id is 0:
                 break
 
@@ -142,7 +142,7 @@ class DAWGBuilder(object):
                 self.nodes[child_id].has_sibling = True
                 self.flush(child_id)
                 break
-            id = child_id
+            id_ = child_id
             key_pos += 1
 
         if key_pos > len(key):
@@ -152,16 +152,16 @@ class DAWGBuilder(object):
             key_label = key[key_pos] if key_pos < len(key) else 0
             child_id = self.append_node()
 
-            if self.nodes[id].child is 0:
+            if self.nodes[id_].child is 0:
                 self.nodes[child_id].is_state = True
-            self.nodes[child_id].sibling = self.nodes[id].child
+            self.nodes[child_id].sibling = self.nodes[id_].child
             self.nodes[child_id].label = key_label
-            self.nodes[id].child = child_id
+            self.nodes[id_].child = child_id
             self.node_stack.append(child_id)
 
-            id = child_id
+            id_ = child_id
             key_pos += 1
-        self.nodes[id].set_value(value)
+        self.nodes[id_].set_value(value)
 
     def clear(self):
 
@@ -210,9 +210,9 @@ class DAWGBuilder(object):
 
             n = node_id
             while n is not 0:
-                next = self.nodes[n].sibling
+                next_ = self.nodes[n].sibling
                 self.free_node(n)
-                n = next
+                n = next_
 
             self.nodes[self.stack_top(self.node_stack)].child = match_id
         self.stack_pop(self.node_stack)
@@ -222,11 +222,11 @@ class DAWGBuilder(object):
         self.table.clear()
         self.table = [0] * table_size
 
-        for id in range(1, len(self.units)):
-            if self.labels[id] is 0 or self.units[id].is_state():
-                find_result = self.find_unit(id)
+        for id_ in range(1, len(self.units)):
+            if self.labels[id_] is 0 or self.units[id_].is_state():
+                find_result = self.find_unit(id_)
                 hash_id = find_result[1]
-                self.table[hash_id] = id
+                self.table[hash_id] = id_
 
     def find_unit(self, id):
         result = [0] * 2
@@ -288,13 +288,13 @@ class DAWGBuilder(object):
             id += 1
         return hash_value
 
-    def hash_node(self, id):
+    def hash_node(self, id_):
         hash_value = 0
-        while id is not 0:
-            unit = self.nodes[id].unit()
-            label = self.nodes[id].label
+        while id_ is not 0:
+            unit = self.nodes[id_].unit()
+            label = self.nodes[id_].label
             hash_value ^= self.hash(((label & 0xFF) << 24) ^ unit)
-            id = self.nodes[id].sibling
+            id_ = self.nodes[id_].sibling
         return hash_value
 
     def append_unit(self):
@@ -306,13 +306,13 @@ class DAWGBuilder(object):
 
     def append_node(self):
         if len(self.recycle_bin) is 0:
-            id = len(self.nodes)
+            id_ = len(self.nodes)
             self.nodes.append(self.Node())
         else:
-            id = self.stack_top(self.recycle_bin)
-            self.nodes[id].reset()
+            id_ = self.stack_top(self.recycle_bin)
+            self.nodes[id_].reset()
             self.stack_pop(self.recycle_bin)
-        return id
+        return id_
 
     def free_node(self, id):
         self.recycle_bin.append(id)
