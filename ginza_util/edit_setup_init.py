@@ -37,6 +37,8 @@ def main():
             '"spacy_factories": ["JapaneseCorrector = ginza:JapaneseCorrector"],'
             '"spacy_languages": ["ja = ginza:Japanese"],'
             "},",
+        "        install_requires=list_requirements(meta),":
+            "        install_requires=list_requirements(meta) + ['sortedcontainers>=2.1.0,<2.2.0'],"
     }
     setup_path = sys.argv[1]
     with open(setup_path, 'r') as f:
