@@ -19,3 +19,4 @@ python -m spacy train ${lang_name} ${work_dir} \
     -V ${model_version} \
     -VV
 cp -r ${work_dir}/model-best ${model_dir}/
+python -m ginza_util.edit_meta_json ${model_dir}/meta.json
