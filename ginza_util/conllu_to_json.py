@@ -2,6 +2,7 @@
 from __future__ import unicode_literals, print_function
 
 import json
+import random
 import re
 import sys
 import os
@@ -36,7 +37,10 @@ def rewrite_with_tokens(gold_tokens, rewriting_gold_index, tokens):
     g['whitespace'] = t.whitespace_ != ''
     if not g['dep'].startswith('as_'):
         dep = g['dep'].split('_as_')[0]
-        g['dep'] = dep if g_pos == t.pos_ else '{}_as_{}'.format(dep, g_pos)
+        if dep == 'root' or g_pos == t.pos_ and not t.tag_.endswith('可能'):
+            g['dep'] = dep
+        else:
+            g['dep'] = '{}_as_{}'.format(dep, g_pos)
     if len(tokens) == 1:
         return
     label = 'as_{}'.format(g_pos)
@@ -227,6 +231,10 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
     sentence_id = None
     sentence = ''
     tokens = []
+    ents = []
+    ent_start_char = None
+    ent_label = None
+    offset = 0
     state = 'sid'
 
     def error_line(_state, _path, _line_index, _sentence_id, _sentence, _line):
@@ -288,7 +296,8 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
             if head_id < 0:
                 head_id = token_id
             dep = m.group(8)
-            whitespace = m.group(10).find('SpaceAfter=No') < 0
+            options = m.group(10)
+            whitespace = options.find('SpaceAfter=No') < 0
             tokens.append({
                 'id': token_id,
                 'orth': orth,
@@ -299,11 +308,43 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
                 'head': head_id - token_id,
                 'whitespace': whitespace,
             })
+            m = re.search(r'NE=([^|]+)', options)
+            if m:
+                label = m.group(1)
+                if label.startswith('B-'):
+                    if ent_label:
+                        ents.append({
+                            'start': ent_start_char,
+                            'end': offset,
+                            'label': ent_label,
+                        })
+                    ent_start_char = offset
+                    ent_label = label[2:]
+                elif not label.startswith('I-') or not ent_label:
+                    raise Exception('Bad NE label: ' + line)
+            elif ent_label:
+                ents.append({
+                    'start': ent_start_char,
+                    'end': offset,
+                    'label': ent_label,
+                })
+                ent_start_char = None
+                ent_label = None
+            offset += len(orth)
+            if whitespace:
+                offset += 1
 
         elif state == 'ios' and line == '':
             if len(tokens) == 0:
                 error_line(state, path, line_index, sentence_id, sentence, line)
                 return []
+            if ent_label:
+                ents.append({
+                    'start': ent_start_char,
+                    'end': offset,
+                    'label': ent_label,
+                })
+
             heads = [t['id'] + t['head'] for t in tokens]
             if is_nonproj_tree(heads):
                 print(file=sys.stderr)
@@ -316,6 +357,49 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
                     retokenize(tokens, tokenizer(
                         ''.join([t['orth'] + (' ' if t['whitespace'] else '') for t in tokens])
                     ))
+                offset = 0
+                ent_label = None
+                ent_end = 0
+                ent_queue = []
+                for t in tokens:
+                    end = offset + len(t['orth'])
+                    if t['whitespace']:
+                        end += 1
+                    if ent_end > 0:
+                        if offset < ent_end:
+                            ent_queue.append(t)
+                            offset = end
+                            continue
+                        if end >= ent_end:
+                            if len(ent_queue) == 1:
+                                ent_queue[0]['ner'] = 'U-' + ent_label
+                            else:
+                                ent_queue[0]['ner'] = 'B-' + ent_label
+                                for et in ent_queue[1:-1]:
+                                    et['ner'] = 'I-' + ent_label
+                                ent_queue[-1]['ner'] = 'L-' + ent_label
+                            ent_label = None
+                            ent_end = 0
+                            ent_queue.clear()
+                    for ent in ents:
+                        if ent['start'] < end and offset < ent['end']:
+                            ent_label = ent['label']
+                            ent_end = ent['end']
+                            ent_queue.append(t)
+                            break
+                    offset = end
+                if ent_end > 0:
+                    if len(ent_queue) == 1:
+                        ent_queue[0]['ner'] = 'U-' + ent_label
+                    else:
+                        ent_queue[0]['ner'] = 'B-' + ent_label
+                        for et in ent_queue[1:-1]:
+                            et['ner'] = 'I-' + ent_label
+                        ent_queue[-1]['ner'] = 'L-' + ent_label
+                for t in tokens:
+                    if 'ner' not in t:
+                        t['ner'] = 'O'
+
                 sentences.append({'tokens': tokens})
                 if len(sentences) >= n_sents:
                     paragraphs.append({
@@ -328,6 +412,10 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
             sentence_id = None
             sentence = ""
             tokens = []
+            ents = []
+            ent_start_char = None
+            ent_label = None
+            offset = 0
             state = 'sid'
 
         else:
@@ -379,6 +467,66 @@ def convert_files(path, tokenizer, paragraph_id_regex, n_sents):
     return docs
 
 
+HALF_FULL_MAP = {
+    chr(c): chr(c - ord('!') + ord('！')) for c in range(ord('!'), ord('~') + 1)
+}
+FULL_HALF_MAP = {
+    v: k for k, v in HALF_FULL_MAP.items()
+}
+TURN_FULL_HALF_MAP = {}
+TURN_FULL_HALF_MAP.update(FULL_HALF_MAP)
+TURN_FULL_HALF_MAP.update(HALF_FULL_MAP)
+
+
+def to_full(s):
+    return ''.join([
+        HALF_FULL_MAP[c] if c in HALF_FULL_MAP else c for c in s
+    ])
+
+
+def to_half(s):
+    return ''.join([
+        FULL_HALF_MAP[c] if c in FULL_HALF_MAP else c for c in s
+    ])
+
+
+def turn_full_half(s):
+    return ''.join([
+        TURN_FULL_HALF_MAP[c] if c in TURN_FULL_HALF_MAP else c for c in s
+    ])
+
+
+def char_augmentation(paragraph):
+    raw = ''
+    sentences = []
+    for sentence in paragraph['sentences']:
+        text = ''.join([t['orth'] + (' ' if t['whitespace'] else '') for t in sentence['tokens']])
+        turned_text = turn_full_half(str(text))
+        if text == turned_text:
+            continue
+        # add variation of surface and lemma zenkaku-hankaku turning
+        turn_surface = random.random() < 2 / 3
+        if turn_surface:
+            turn_lemma = random.random() < 0.5
+        else:
+            turn_lemma = True
+        if turn_surface:
+            raw += turned_text
+        else:
+            raw += text
+        tokens = [t.copy() for t in sentence['tokens']]
+        for t in tokens:
+            if turn_surface:
+                t['orth'] = turn_full_half(t['orth'])
+            if turn_lemma:
+                t['lemma'] = turn_full_half(t['lemma'])
+        sentences.append({'tokens': tokens})
+    if sentences:
+        return [paragraph, {'raw': raw, 'sentences': sentences}]
+    else:
+        return [paragraph]
+
+
 def print_json(docs, file=sys.stdout):
     json.dump(docs, file, ensure_ascii=False, indent=1)
     print(file=file)
@@ -389,14 +537,28 @@ def print_json(docs, file=sys.stdout):
     retokenize_lang=("Retokenize", "option", "r", str),
     paragraph_id_regex=("Regex pattern for paragraph_id (default=r'')", 'option', 'p', str),
     n_sents=("Number of sentences per paragraph (default=10)", "option", "n", int),
+    augmentation=("Enable Zenkaku/Hankaku augmentation", "flag", "a"),
 )
-def main(input_path='-', retokenize_lang='ja', paragraph_id_regex=r'^(.*)[\-:][^\-:]*$', n_sents=10):
+def main(
+        input_path='-',
+        retokenize_lang='ja',
+        paragraph_id_regex=r'^(.*)[\-:][^\-:]*$',
+        n_sents=10,
+        augmentation=False,
+):
     if retokenize_lang:
         tokenizer = get_lang_class(retokenize_lang)()
     else:
         tokenizer = None
     out = sys.stdout
-    print_json(convert_files(input_path, tokenizer, paragraph_id_regex, n_sents), out)
+    docs = convert_files(input_path, tokenizer, paragraph_id_regex, n_sents)
+    if augmentation:
+        random.seed(1)
+        docs = [{
+            'id': doc['id'],
+            'paragraphs': sum([char_augmentation(p) for p in doc['paragraphs']], []),
+        } for doc in docs]
+    print_json(docs, out)
 
 
 if __name__ == '__main__':
