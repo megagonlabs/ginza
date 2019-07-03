@@ -1,0 +1,13 @@
+{
+  "name":"core_web_md",
+  "author":"Megagon Labs, Tokyo.",
+  "description":"Japanese multi-task CNN trained on UD_Japanese-PUD v2.4-NE. Assigns word2vec token vectors, POS tags, dependency parse and named entities.",
+  "email":"ginza@megagon.ai",
+  "license":"CC-BY-SA",
+  "parent_package":"spacy",
+  "sources":[
+    "jawiki-cirrussearch-content",
+    "UD_Japanese-PUD v2.4-NE"
+  ],
+  "url":"https://github.com/megagonlabs/ginza"
+}

@@ -2,11 +2,11 @@
 mkdir target
 set -eu
 lang_name=ja
-model_dir=${lang_name}_$1-$2
-python -m spacy package --force models/${model_dir} target/
+model_dir=${lang_name}_ginza-$1
+python -m spacy package ${@:2} --force models/${model_dir} target/
 set -e
 cp -r ginza sudachipy target/${model_dir}/
-python -m ginza_util.edit_setup_init target/${model_dir}/setup.py
+python -m ginza_util.edit_setup_init_ginza target/${model_dir}/setup.py
 cd target/${model_dir}/
 python setup.py sdist
 cd ../../
