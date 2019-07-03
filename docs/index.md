@@ -56,13 +56,30 @@ for sent in doc.sents:
 ### API
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
+### version 1.1
+#### ja_gsd-1.2.0-alpha4 (2019-06-08)
+- 詳細品詞情報がtoken.tag_に保存されるよう改良（token._.pos_detailは廃止）
+- doc.\_.(bunsetu_bi_label|bunsetu_position_type) を token.\_.(bunsetu_bi_label|bunsetu_position_type) に移動
+#### ja_gsd-1.1.2-alpha3 (2019-06-07)
+- 可能性品詞（名詞系ルートトークン）の曖昧性解消ルールの改良
+#### ja_gsd-1.1.1-alpha2 (2019-06-07)
+- Entry Pointsを使用する形でリファクタリング
+- パッケージ全体の構成を変更（コードをginza/とginza_util/に分離）
+
+TODO:
+- refactor train_*.py to fit for spaCy's standard training methods
+- disambiguate POS of root token by referring POSs of following tokens
+#### ja_ginza_gsd-1.1.0-alpha1 (2019-05-31)
+- カスタムフィールドの追加: Doc.\_.bunsetu_bi_label and Doc.\_.bunsetu_position_type
+- spaCy v2.1で導入されたretokenizerを適用
+- Obsoleted: JapaneseCorrector.rewrite_ne_as_proper_noun
 ### version 1.0
 #### ja_ginza_nopn-1.0.2 (2019-04-07)
-conllu形式に合致するようcli出力のroot依存元インデックスを0に変更
+- conllu形式に合致するようcli出力のroot依存元インデックスを0に変更
 #### ja_ginza_nopn-1.0.1 (2019-04-02)
-新元号『令和』をsystem_core.dicに追加
+- 新元号『令和』をsystem_core.dicに追加
 #### ja_ginza_nopn-1.0.0 (2019-04-01)
-初回リリース
+- 初回リリース
 
 ## 開発環境
 ### 開発環境のセットアップ
