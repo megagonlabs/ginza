@@ -21,6 +21,10 @@ def main():
             "        entry_points={"
             '"spacy_factories": ["JapaneseCorrector = spacy.lang.ja:JapaneseCorrector"],'
             "},",
+        "        install_requires=list_requirements(meta),":
+            "        install_requires=list_requirements(meta) + ["
+            "'SudachiPy @ git+git://github.com/MegagonLabs/SudachiPy@develop#egg=SudachiPy'"
+            "],"
     }
     setup_path = sys.argv[1]
     with open(setup_path, 'r') as f:
