@@ -27,7 +27,7 @@ def main():
     copy_template(template, meta)
 
     with open(json_path, 'w') as f:
-        json.dump(meta, f, ensure_ascii=False, indent=2)
+        json.dump(meta, f, ensure_ascii=False, indent=2, sort_keys=True)
 
 
 if __name__ == '__main__':
