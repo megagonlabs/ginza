@@ -4,27 +4,12 @@ import sys
 
 def main():
     edit_map = {
-        "    requirements = [parent_package + meta['spacy_version']]":
-            '    requirements = [parent_package + "==" + ('
-            "meta['spacy_version'][2:] if meta['spacy_version'].startswith('>=') else meta['spacy_version'])]",
-        "        packages=[model_name],":
-            "        packages = [model_name, "
-            "'sudachidict', "
-            "],",
-        "        package_data={model_name: list_files(model_dir)},":
-            "        package_data={" +
-            "model_name: list_files(model_dir), "
-            "'sudachidict': "
-            "list_files(path.relpath('sudachidict')) + "
-            "list_files(path.relpath('sudachidict/resources')),"
-            "},\n"
+        "        install_requires=list_requirements(meta),":
+            "        install_requires=list_requirements(meta) + "
+            "['SudachiDict_core @ https://github.com/megagonlabs/SudachiPy/releases/download/v0.3.1/SudachiDict_core-20190531.tar.gz'],"
             "        entry_points={"
             '"spacy_factories": ["JapaneseCorrector = spacy.lang.ja:JapaneseCorrector"],'
             "},",
-        "        install_requires=list_requirements(meta),":
-            "        install_requires=list_requirements(meta) + ["
-            "'SudachiPy @ git+git://github.com/MegagonLabs/SudachiPy@develop#egg=SudachiPy'"
-            "],"
     }
     setup_path = sys.argv[1]
     with open(setup_path, 'r') as f:
