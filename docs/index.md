@@ -1,5 +1,5 @@
-# GiNZAの公開ページ
 ![GiNZA logo](https://github.com/megagonlabs/ginza/releases/download/latest/GINZA_logo_4c_y.png)
+# GiNZAの公開ページ
 
 [NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf),
 [論文発表資料](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-139011245)
@@ -63,7 +63,7 @@ for sent in doc.sents:
   - 言語モデル: `ja_ginza`
   - `spacy.lang.ja` を `ginza` で置き換え
 - `sudachipy` に関連するディレクトリの削除
-  - SudachiPyと辞書はginzaと同時にpipでインストールされます
+  - SudachiPyと辞書は`ginza`と同時に`pip`でインストールされます
 - ユーザ辞書が利用可能
   - 参照 [Customized dictionary - SudachiPy](https://github.com/WorksApplications/SudachiPy#customized-dictionary)
 - トークン拡張フィールド

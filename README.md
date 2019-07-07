@@ -62,7 +62,7 @@ Please see [spaCy API documents](https://spacy.io/api/).
   - language model package as `ja_ginza`
   - `spacy.lang.ja` is overridden by `ginza`
 - Remove `sudachipy` related directories
-  - SudachiPy and its dictionary are installed via `pip`
+  - SudachiPy and its dictionary are installed via `pip` during `ginza` installation
 - User dictionary available
   - See [Customized dictionary - SudachiPy](https://github.com/WorksApplications/SudachiPy#customized-dictionary)
 - Token extension fields
