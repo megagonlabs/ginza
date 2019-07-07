@@ -12,8 +12,8 @@ setup(
     install_requires=[
         "spacy>=2.1.0",
         "SudachiPy>=0.3.2",
-        "SudachiDict_core @ https://github.com/megagonlabs/SudachiPy/releases/download/v0.3.1/SudachiDict_core-20190531.tar.gz",
-        "ja_ginza @ https://github.com/megagonlabs/ginza/releases/download/v2.0.0-preview1/ja_ginza-2.1.0.tar.gz",
+        "SudachiDict_core @ https://github.com/megagonlabs/ginza/releases/download/v2.0.0/SudachiDict_core-20190531.tar.gz",
+        "ja_ginza @ https://github.com/megagonlabs/ginza/releases/download/v2.0.0/ja_ginza-2.1.0.tar.gz",
     ],
     license="MIT",
     name="ginza",
