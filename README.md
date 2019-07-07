@@ -1,4 +1,6 @@
 # GiNZA NLP Library
+![GiNZA logo](images/GINZA_logo_4c_y.png)
+
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
 ## License
@@ -18,58 +20,58 @@ SudachiPy provides high accuracies for tokenization and pos tagging.
 ## Runtime Environment
 This project is developed with Python>=3.6 and pip for it.
 
-The footprint of this project is about 250MB.
-Sudachi dictionary is 200MB.
-The word embeddings from entire Japanese Wikipedia is 50MB.
-
 (Please see Development Environment section located on bottom too)
 ### Runtime set up
 #### 1. Install GiNZA NLP Library with Japanese Universal Dependencies Model
 Run following line
+```bash
+$ pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
 ```
-pip install "https://github.com/megagonlabs/ginza/releases/download/v1.0.2/ja_ginza_nopn-1.0.2.tgz"
+or download pip install archive from
+[release page](https://github.com/megagonlabs/ginza/releases)
+and run `pip install` with it.
+```bash
+$ pip install ginza-2.0.0.tar.gz
 ```
-or download pip install archive from [release page](https://github.com/megagonlabs/ginza/releases) and
-specify it as below.
-```
-pip install ja_ginza_nopn-1.0.2.tgz
-```
-#### 2. Test
-Run following line and input some Japanese text + Enter, then you can see the parsed results with conllu format.
-```
-python -m spacy.lang.ja_ginza.cli
+#### 2. Execute ginza from command line
+Run `ginza` command from the console, then input some Japanese text.
+After pressing enter key, you will get the parsed results with conllu format.
+```bash
+$ ginza
 ```
 ### Coding example
 Following steps shows dependency parsing results with sentence boundary 'EOS'.
-```
+```python
 import spacy
-nlp = spacy.load('ja_ginza_nopn')
+nlp = spacy.load('ja_ginza')
 doc = nlp('依存構造解析の実験を行っています。')
 for sent in doc.sents:
     for token in sent:
-        print(token.i, token.orth_, token.lemma_, token.pos_, token.dep_, token.head.i)
+        print(token.i, token.orth_, token.lemma_, token.pos_, token.tag_, token.dep_, token.head.i)
     print('EOS')
 ```
 ### APIs
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
-### version 1.1
-#### ja_gsd-1.2.0-alpha4 (2019-06-08)
-- Set detailed part-of-speech information to token.tag_ (and removing token._.pos_detail)
-- Move doc.\_.(bunsetu_bi_label|bunsetu_position_type) to token.\_.(bunsetu_bi_label|bunsetu_position_type)
-#### ja_gsd-1.1.2-alpha3 (2019-06-07)
-- Improve POS disambiguation rule for NOUN root token
-#### ja_gsd-1.1.1-alpha2 (2019-06-07)
-- Refactoring with Entry Points
-- package structure is changed entirely (codes were separated to ginza/ and ginza/_util)
-
-TODO:
-- refactor train_*.py to fit for spaCy's standard training methods
-- disambiguate POS of root token by referring POSs of following tokens
-#### ja_ginza_gsd-1.1.0-alpha1 (2019-05-31)
-- Add custom fields: Doc.\_.bunsetu_bi_label and Doc.\_.bunsetu_position_type
-- Use new retokenize API (spaCy v2.1)
-- Obsoleted: JapaneseCorrector.rewrite_ne_as_proper_noun
+### version 2.0
+#### ja_ginza-2.0.0 (2019-07-08)
+- Add `ginza` command
+  - run `ginza` from the console
+- Change package structure
+  - module package as `ginza`
+  - language model package as `ja_ginza`
+  - `spacy.lang.ja` is overridden by `ginza`
+- Remove `sudachipy` related directories
+  - SudachiPy and its dictionary are installed via `pip`
+- User dictionary available
+  - See [Customized dictionary - SudachiPy](https://github.com/WorksApplications/SudachiPy#customized-dictionary)
+- Token extension fields
+  - Added
+    - `token._.bunsetu_bi_label`, `token._.bunsetu_position_type`
+  - Remained
+    - `token._.inf`
+  - Removed
+    - `pos_detail` (same value is set to `token.tag_`)
 ### version 1.0
 #### ja_ginza_nopn-1.0.2 (2019-04-07)
 - Set depending token index of root as 0 to meet with conllu format definitions
@@ -81,27 +83,13 @@ TODO:
 ## Development Environment
 ### Development set up
 #### 1. Clone from github
+```bash
+$ git clone --recursive 'https://github.com/megagonlabs/ginza.git'
 ```
-git clone --recursive 'https://github.com/megagonlabs/ginza.git'
-```
-#### 2. Run ./setup.sh
+#### 2. Run python setup.py
 For normal environment:
-```
-./setup.sh
-```
-For GPU environment(cuda92):
-```
-./setup_cuda92.sh
+```bash
+$ python setup.sh develop
 ```
 ### Training
-Prepare nopn_embedding/, nopn/, and kwdlc/ in your project directory, then run below.
-(We're preparing the descriptions of training environment. Coming soon.)
-```
-shell/build.sh nopn 1.0.2
-```
-You can speed up training and analyze process by adding -g option if GPUs available.
-
-After a while, you will find pip installable archive.
-```
-target/ja_ginza_nopn-1.0.2.tgz
-```
+To be described
