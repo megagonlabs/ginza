@@ -6,7 +6,6 @@ import sys
 import plac
 import spacy
 from .bccwj_ud_corpus import convert_files
-from . import *
 from .parse_tree import create_parsed_sentences, rewrite_by_tokenizer
 
 
@@ -40,8 +39,12 @@ def evaluate_from_file(
     else:
         gold = None
     if not nlp:
-        nlp = load_model(model_path)
+        nlp = spacy.load(model_path)
         nlp.tokenizer.use_sentence_separator = False
+
+    if 'JapaneseCorrector' not in nlp.pipe_names:
+        corrector = nlp.create_pipe('JapaneseCorrector')
+        nlp.add_pipe(corrector, last=True)
 
     rewritten = [g.clone() for g in gold]
     if not keep_gold_tokens:
@@ -72,10 +75,10 @@ def evaluate(
         evaluate_all_combinations=False,
         print_file=None,
         nlp=None,
-        morph_custom_condition=lambda g, r: g.pos == r.pos if g.pos_detail.find('可能') >= 0 else None,
+        morph_custom_condition=lambda g, r: g.pos == r.pos if g.tag.find('可能') >= 0 else None,
 ):
     if not nlp:
-        nlp = load_model(model_path)
+        nlp = spacy.load(model_path)
         nlp.tokenizer.use_sentence_separator = False
 
     stats = EvaluationResult(keep_gold_tokens, evaluate_all_combinations)
@@ -354,7 +357,7 @@ def evaluate_parse_result(stats, gold, result, morph_custom_condition, print_inp
                 if custom:
                     correct_custom_tokens += 1
                 # else:
-                    # print(custom, g.surface, r.surface, g.pos, r.pos, g.pos_detail, r.pos_detail)
+                    # print(custom, g.surface, r.surface, g.pos, r.pos, g.tag, r.tag)
     stats.custom_tokens += custom_tokens
     stats.correct_custom_tokens += correct_custom_tokens
 

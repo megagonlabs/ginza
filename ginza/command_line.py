@@ -1,16 +1,14 @@
 # coding: utf8
+from pathlib import Path
 import plac
 import spacy
+import sys
 from sudachipy.tokenizer import Tokenizer as OriginalTokenizer
-from . import *
-from .bccwj_ud_corpus import convert_files
-from .corpus import *
-from .parse_tree import ParsedSentence
+from .japanese_corrector import JapaneseCorrector
 from .sudachi_tokenizer import SUDACHI_DEFAULT_MODE
 
 
 @plac.annotations(
-    corpus_type=("Corpus type: specify text, bccwj_ud or (default=)None", "option", "t", str),
     model_path=("model directory path", "option", "b", str),
     mode=("sudachi mode", "option", "m", str),
     use_sentence_separator=("enable sentence separator", "flag", "s"),
@@ -19,8 +17,7 @@ from .sudachi_tokenizer import SUDACHI_DEFAULT_MODE
     output_path=("output path", "option", "o", Path),
     require_gpu=("enable require_gpu", "flag", "g"),
 )
-def main(
-        corpus_type=None,
+def run(
         model_path=None,
         mode=SUDACHI_DEFAULT_MODE,
         use_sentence_separator=False,
@@ -28,22 +25,24 @@ def main(
         recreate_corrector=False,
         output_path=None,
         require_gpu=False,
-        *lines,
+        *files,
 ):
     if require_gpu:
         spacy.require_gpu()
         print("GPU enabled", file=sys.stderr)
-    nlp = load_model(model_path)
+    if model_path:
+        nlp = spacy.load(model_path)
+    else:
+        nlp = spacy.load('ja_ginza')
     if disable_pipes:
         print("disabling pipes: {}".format(disable_pipes), file=sys.stderr)
         nlp.disable_pipes(disable_pipes)
         print("using : {}".format(nlp.pipe_names), file=sys.stderr)
-    else:
-        # to ensure reflect local changes of corrector
-        if recreate_corrector and 'JapaneseCorrector' in nlp.pipe_names:
+    if recreate_corrector:
+        if 'JapaneseCorrector' in nlp.pipe_names:
             nlp.remove_pipe('JapaneseCorrector')
-            corrector = JapaneseCorrector(nlp)
-            nlp.add_pipe(corrector, last=True)
+        corrector = JapaneseCorrector(nlp)
+        nlp.add_pipe(corrector, last=True)
 
     if mode == 'A':
         nlp.tokenizer.mode = OriginalTokenizer.SplitMode.A
@@ -63,21 +62,13 @@ def main(
     else:
         output = sys.stdout
 
-    line = '<init>'
     try:
-        if corpus_type:
-            if corpus_type == 'bccwj_ud':
-                for line in convert_files(lines):
+        if files:
+            for path in files:
+                with open(path, 'r') as f:
+                    lines = f.readlines()
+                for line in lines:
                     print_result(line, nlp, True, output)
-            else:
-                for path in lines:
-                    with open(path, 'r') as f:
-                        lines = f.readlines()
-                    for line in lines:
-                        print_result(line, nlp, True, output)
-        elif len(lines) > 0:
-            for line in lines:
-                print_result(line, nlp, True, output)
         else:
             while True:
                 line = input()
@@ -86,18 +77,15 @@ def main(
         pass
     except KeyboardInterrupt:
         pass
-    except Exception as e:
-        print(e, file=sys.stderr)
-        print('exception raised while analyzing the line:', line, file=sys.stderr)
+#    except Exception as e:
+#        print(e, file=sys.stderr)
+#        print('exception raised while analyzing the line:', line, file=sys.stderr)
     finally:
         output.close()
 
 
 def print_result(line, nlp, print_origin, file=sys.stdout):
-    if isinstance(line, ParsedSentence):
-        if print_origin:
-            print('# sent_id = {}'.format(getattr(line, 'sid', 'None')), file=file)
-    elif line.startswith('#'):
+    if line.startswith('#'):
         print(line, file=file)
         return
     doc = nlp(line)
@@ -114,7 +102,11 @@ def print_result(line, nlp, print_origin, file=sys.stdout):
 
 
 def token_line(token, np_tokens):
+    bunsetu_bi = token._.bunsetu_bi_label
+    position_type = token._.bunsetu_position_type
     info = '|'.join(filter(lambda s: s, [
+        '' if not bunsetu_bi else 'BunsetuBILabel={}'.format(bunsetu_bi),
+        '' if not position_type else 'BunsetuPositionType={}'.format(position_type),
         '' if token.whitespace_ else 'SpaceAfter=No',
         np_tokens.get(token.i, ''),
         '' if not token.ent_type else 'NE={}_{}'.format(token.ent_type_, token.ent_iob_),
@@ -125,7 +117,7 @@ def token_line(token, np_tokens):
         token.orth_,
         token.lemma_,
         token.pos_,
-        token._.pos_detail.replace(',*', '').replace(',', '-'),
+        token.tag_.replace(',*', '').replace(',', '-'),
         'NumType=Card' if token.pos_ == 'NUM' else '_',
         0 if token.head.i == token.i else token.head.i + 1,
         token.dep_.lower() if token.dep_ else '_',
@@ -134,5 +126,9 @@ def token_line(token, np_tokens):
     )
 
 
+def main():
+    plac.call(run)
+
+
 if __name__ == '__main__':
-    plac.call(main)
+    plac.call(run)

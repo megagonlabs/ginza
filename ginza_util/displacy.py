@@ -3,13 +3,14 @@ import plac
 import threading
 import time
 import webbrowser
+import spacy
 from spacy import displacy
 from sudachipy.tokenizer import Tokenizer as OriginalTokenizer
-from . import *
+from ginza.japanese_corrector import JapaneseCorrector
 from .bccwj_ud_corpus import convert_files
 from .corpus import *
-from .parse_tree import correct_dep
-from .sudachi_tokenizer import SUDACHI_DEFAULT_MODE
+from ginza.japanese_corrector import correct_dep
+from ginza.sudachi_tokenizer import SUDACHI_DEFAULT_MODE
 
 
 @plac.annotations(
@@ -33,7 +34,7 @@ def main(
         browser_command=None,
         *lines,
 ):
-    nlp = load_model(model_path)
+    nlp = spacy.load(model_path)
     if disable_pipes:
         print("disabling pipes: {}".format(disable_pipes), file=sys.stderr)
         nlp.disable_pipes(disable_pipes)
@@ -65,7 +66,7 @@ def main(
 
     if corpus_type:
         if corpus_type == 'bccwj_ud':
-            doc = correct_dep(convert_files(lines)[0].to_doc(nlp.vocab, True), False)
+            doc = correct_dep(convert_files(lines)[0].to_doc(nlp.vocab, True))
             print('Displaying first sentence with result and raw_result:', doc.text, file=sys.stderr)
             result = nlp(doc.text)
             with nlp.disable_pipes('JapaneseCorrector'):

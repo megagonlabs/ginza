@@ -7,17 +7,18 @@ import pickle
 import sys
 import spacy
 from gensim.models import Word2Vec
-from . import Japanese, create_model_path
+from ginza.sudachi_tokenizer import read_sudachi_a, read_sudachi_b, read_sudachi_c
 from .corpus import sentence_iter
-from .sudachi_tokenizer import read_sudachi_a, read_sudachi_b, read_sudachi_c
 from .bccwj_ud_corpus import read_bccwj_ud
+from spacy.util import get_lang_class
 
 
 @plac.annotations(
     corpus_type=("Corpus type (default='sudachi_b')", "option", "t", str),
     base_model_path=("Path to base model directory", "option", "b", Path),
-    model_name=("Output model name", "option", "n", str),
-    model_version=("Output model version", "option", "v", str),
+    lang_name=("Language name", "option", "l", str),
+    model_name=("Model name", "option", "n", str),
+    model_version=("Model version", "option", "v", str),
     dimension=("Dimension of the word vectors (default=100)", "option", "d", int),
     vocab_size=("Vocab size (default=100000)", "option", "s", int),
     min_count=("Min count (default=5)", "option", "c", int),
@@ -31,6 +32,7 @@ from .bccwj_ud_corpus import read_bccwj_ud
 def train_word2vec_from_file(
         corpus_type='sudachi_b',
         base_model_path=None,
+        lang_name='ja',
         model_name='bccwj_ud',
         model_version='1.0.0',
         dimension=100,
@@ -42,7 +44,7 @@ def train_word2vec_from_file(
         epochs=2,
         output_dir=Path('.'),
         require_gpu=False,
-        input_path=[],
+        input_path=None,
 ):
     if require_gpu:
         spacy.require_gpu()
@@ -83,9 +85,11 @@ def train_word2vec_from_file(
         model, total_sents, word_store, word_counter, corpus_reader, vocab_size, min_count, epochs, input_path
     )
 
-    new_model_path = create_model_path(output_dir, model_name, model_version)
+    new_model_path = output_dir
 
-    nlp = Japanese(meta={'name': model_name, 'version': model_version})
+    nlp = get_lang_class(lang_name)
+    nlp.meta['name'] = model_name
+    nlp.meta['version'] = model_version
     vocab = nlp.vocab
     for word in words:
         vocab.set_vector(word, model.wv[word])

@@ -5,7 +5,6 @@ import datetime
 import plac
 import random
 import spacy
-from . import *
 from .bccwj_ud_corpus import convert_files
 from .corpus import *
 from .evaluate_parser import evaluate
@@ -84,7 +83,7 @@ def train(
     if model_path is None:
         raise Exception('model_path must be specified')
 
-    nlp = load_model(model_path)
+    nlp = spacy.load(model_path)
     nlp.tokenizer.use_sentence_separator = False
 
     if output_base_path:
@@ -170,8 +169,6 @@ def train(
     for sentence in entire_set:
         for m in sentence.morphs:
             parser.add_label(m.dep_label)
-    if keep_gold_tokens:
-        parser.add_label('root_as_')
 
     if clear_model:
         best = None
@@ -207,7 +204,10 @@ def train(
                 if i % 100 == 0:
                     print('.', end='', file=sys.stderr, flush=True)
                 sents = [sentence]
-                golds = [heads_and_deps_with_virtual_root(sentence, keep_gold_tokens)]
+                golds = [{
+                    'heads': [m.dep_morph.id for m in sentence.morphs],
+                    'deps': [m.dep_label for m in sentence.morphs],
+                }]
                 # for m, dep in zip(sents[0].morphs, golds[0]['deps']):
                 #     print(m.id, m.surface, m.pos, m.dep_label, dep, m.dep_morph.id, m.dep_morph.surface)
                 turned = turn_full_half(str(sentence))
@@ -266,7 +266,7 @@ def train(
             best = stats
             best_model = nlp
             skipped_iter = 0
-            save_model(output_path, nlp)
+            nlp.to_disk(output_path)
             if batch_size > 1 and itn == max_epochs:
                 batch_size = 1
                 max_epochs = itn + online_sgd_max_epochs
@@ -290,18 +290,6 @@ def train(
         itn += 1
 
     return best
-
-
-def heads_and_deps_with_virtual_root(sentence, keep_gold_tokens):
-    root = len(sentence.morphs)
-    heads = [m.dep_morph.id for m in sentence.morphs] + [root]
-    deps = [m.dep_label for m in sentence.morphs] + ['root']
-    for i, (m, head, dep) in enumerate(zip(sentence.morphs, heads, deps)):
-        if i == head:
-            heads[i] = root
-            if keep_gold_tokens:
-                deps[i] = 'root_as_'
-    return {'heads': heads, 'deps': deps}
 
 
 if __name__ == '__main__':

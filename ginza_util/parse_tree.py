@@ -1,33 +1,26 @@
 # encoding: utf8
 from __future__ import unicode_literals, print_function
 
-import sys
 from spacy.tokens import Doc
-from .syntax_iterators import noun_chunks
+from ginza.japanese_corrector import ex_attr, correct_dep
 
 __all__ = [
-    'EOS',
     'Morph',
     'ParsedSentence',
     'create_parsed_sentences',
     'trailing_spaces',
     'rewrite_by_tokenizer',
-    'correct_dep',
 ]
 
 
-EOS = '$$'
-
-
 class Morph:
-    def __init__(self, _id, _offset, _surface, _lemma, _pos, _tag, _pos_detail, _inf, _trailing_space):
+    def __init__(self, _id, _offset, _surface, _lemma, _pos, _tag, _inf, _trailing_space):
         self.id = _id
         self.offset = _offset
         self.surface = _surface
         self.lemma = _lemma
         self.pos = _pos
         self.tag = _tag
-        self.pos_detail = _pos_detail
         self.inf = _inf
         self.trailing_space = _trailing_space
         self.dep_morph = None
@@ -39,7 +32,7 @@ class Morph:
                 self.surface,
                 self.lemma,
                 self.pos,
-                self.pos_detail.replace(',*', '').replace(',', '_'),
+                self.tag.replace(',*', '').replace(',', '_'),
                 self.inf.replace('*,*', '').replace(',', '_'),
             )
         else:
@@ -47,7 +40,7 @@ class Morph:
                 self.surface,
                 self.lemma,
                 self.pos,
-                self.pos_detail.replace(',*', '').replace(',', '_'),
+                self.tag.replace(',*', '').replace(',', '_'),
                 self.inf.replace('*,*', '').replace(',', '_'),
                 self.dep_label,
                 self.dep_morph.id - self.id,
@@ -76,8 +69,7 @@ def create_parsed_sentences(doc, separate_sentences=True):
                     t.lemma_,
                     t.pos_,
                     t.tag_,
-                    t._.pos_detail,
-                    t._.inf,
+                    ex_attr(t).inf,
                     t.whitespace_,
                 ) for i, t in enumerate(doc[begin:end])]
                 for m, t in zip(morphs, doc[begin:end]):
@@ -94,8 +86,7 @@ def create_parsed_sentences(doc, separate_sentences=True):
             t.lemma_,
             t.pos_,
             t.tag_,
-            t._.pos_detail,
-            t._.inf,
+            ex_attr(t).inf,
             t.whitespace_,
         ) for i, t in enumerate(doc[begin:])]
         for m, t in zip(morphs, doc[begin:]):
@@ -128,7 +119,6 @@ class ParsedSentence(str):
                 m.lemma,
                 m.pos,
                 m.tag,
-                m.pos_detail,
                 m.inf,
                 m.trailing_space,
             ) for m in self.morphs
@@ -151,33 +141,22 @@ class ParsedSentence(str):
         return new_sentence
 
     def to_doc(self, vocab, is_parsed=False):
-        words = [morph.surface for morph in self.morphs] + [EOS]
-        spaces = [morph.trailing_space for morph in self.morphs] + [False]
+        words = [morph.surface for morph in self.morphs]
+        spaces = [morph.trailing_space for morph in self.morphs]
         doc = Doc(vocab, words=words, spaces=spaces)
-        root_label = None
         for token, morph in zip(doc, self.morphs):
-            token.tag_ = morph.pos
-            token._.pos_detail = morph.pos_detail
-            token._.inf = morph.inf
+            token.tag_ = morph.tag
+            token.pos_ = morph.pos
+            ex_attr(token).inf = morph.inf
             token.lemma_ = morph.lemma  # work around: lemma_ must be set after tag_ (spaCy's bug)
             if is_parsed and morph.dep_label:
-                if morph.id == morph.dep_morph.id:
-                    root_label = morph.dep_label
-                    token.dep_ = root_label if root_label.find('as_') >= 0 else '{}_as_{}'.format(root_label, morph.pos)
-                    token.head = doc[-1]
-                else:
-                    token.dep_ = morph.dep_label
-                    token.head = doc[morph.dep_morph.id]
-        doc[-1].tag_ = 'X'  # work around: lemma_ must be set after tag_ (spaCy's bug)
-        doc[-1].lemma_ = EOS
-        if root_label:
-            doc[-1].head = doc[-1]
-            doc[-1].dep_ = 'root'
-            doc.is_parsed = True
+                token.dep_ = morph.dep_label
+                token.head = doc[morph.dep_morph.id]
         return doc
 
     def apply_corrector(self, vocab):
-        doc = correct_dep(self.to_doc(vocab, True), False)
+        doc = self.to_doc(vocab, True)
+        correct_dep(doc)
         new_sentence = create_parsed_sentences(doc, False)[0]
         if hasattr(self, 'origin'):
             new_sentence.origin = self.origin
@@ -214,14 +193,13 @@ class ParsedSentence(str):
         origin.lemma = t.lemma_
         origin.pos = t.pos_
         origin.tag = t.tag_
-        origin.pos_detail = t._.pos_detail
-        origin.inf = t._.inf
+        origin.inf = ex_attr(t).inf
         origin.trailing_space = t.whitespace_
         if origin_pos != origin.pos:
             origin.dep_label = '{}_as_{}'.format(origin.dep_label, origin_pos)
         if len(tokens) == 1:
             return
-        label = 'as_{}'.format(origin.pos.lower())
+        label = 'as_{}'.format(origin.pos)
         others = [
             Morph(
                 rewriting_morph_index + i + 1,
@@ -230,8 +208,7 @@ class ParsedSentence(str):
                 t.lemma_,
                 t.pos_,
                 t.tag_,
-                t._.pos_detail,
-                t._.inf,
+                ex_attr(t).inf,
                 t.whitespace_,
             ) for i, t in enumerate(tokens[1:])
         ]
@@ -281,8 +258,7 @@ class ParsedSentence(str):
         origin.lemma = replacing_token.lemma_
         origin.pos = replacing_token.pos_
         origin.tag = replacing_token.tag_
-        origin.pos_detail = replacing_token._.pos_detail
-        origin.inf = replacing_token._.inf
+        origin.inf = ex_attr(replacing_token).inf
         origin.trailing_space = replacing_token.whitespace_
         origin.dep_morph = self.morphs[dep_outer_id]
         origin.dep_label = dep_outer_label if origin.pos == head.pos else '{}_as_{}'.format(dep_outer_label, head.pos)
@@ -306,8 +282,8 @@ def _print(_prefix, _morphs, _tokens):
         _prefix,
         len(_morphs),
         len(_tokens),
-        ','.join([m.pos_detail for m in _morphs]),
-        ','.join([t._.pos_detail for t in _tokens]),
+        ','.join([m.pos for m in _morphs]),
+        ','.join([t.tag_ for t in _tokens]),
         ','.join([m.surface for m in _morphs]),
         ','.join([t.orth_ for t in _tokens]))
     )
@@ -316,7 +292,7 @@ def _print(_prefix, _morphs, _tokens):
 def rewrite_by_tokenizer(corpus, nlp, file=None, debug=False):
     eq = 0
     eq_pos = 0
-    eq_pos_detail = 0
+    eq_tag = 0
     fragmentation = 0
     unification = 0
     difference = 0
@@ -361,26 +337,26 @@ def rewrite_by_tokenizer(corpus, nlp, file=None, debug=False):
                     align_from_g = None
                 elif g_offset == t_offset:
                     if debug:
-                        pos_detail = g.pos_detail.replace(
+                        tag = g.tag.replace(
                                 '-',
                                 ','
                             ).replace(
                                 '.*',
                                 ''
-                            ) == t._.pos_detail.replace(
+                            ) == t.tag_.replace(
                                 '.*',
                                 ''
                             )
                         _print(
-                            '==' if pos_detail else '=',
+                            '==' if tag else '=',
                             gold.morphs[index_g:index_g + 1],
                             tokens[index_t:index_t+1]
                         )
                         eq += 1
                         if g.pos == t.pos_:
                             eq_pos += 1
-                        if pos_detail:
-                            eq_pos_detail += 1
+                        if tag:
+                            eq_tag += 1
                     gold.rewrite_with_tokens(index_g, tokens[index_t:index_t + 1])
                 else:
                     if debug:
@@ -417,7 +393,7 @@ def rewrite_by_tokenizer(corpus, nlp, file=None, debug=False):
                 )
             )
         for m in gold.morphs:
-            if m.pos_detail.find('可能') >= 0 and m.dep_label.find('as_') < 0:
+            if m.tag.find('可能') >= 0 and m.dep_label.find('as_') == -1:
                 m.dep_label = '{}_as_{}'.format(m.dep_label, m.pos)
             elif m.id == m.dep_morph.id and m.dep_label.find('as_') < 0:
                 m.dep_label = '{}_as_'.format(m.dep_label)
@@ -425,7 +401,7 @@ def rewrite_by_tokenizer(corpus, nlp, file=None, debug=False):
     if debug:
         print('eq={}'.format(eq), file=file)
         print('eq_pos={}'.format(eq_pos), file=file)
-        print('eq_pos_detail={}'.format(eq_pos_detail), file=file)
+        print('eq_tag={}'.format(eq_tag), file=file)
         print('fragmentation={}'.format(fragmentation), file=file)
         print('unification={}'.format(unification), file=file)
         print('difference={}'.format(difference), file=file)
@@ -440,129 +416,3 @@ def trailing_spaces(token):
             return doc.text[token.idx + len(token.orth_):]
     else:
         return None
-
-
-def correct_dep(doc, rewrite_ne_as_proper_noun):
-    complex_tokens = []
-    last_head = -1
-    for token in doc[0:-1]:
-        label = token.dep_
-        p = label.find('_as_')
-        if p >= 0:
-            tag = label[p + 4:]
-            if len(tag) > 0:
-                lemma = token.lemma_
-                token.tag_ = tag  # work around: lemma_ must be set after tag_ (spaCy's bug)
-                token.lemma_ = lemma
-            token.dep_ = label[0:p]
-
-    for token in doc[0:-1]:
-        label = token.dep_
-        if label.startswith('as_'):
-            head = token.head
-            if last_head == head.i:
-                complex_tokens[-1].append(token)
-            else:
-                complex_tokens.append([token])
-                last_head = token.i
-            tag = label[3:]
-            if len(tag) > 0:
-                lemma = token.lemma_
-                token.tag_ = tag  # work around: lemma_ must be set after tag_ (spaCy's bug)
-                token.lemma_ = lemma
-            token.dep_ = 'dep'
-        else:
-            complex_tokens.append([token])
-            last_head = token.i
-    complex_tokens.append([doc[-1]])  # for root detection error
-
-    index = 0
-    count = 0
-    index_map = [0] * (len(doc) + 1)  # last element is for ner
-    for comp in complex_tokens:
-        for _ in comp:
-            index_map[count] = index
-            count += 1
-        index += 1
-    index_map[-1] = count
-
-    if len(complex_tokens) > 1:
-        words, lemmas, tags, pos_details, infs, spaces, sent_starts, deps, heads = zip(*[
-            (
-                ''.join([t.orth_ + ' ' if t.whitespace_ else t.orth_ for t in comp[0:-1]] + [comp[-1].orth_]),
-                ''.join([t.lemma_ + ' ' if t.whitespace_ else t.lemma_ for t in comp[0:-1]] + [comp[-1].lemma_]),
-                comp[0].pos_,
-                comp[0]._.pos_detail,
-                comp[-1]._.inf,
-                comp[-1].whitespace_,
-                True if comp[0].sent_start else False,
-                comp[0].dep_,
-                index_map[comp[0].head.i],
-            ) if len(comp) > 1 else (
-                comp[0].orth_,
-                comp[0].lemma_,
-                comp[0].pos_,
-                comp[0]._.pos_detail,
-                comp[0]._.inf,
-                comp[0].whitespace_,
-                True if comp[0].sent_start else False,
-                comp[0].dep_,
-                index_map[comp[0].head.i],
-            ) for comp in complex_tokens[0:-1]
-        ])
-    else:
-        words = lemmas = tags = pos_details = infs = spaces = sent_starts = deps = heads = []
-    new_doc = Doc(doc.vocab, words=words, spaces=spaces)
-    for token, lemma, tag, pos_detail, inf, dep in zip(new_doc, lemmas, tags, pos_details, infs, deps):
-        token.tag_ = tag
-        token.lemma_ = lemma  # work around: lemma_ must be set after tag_ (spaCy's bug)
-        token._.pos_detail = pos_detail
-        token._.inf = inf
-        token.dep_ = dep
-    for token, sent_start in zip(new_doc, sent_starts):
-        if sent_start:
-            token.sent_start = True
-    root_i = len(new_doc)
-    for token, head in zip(new_doc, heads):
-        if head == root_i:
-            token.head = token
-        else:
-            token.head = new_doc[head]
-
-    ents = []
-    prev_start = prev_end = -1
-    for ent in doc.ents:
-        start = index_map[ent.start]
-        end = max(index_map[ent.end], start + 1)
-        if prev_end > start and prev_start < end:
-            ents = ents[:-1]
-        ents.append((ent.label, start, end))
-        prev_start = start
-        prev_end = end
-    new_doc.ents = ents
-
-    new_doc.is_tagged = doc.is_tagged
-    new_doc.is_parsed = doc.is_parsed
-
-    if rewrite_ne_as_proper_noun:
-        for _, start, end in ents:
-            for token in new_doc[start:end]:
-                lemma = token.lemma_
-                token.tag_ = 'PROPN'  # work around: lemma_ must be set after tag_ (spaCy's bug)
-                token.lemma_ = lemma
-
-    new_doc.noun_chunks_iterator = noun_chunks  # TODO work around for spaCy 2.0.12
-
-    if len(doc.text) - len(EOS) != len(new_doc.text):
-        print(
-            'doc.text length is different from source={} to corrected={}'.format(
-                len(doc.text) - len(EOS),
-                len(new_doc.text)),
-            file=sys.stderr
-        )
-        for t in doc:
-            print('<', t.i, t.orth_, t.pos_, t.dep_, t.head.i, file=sys.stderr)
-        for t in new_doc:
-            print('>', t.i, t.orth_, t.pos_, t.dep_, t.head.i, file=sys.stderr)
-
-    return new_doc
