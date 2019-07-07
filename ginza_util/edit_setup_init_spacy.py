@@ -6,7 +6,7 @@ def main():
     edit_map = {
         "        install_requires=list_requirements(meta),":
             "        install_requires=list_requirements(meta) + "
-            "['SudachiPy @ https://github.com/megagonlabs/SudachiPy/releases/download/v0.1.3-dict/SudachiPy-0.1.3.tar.gz'],"
+            "['SudachiDict_core @ https://github.com/megagonlabs/SudachiPy/releases/download/v0.3.1/SudachiDict_core-20190531.tar.gz'],"
             "        entry_points={"
             '"spacy_factories": ["JapaneseCorrector = spacy.lang.ja:JapaneseCorrector"],'
             "},",
