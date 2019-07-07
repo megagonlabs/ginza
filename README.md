@@ -1,5 +1,5 @@
 # GiNZA NLP Library
-![GiNZA logo](images/GINZA_logo_4c_y.png)
+![GiNZA logo](./docs/images/GINZA_logo_4c_y.png)
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
@@ -54,7 +54,7 @@ for sent in doc.sents:
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
 ### version 2.0
-#### ja_ginza-2.0.0 (2019-07-08)
+#### ginza-2.0.0 (2019-07-08)
 - Add `ginza` command
   - run `ginza` from the console
 - Change package structure
@@ -84,7 +84,7 @@ Please see [spaCy API documents](https://spacy.io/api/).
 ### Development set up
 #### 1. Clone from github
 ```bash
-$ git clone --recursive 'https://github.com/megagonlabs/ginza.git'
+$ git clone 'https://github.com/megagonlabs/ginza.git'
 ```
 #### 2. Run python setup.py
 For normal environment:

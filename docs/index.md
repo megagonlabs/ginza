@@ -1,5 +1,5 @@
 # GiNZAの公開ページ
-![GiNZA logo](images/GINZA_logo_4c_y.png)
+![GiNZA logo](./images/GINZA_logo_4c_y.png)
 
 [NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf),
 [論文発表資料](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-139011245)
@@ -55,7 +55,7 @@ for sent in doc.sents:
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 2.0
-#### ja_ginza-2.0.0 (2019-07-08)
+#### ginza-2.0.0 (2019-07-08)
 - `ginza` コマンドの追加
   - コンソールから `ginza` を実行してください
 - パッケージ構成の変更
@@ -85,7 +85,7 @@ for sent in doc.sents:
 ### 開発環境のセットアップ
 #### 1. githubからsubmodulesを含めてclone
 ```bash
-$ git clone --recursive 'https://github.com/megagonlabs/ginza.git'
+$ git clone 'https://github.com/megagonlabs/ginza.git'
 ```
 #### 2. ./setup.sh の実行
 通常の開発環境はこちらを実行。
