@@ -1,5 +1,5 @@
 # GiNZAの公開ページ
-![GiNZA logo](./images/GINZA_logo_4c_y.png)
+![GiNZA logo](https://github.com/megagonlabs/ginza/releases/download/latest/GINZA_logo_4c_y.png)
 
 [NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf),
 [論文発表資料](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-139011245)
