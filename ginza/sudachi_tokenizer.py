@@ -53,7 +53,14 @@ class SudachiTokenizer(DummyTokenizer):
 
         dict_ = dictionary.Dictionary()
         self.tokenizer = dict_.create()
-        self.mode = mode
+        if mode == 'A':
+            self.mode = self.tokenizer.SplitMode.A
+        elif mode == 'B':
+            self.mode = self.tokenizer.SplitMode.B
+        elif mode == 'C':
+            self.mode = self.tokenizer.SplitMode.C
+        else:
+            self.mode = mode
         self.use_sentence_separator = True
 
     def __call__(self, text):
