@@ -46,7 +46,11 @@ def correct_dep(doc):
                 corrected_pos = label[p + 4:]
                 if len(corrected_pos) > 0:
                     token.pos_ = corrected_pos
-                token.dep_ = label[0:p]
+                dep = label[0:p]
+                if dep == 'root' and token.head.i != token.i:
+                    token.dep_ = 'dep'
+                else:
+                    token.dep_ = dep
             elif label.startswith('as_'):
                 corrected_pos = label[3:]
                 m = merge_range(doc, token)
