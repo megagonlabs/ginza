@@ -60,7 +60,7 @@ class SudachiTokenizer(DummyTokenizer):
         elif mode == 'C':
             self.mode = self.tokenizer.SplitMode.C
         else:
-            self.mode = mode
+            raise Exception('mode must be A, B, or C but actually {}'.format(str(mode)))
         self.use_sentence_separator = True
 
     def __call__(self, text):
