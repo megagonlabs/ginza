@@ -3,7 +3,7 @@
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
-***Please read [Important changes](#ginza-211) if you upgrade GiNZA to `v2.1.1`.***
+***Please read [Important changes](#ginza-211) before you upgrade GiNZA to `v2.1.1`.***
 
 ## License
 GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under
