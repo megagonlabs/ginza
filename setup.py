@@ -10,7 +10,7 @@ setup(
         "console_scripts": ["ginza = ginza.command_line:main"],
     },
     install_requires=[
-        "spacy>=2.1.8",
+        "spacy>=2.2.0",
         "SudachiPy>=0.4.0 ; python_version >= '3.5'",
         "SudachiDict_core @ https://github.com/megagonlabs/ginza/releases/download/v2.1.1/SudachiDict_core-20190927.tar.gz ; python_version >= '3.5'",
         "ja_ginza @ https://github.com/megagonlabs/ginza/releases/download/v2.1.1/ja_ginza-2.1.1.tar.gz",
