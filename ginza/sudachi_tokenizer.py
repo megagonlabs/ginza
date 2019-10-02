@@ -51,20 +51,20 @@ class SudachiTokenizer(DummyTokenizer):
         self.vocab = nlp.vocab if nlp is not None else Vocab()
         dictionary = try_import_sudachipy_dictionary()
 
-        dict_ = dictionary.Dictionary()
-        self.tokenizer = dict_.create()
         if mode == 'A':
-            self.mode = self.tokenizer.SplitMode.A
+            split_mode = self.tokenizer.SplitMode.A
         elif mode == 'B':
-            self.mode = self.tokenizer.SplitMode.B
+            split_mode = self.tokenizer.SplitMode.B
         elif mode == 'C':
-            self.mode = self.tokenizer.SplitMode.C
+            split_mode = self.tokenizer.SplitMode.C
         else:
-            raise Exception('mode must be A, B, or C but actually {}'.format(str(mode)))
+            raise Exception('mode must be A, B, or C ({})'.format(str(mode)))
+        dict_ = dictionary.Dictionary()
+        self.tokenizer = dict_.create(mode=split_mode)
         self.use_sentence_separator = True
 
     def __call__(self, text):
-        result = self.tokenizer.tokenize(text=text, mode=self.mode)
+        result = self.tokenizer.tokenize(text=text)
         morph_spaces = []
         last_morph = None
         for m in result:
