@@ -8,6 +8,7 @@
     "SudachiPy",
     "jawiki-cirrussearch-content",
     "UD-Japanese BCCWJ v2.4",
+    "UD_Japanese-PUD v2.4",
     "KWDLC"
   ],
   "url":"https://github.com/megagonlabs/ginza"
