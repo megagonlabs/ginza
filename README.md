@@ -19,6 +19,8 @@ SudachiPy provides high accuracies for tokenization and pos tagging.
 
 ## Runtime Environment
 This project is developed with Python>=3.6 and pip for it.
+We do not recommend to use Anaconda environment because the pip install step may not work properly.
+(We'd like to support Anaconda in near future.)
 
 (Please see Development Environment section located on bottom too)
 ### Runtime set up
