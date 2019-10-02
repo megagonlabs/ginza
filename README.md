@@ -33,6 +33,11 @@ and run `pip install` with it.
 ```bash
 $ pip install ginza-2.0.0.tar.gz
 ```
+
+If you encountered some install problems related to Cython, please try to set the CFLAGS like below.
+```bash
+$ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
+```
 #### 2. Execute ginza from command line
 Run `ginza` command from the console, then input some Japanese text.
 After pressing enter key, you will get the parsed results with conllu format.
