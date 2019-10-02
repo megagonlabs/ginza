@@ -19,6 +19,16 @@ SUDACHI_DEFAULT_MODE = 'C'
 SUDACHI_DEFAULT_SPLITMODE = 'C'
 
 
+def try_import_sudachipy_split_mode():
+    try:
+        from sudachipy import tokenizer
+        return tokenizer.Tokenizer.SplitMode
+    except ImportError:
+        raise ImportError(
+            "Japanese support requires SudachiPy distributed with ja language model"
+        )
+
+
 def try_import_sudachipy_dictionary():
     try:
         from sudachipy import dictionary
@@ -51,12 +61,13 @@ class SudachiTokenizer(DummyTokenizer):
         self.vocab = nlp.vocab if nlp is not None else Vocab()
         dictionary = try_import_sudachipy_dictionary()
 
+        SplitMode = try_import_sudachipy_split_mode()
         if mode == 'A':
-            split_mode = self.tokenizer.SplitMode.A
+            split_mode = SplitMode.A
         elif mode == 'B':
-            split_mode = self.tokenizer.SplitMode.B
+            split_mode = SplitMode.B
         elif mode == 'C':
-            split_mode = self.tokenizer.SplitMode.C
+            split_mode = SplitMode.C
         else:
             raise Exception('mode must be A, B, or C ({})'.format(str(mode)))
         dict_ = dictionary.Dictionary()
