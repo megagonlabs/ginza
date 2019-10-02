@@ -22,21 +22,21 @@ ShortUnitWord = namedtuple("ShortUnitWord", ["surface", "lemma", "pos"])
 
 Language.factories['JapaneseCorrector'] = lambda nlp, **cfg: JapaneseCorrector(nlp)
 
-if not Token.get_extension('inf'):
-    Token.set_extension('inf', default='')
-if not Token.get_extension('bunsetu_bi_label'):
-    Token.set_extension('bunsetu_bi_label', default='')
-if not Token.get_extension('bunsetu_position_type'):
-    Token.set_extension('bunsetu_position_type', default='')
-
 
 class JapaneseDefaults(Language.Defaults):
     lex_attr_getters = dict(Language.Defaults.lex_attr_getters)
     lex_attr_getters[LANG] = lambda _text: "ja"
     stop_words = STOP_WORDS
     tag_map = TAG_MAP
-    syntax_iterators = SYNTAX_ITERATORS  # TODO not works for spaCy 2.0.12, see work around in JapaneseCorrector
+    syntax_iterators = SYNTAX_ITERATORS
     writing_system = {"direction": "ltr", "has_case": False, "has_letters": False}
+
+    if not Token.get_extension('inf'):
+        Token.set_extension('inf', default='')
+    if not Token.get_extension('bunsetu_bi_label'):
+        Token.set_extension('bunsetu_bi_label', default='')
+    if not Token.get_extension('bunsetu_position_type'):
+        Token.set_extension('bunsetu_position_type', default='')
 
     @classmethod
     def create_tokenizer(cls, nlp=None):
