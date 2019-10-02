@@ -38,7 +38,7 @@ $ pip install "https://github.com/megagonlabs/ginza/releases/download/latest/gin
 pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
 次のように直接指定することもできます。
 ```bash
-$ pip install ginza-2.0.0.tar.gz
+$ pip install ginza-2.1.1.tar.gz
 ```
 インストール時にCythonに関するエラーが発生した場合は、次のように県境変数CFLAGSを設定してください。
 ```bash
