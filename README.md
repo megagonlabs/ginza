@@ -19,6 +19,8 @@ SudachiPy provides high accuracies for tokenization and pos tagging.
 
 ## Runtime Environment
 This project is developed with Python>=3.6 and pip for it.
+We do not recommend to use Anaconda environment because the pip install step may not work properly.
+(We'd like to support Anaconda in near future.)
 
 (Please see Development Environment section located on bottom too)
 ### Runtime set up
@@ -32,6 +34,11 @@ or download pip install archive from
 and run `pip install` with it.
 ```bash
 $ pip install ginza-2.0.0.tar.gz
+```
+
+If you encountered some install problems related to Cython, please try to set the CFLAGS like below.
+```bash
+$ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
 ```
 #### 2. Execute ginza from command line
 Run `ginza` command from the console, then input some Japanese text.
