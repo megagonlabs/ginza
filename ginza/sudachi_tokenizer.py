@@ -115,8 +115,10 @@ class SudachiTokenizer(DummyTokenizer):
                     token.pos_ = 'VERB'
                 elif next_tag == '助動詞' or next_tag.find('形状詞') >= 0:
                     token.pos_ = 'ADJ'
+            token.lemma_ = morph.normalized_form()
             token._.inf = ','.join(morph.part_of_speech()[4:])
-            token.lemma_ = morph.normalized_form()  # work around: lemma_ must be set after tag_
+            token._.reading = morph.reading_form()
+            token._.sudachi = morph
         if self.use_sentence_separator:
             separate_sentences(doc)
         return doc
