@@ -1,7 +1,7 @@
 ![GiNZA logo](https://github.com/megagonlabs/ginza/releases/download/latest/GINZA_logo_4c_y.png)
 # GiNZAの公開ページ
 
-***Ginza 'v2.1.1'をインストールする前に [重要な変更](#ginza-211)の記述をご確認ください。***
+***GiNZA 'v2.2.0'をインストールする前に [重要な変更](#ginza-211) の記述をご確認ください。***
 
 [Universal Dependencies Symposium 2019@国語研での発表資料](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
 [NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf),
@@ -38,16 +38,21 @@ $ pip install "https://github.com/megagonlabs/ginza/releases/download/latest/gin
 pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
 次のように直接指定することもできます。
 ```bash
-$ pip install ginza-2.1.1.tar.gz
+$ pip install ginza-2.2.0.tar.gz
 ```
 インストール時にCythonに関するエラーが発生した場合は、次のように県境変数CFLAGSを設定してください。
 ```bash
 $ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
 ```
 #### 2. ginzaコマンドの実行
-コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、conllu形式で解析結果が出力されます。
+コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、[CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) 形式で解析結果が出力されます。
 ```bash
 $ ginza
+```
+日本語係り受け解析器 [CaboCha](https://taku910.github.io/cabocha/) 互換(`cabocha -f1`)のラティス形式で解析結果を出力する場合は
+`-f 1` または `-f cabocha` オプションを追加して下さい。
+```bash
+ginza -f 1
 ```
 ### コーディング例
 次のコードは文単位で依存構造解析結果を出力します。
@@ -64,14 +69,22 @@ for sent in doc.sents:
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 2.0
-#### ginza-2.1.1
-- 2019-10-03, Ametrine
+#### ginza-2.2.0
+- 2019-10-04, Ametrine
 - 重要な変更
   - sudachipy.tokenizerの`split_mode`が正しく設定されない不具合(v2.0.0でデグレード)を改修 (#43)
     - この不具合により学習時と`ginza`コマンドによる解析時で`split_mode`が異なる状態となっていました。
     - v2.0.0で`split_mode`は学習時およびAPIでは'B'に、`ginza`コマンド実行時は'C'にセットされていました。
     - 今回の改修でデフォルトの`split_mode`は'C'に統一されました。
-    - この改修によりGiNZAをv2.0.0からv2.1.1にアップグレードする際にトークン区切り基準が変化します。
+    - この改修によりGiNZAをv2.0.0からv2.2.0にアップグレードする際にトークン区切り基準が変化します。
+- 機能追加
+  - `ginza` コマンドの出力形式を指定する`-f`, `--output-format` オプションを追加
+    - `-f 0` or `-f conllu` : [CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) 形式
+    - `-f 1` or `-f cabocha`: [cabocha](https://taku910.github.io/cabocha/) -f1 互換形式
+  - カスタムトークンフィールドの追加:
+    - `bunsetu_index` : 文節番号 (0起番)
+    - `reading`: 読み (発音フィールドには未対応)
+    - `sudachi`: SudachiPyのmorphemeインスタンスまたはmorphemeのリスト(JapaneseCorrectorが複数トークンをまとめ上げた場合はリストとなる)
 - 性能改良
   - Tokenizer
     - 最新のSudachiDictを使用(SudachiDict_core-20190927.tar.gz) 
@@ -80,7 +93,7 @@ for sent in doc.sents:
     - `spacy pretrain`コマンドを用いてUD-Japanese BCCWJ, UD_Japanese-PUD, KWDLCから言語モデルを学習。
     - `spacy train`コマンド実行時にマルチタスク学習のために`-pt 'tag,dep'`オプションを指定 
   - New model file
-    - ja_ginza-2.1.1.tar.gz
+    - ja_ginza-2.2.0.tar.gz
 #### ginza-2.0.0
 - 2019-07-08
 - `ginza` コマンドの追加

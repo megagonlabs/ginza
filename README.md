@@ -3,7 +3,7 @@
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
-***Please read [Important changes](#ginza-211) before you upgrade GiNZA to `v2.1.1`.***
+***Please read [Important changes](#ginza-211) before you upgrade GiNZA to `v2.2.0`.***
 
 ## License
 GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under
@@ -35,7 +35,7 @@ or download pip install archive from
 [release page](https://github.com/megagonlabs/ginza/releases)
 and run `pip install` with it.
 ```bash
-$ pip install ginza-2.1.1.tar.gz
+$ pip install ginza-2.2.0.tar.gz
 ```
 
 If you encountered some install problems related to Cython, please try to set the CFLAGS like below.
@@ -44,9 +44,13 @@ $ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/rele
 ```
 #### 2. Execute ginza from command line
 Run `ginza` command from the console, then input some Japanese text.
-After pressing enter key, you will get the parsed results with conllu format.
+After pressing enter key, you will get the parsed results with [CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) format.
 ```bash
 $ ginza
+```
+If you want to use [`cabocha -f1`](https://taku910.github.io/cabocha/) (lattice style) output, add `-f 1` or `-f cabocha` option to `ginza` command.
+```bash
+ginza -f 1
 ```
 ### Coding example
 Following steps shows dependency parsing results with sentence boundary 'EOS'.
@@ -63,14 +67,22 @@ for sent in doc.sents:
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
 ### version 2.0
-#### ginza-2.1.1
-- 2019-10-03, Ametrine
+#### ginza-2.2.0
+- 2019-10-04, Ametrine
 - Important changes
   - `split_mode` has been set incorrectly to sudachipy.tokenizer from v2.0.0 (#43)
     - This bug caused `split_mode` incompatibility between the training phase and the `ginza` command.
     - `split_mode` was set to 'B' for training phase and python APIs, but 'C' for `ginza` command.
     - We fixed this bug by setting the default `split_mode` to 'C' entirely.
-    - This fix may cause the word segmentation incompatibilities during upgrading GiNZA from v2.0.0 to v2.1.1.
+    - This fix may cause the word segmentation incompatibilities during upgrading GiNZA from v2.0.0 to v2.2.0.
+- New features
+  - Add `-f` and `--output-format` option to `ginza` command:
+    - `-f 0` or `-f conllu` : [CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) format
+    - `-f 1` or `-f cabocha`: [cabocha](https://taku910.github.io/cabocha/) -f1 compatible format
+  - Add custom token fields:
+    - `bunsetu_index` : bunsetu index starting from 0
+    - `reading`: reading of token (not a pronunciation)
+    - `sudachi`: SudachiPy's morpheme instance (or its list when then tokens are gathered by JapaneseCorrector)
 - Performance improvements
   - Tokenizer
     - Use latest SudachiDict (SudachiDict_core-20190927.tar.gz) 
@@ -79,7 +91,7 @@ Please see [spaCy API documents](https://spacy.io/api/).
     - Apply `spacy pretrain` command to capture the language model from UD-Japanese BCCWJ, UD_Japanese-PUD and KWDLC.
     - Apply multitask objectives by using `-pt 'tag,dep'` option of `spacy train`
   - New model file
-    - ja_ginza-2.1.1.tar.gz
+    - ja_ginza-2.2.0.tar.gz
 #### ginza-2.0.0
 - 2019-07-08
 - Add `ginza` command
