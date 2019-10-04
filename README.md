@@ -47,10 +47,31 @@ Run `ginza` command from the console, then input some Japanese text.
 After pressing enter key, you will get the parsed results with [CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) format.
 ```bash
 $ ginza
+銀座七丁目はお洒落だ。
+# text = 銀座七丁目はお洒落だ。
+1	銀座	銀座	PROPN	名詞-固有名詞-地名-一般	_	3	compound	_	BunsetuBILabel=B|BunsetuPositionType=CONT|SpaceAfter=No|NP_B|NE=LOC_B
+2	七	7	NUM	名詞-数詞	NumType=Card	3	nummod	_	BunsetuBILabel=I|BunsetuPositionType=CONT|SpaceAfter=No|NE=LOC_I
+3	丁目	丁目	NOUN	名詞-普通名詞-助数詞可能	_	5	nsubj	_	BunsetuBILabel=I|BunsetuPositionType=SEM_HEAD|SpaceAfter=No|NP_B|NE=LOC_I
+4	は	は	ADP	助詞-係助詞	_	3	case	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
+5	お洒落	御洒落	ADJ	名詞-普通名詞-サ変形状詞可能	_	0	root	_	BunsetuBILabel=B|BunsetuPositionType=ROOT|SpaceAfter=No
+6	だ	だ	AUX	助動詞	_	5	cop	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
+7	。	。	PUNCT	補助記号-句点	_	5	punct	_	BunsetuBILabel=I|BunsetuPositionType=CONT|SpaceAfter=No
+
 ```
 If you want to use [`cabocha -f1`](https://taku910.github.io/cabocha/) (lattice style) output, add `-f 1` or `-f cabocha` option to `ginza` command.
 ```bash
-ginza -f 1
+$ ginza -f 1
+銀座七丁目はお洒落だ。
+* 0 1D 2/3 0.000000
+銀座	名詞,固有名詞,地名,一般,*,*,銀座,ギンザ,	B-LOC
+七	名詞,数詞,*,*,*,*,7,ナナ,	I-LOC
+丁目	名詞,普通名詞,助数詞可能,*,*,*,丁目,チョウメ,	I-LOC
+は	助詞,係助詞,*,*,*,*,は,ハ,	O
+* 1 -1D 0/1 0.000000
+お洒落	名詞,普通名詞,サ変形状詞可能,*,*,*,御洒落,オシャレ,	O
+だ	助動詞,*,*,*,助動詞-ダ,終止形-一般,だ,ダ,	O
+。	補助記号,句点,*,*,*,*,。,。,	O
+EOS
 ```
 ### Coding example
 Following steps shows dependency parsing results with sentence boundary 'EOS'.

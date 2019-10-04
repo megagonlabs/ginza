@@ -49,6 +49,16 @@ $ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/rele
 コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、[CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) 形式で解析結果が出力されます。
 ```bash
 $ ginza
+銀座七丁目はお洒落だ。
+# text = 銀座七丁目はお洒落だ。
+1	銀座	銀座	PROPN	名詞-固有名詞-地名-一般	_	3	compound	_	BunsetuBILabel=B|BunsetuPositionType=CONT|SpaceAfter=No|NP_B|NE=LOC_B
+2	七	7	NUM	名詞-数詞	NumType=Card	3	nummod	_	BunsetuBILabel=I|BunsetuPositionType=CONT|SpaceAfter=No|NE=LOC_I
+3	丁目	丁目	NOUN	名詞-普通名詞-助数詞可能	_	5	nsubj	_	BunsetuBILabel=I|BunsetuPositionType=SEM_HEAD|SpaceAfter=No|NP_B|NE=LOC_I
+4	は	は	ADP	助詞-係助詞	_	3	case	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
+5	お洒落	御洒落	ADJ	名詞-普通名詞-サ変形状詞可能	_	0	root	_	BunsetuBILabel=B|BunsetuPositionType=ROOT|SpaceAfter=No
+6	だ	だ	AUX	助動詞	_	5	cop	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
+7	。	。	PUNCT	補助記号-句点	_	5	punct	_	BunsetuBILabel=I|BunsetuPositionType=CONT|SpaceAfter=No
+
 ```
 日本語係り受け解析器 [CaboCha](https://taku910.github.io/cabocha/) 互換(`cabocha -f1`)のラティス形式で解析結果を出力する場合は
 `-f 1` または `-f cabocha` オプションを追加して下さい。
