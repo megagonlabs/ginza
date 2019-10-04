@@ -3,9 +3,10 @@
 
 ***GiNZA 'v2.2.0'をインストールする前に [重要な変更](#ginza-211) の記述をご確認ください。***
 
-[Universal Dependencies Symposium 2019@国語研での発表資料](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
-[NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf),
-[論文発表資料](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-139011245)
+## 発表資料
+- [Universal Dependencies Symposium 2019@国語研での発表スライド](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
+- [NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf)
+([発表スライド](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-139011245))
 
 ## ライセンス
 GiNZA NLPライブラリおよびGiNZA日本語Universal Dependenciesモデルは
@@ -40,7 +41,7 @@ pipインストールアーカイブを[リリースページからダウンロ�
 ```bash
 $ pip install ginza-2.2.0.tar.gz
 ```
-インストール時にCythonに関するエラーが発生した場合は、次のように県境変数CFLAGSを設定してください。
+インストール時にCythonに関するエラーが発生した場合は、次のように環境変数CFLAGSを設定してください。
 ```bash
 $ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
 ```
@@ -68,7 +69,7 @@ for sent in doc.sents:
 ### API
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
-### version 2.0
+### version 2.x
 #### ginza-2.2.0
 - 2019-10-04, Ametrine
 - 重要な変更
@@ -113,7 +114,7 @@ for sent in doc.sents:
     - `token._.inf`
   - 削除
     - `pos_detail` (同じ値が `token.tag_` に保存される)
-### version 1.0
+### version 1.x
 #### ja_ginza_nopn-1.0.2
 - 2019-04-07
 - conllu形式に合致するようcli出力のroot依存元インデックスを0に変更

@@ -66,7 +66,7 @@ for sent in doc.sents:
 ### APIs
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
-### version 2.0
+### version 2.x
 #### ginza-2.2.0
 - 2019-10-04, Ametrine
 - Important changes
@@ -111,7 +111,7 @@ Please see [spaCy API documents](https://spacy.io/api/).
     - `token._.inf`
   - Removed
     - `pos_detail` (same value is set to `token.tag_`)
-### version 1.0
+### version 1.x
 #### ja_ginza_nopn-1.0.2
 - 2019-04-07
 - Set depending token index of root as 0 to meet with conllu format definitions
