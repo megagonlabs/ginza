@@ -43,7 +43,7 @@ class JapaneseDefaults(Language.Defaults):
         return SudachiTokenizer(nlp)
 
     @classmethod
-    def create_lemmatizer(cls, nlp=None):
+    def create_lemmatizer(cls, nlp=None, lookups=None):
         return None
 
 
