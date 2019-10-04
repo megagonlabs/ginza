@@ -61,13 +61,13 @@ class SudachiTokenizer(DummyTokenizer):
         self.vocab = nlp.vocab if nlp is not None else Vocab()
         dictionary = try_import_sudachipy_dictionary()
 
-        SplitMode = try_import_sudachipy_split_mode()
+        split_mode_enum = try_import_sudachipy_split_mode()
         if mode == 'A':
-            split_mode = SplitMode.A
+            split_mode = split_mode_enum.A
         elif mode == 'B':
-            split_mode = SplitMode.B
+            split_mode = split_mode_enum.B
         elif mode == 'C':
-            split_mode = SplitMode.C
+            split_mode = split_mode_enum.C
         else:
             raise Exception('mode must be A, B, or C ({})'.format(str(mode)))
         dict_ = dictionary.Dictionary()
