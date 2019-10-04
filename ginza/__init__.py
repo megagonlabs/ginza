@@ -33,6 +33,12 @@ class JapaneseDefaults(Language.Defaults):
 
     if not Token.get_extension('inf'):
         Token.set_extension('inf', default='')
+    if not Token.get_extension('reading'):
+        Token.set_extension('reading', default='')
+    if not Token.get_extension('sudachi'):
+        Token.set_extension('sudachi', default='')
+    if not Token.get_extension('bunsetu_index'):
+        Token.set_extension('bunsetu_index', default='')
     if not Token.get_extension('bunsetu_bi_label'):
         Token.set_extension('bunsetu_bi_label', default='')
     if not Token.get_extension('bunsetu_position_type'):
