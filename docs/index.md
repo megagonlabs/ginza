@@ -95,6 +95,7 @@ for sent in doc.sents:
     - `spacy train`コマンド実行時にマルチタスク学習のために`-pt 'tag,dep'`オプションを指定 
   - New model file
     - ja_ginza-2.2.0.tar.gz
+
 #### ginza-2.0.0
 - 2019-07-08
 - `ginza` コマンドの追加
@@ -114,13 +115,16 @@ for sent in doc.sents:
     - `token._.inf`
   - 削除
     - `pos_detail` (同じ値が `token.tag_` に保存される)
+
 ### version 1.x
 #### ja_ginza_nopn-1.0.2
 - 2019-04-07
 - conllu形式に合致するようcli出力のroot依存元インデックスを0に変更
+
 #### ja_ginza_nopn-1.0.1
 - 2019-04-02
 - 新元号『令和』をsystem_core.dicに追加
+
 #### ja_ginza_nopn-1.0.0
 - 2019-04-01
 - 初回リリース
