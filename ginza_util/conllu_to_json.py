@@ -15,18 +15,25 @@ from spacy.syntax.nonproj import is_nonproj_tree, contains_cycle
 from ginza.japanese_corrector import ex_attr
 
 
+NEW_DOC_ID_PATTERN = re.compile(
+    r'^# newdoc id = (.+)$'
+)
+
 SID_PATTERN = re.compile(
     r'^# sent_id = (.+)$'
 )
 TEXT_PATTERN = re.compile(
     r'^# text = (.+)$'
 )
+TEXT_EN_PATTERN = re.compile(
+    r'^# text_en = (.+)$'
+)
 TOKEN_PATTERN = re.compile(
     r'^([1-9][0-9]*)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([0-9]*)\t([^\t]+)\t(_)\t([^\t]+)$'
 )
 
 
-def rewrite_with_tokens(gold_tokens, rewriting_gold_index, tokens):
+def rewrite_with_tokens(gold_tokens, rewriting_gold_index, tokens, extend_dep_labels):
     g = gold_tokens[rewriting_gold_index]
     g_pos = g['pos']
     t = tokens[0]
@@ -37,13 +44,16 @@ def rewrite_with_tokens(gold_tokens, rewriting_gold_index, tokens):
     g['whitespace'] = t.whitespace_ != ''
     if not g['dep'].startswith('as_'):
         dep = g['dep'].split('_as_')[0]
-        if dep == 'root' or g_pos == t.pos_ and not t.tag_.endswith('可能'):
+        if not extend_dep_labels or dep == 'root' or g_pos == t.pos_ and not t.tag_.endswith('可能'):
             g['dep'] = dep
         else:
             g['dep'] = '{}_as_{}'.format(dep, g_pos)
     if len(tokens) == 1:
         return
-    label = 'as_{}'.format(g_pos)
+    if extend_dep_labels:
+        label = 'as_{}'.format(g_pos)
+    else:
+        label = 'dep'
     others = [
         {
             'id': rewriting_gold_index + i + 1,
@@ -66,7 +76,7 @@ def rewrite_with_tokens(gold_tokens, rewriting_gold_index, tokens):
     gold_tokens[rewriting_gold_index + 1:rewriting_gold_index + 1] = others
 
 
-def unify_range(gold_tokens, start, end, replacing_token):
+def unify_range(gold_tokens, start, end, replacing_token, extend_dep_labels):
     dep_outer_id = None
     dep_outer_label = None
     head_pos = None
@@ -97,7 +107,7 @@ def unify_range(gold_tokens, start, end, replacing_token):
         g['dep'] = dep_outer_label
     else:
         dep = dep_outer_label.split('_as_')[0]
-        g['dep'] = dep if head_pos == g['pos'] else '{}_as_{}'.format(dep, head_pos)
+        g['dep'] = dep if not extend_dep_labels or head_pos == g['pos'] else '{}_as_{}'.format(dep, head_pos)
 
     for g in gold_tokens:
         if g['id'] <= start and end <= g['id'] + g['head']:
@@ -127,7 +137,7 @@ def _print(_prefix, _golds, _doc):
     )
 
 
-def retokenize(gold_tokens, doc, debug=False):
+def retokenize(gold_tokens, doc, extend_dep_labels, debug=False):
     if debug:
         print(doc.text)
         print([g['orth'] + (' ' if g['whitespace'] else '') for g in gold_tokens])
@@ -156,13 +166,13 @@ def retokenize(gold_tokens, doc, debug=False):
             if align_from_t is not None:
                 if debug:
                     _print('>', gold_tokens[index_g:index_g + 1], doc[align_from_t:index_t + 1])
-                rewrite_with_tokens(gold_tokens, index_g, doc[align_from_t:index_t + 1])
+                rewrite_with_tokens(gold_tokens, index_g, doc[align_from_t:index_t + 1], extend_dep_labels)
                 index_g += index_t - align_from_t
                 align_from_t = None
             elif align_from_g is not None:
                 if debug:
                     _print('<', gold_tokens[align_from_g:index_g + 1], doc[index_t:index_t + 1])
-                if unify_range(gold_tokens, align_from_g, index_g + 1, doc[index_t]):
+                if unify_range(gold_tokens, align_from_g, index_g + 1, doc[index_t], extend_dep_labels):
                     index_g = align_from_g
                 align_from_g = None
             elif g_offset == t_offset:
@@ -173,7 +183,7 @@ def retokenize(gold_tokens, doc, debug=False):
                         gold_tokens[index_g:index_g + 1],
                         doc[index_t:index_t + 1]
                     )
-                rewrite_with_tokens(gold_tokens, index_g, doc[index_t:index_t + 1])
+                rewrite_with_tokens(gold_tokens, index_g, doc[index_t:index_t + 1], extend_dep_labels)
             else:
                 if debug:
                     _print('!', gold_tokens[last_aligned_g:index_g + 1], doc[last_aligned_t:index_t + 1])
@@ -208,7 +218,7 @@ def retokenize(gold_tokens, doc, debug=False):
             )
         )
     for g in gold_tokens:
-        if g['head'] != 0 and g['tag'].endswith('可能') and g['dep'].find('as_') == -1:
+        if extend_dep_labels and g['head'] != 0 and g['tag'].endswith('可能') and g['dep'].find('as_') == -1:
             g['dep'] = '{}_as_{}'.format(g['dep'], g['pos'])
     heads = [g['id'] + g['head'] for g in gold_tokens]
     if is_nonproj_tree(heads):
@@ -223,7 +233,7 @@ def retokenize(gold_tokens, doc, debug=False):
         raise Exception('cyclic')
 
 
-def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
+def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels):
     paragraphs = []
     raw = ''
     sentences = []
@@ -250,6 +260,9 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
         if state == 'sid':
             m = SID_PATTERN.match(line)
             if m is None:
+                m = NEW_DOC_ID_PATTERN.match(line)
+                if m is not None:
+                    continue
                 error_line(state, path, line_index, sentence_id, sentence, line)
                 return []
 
@@ -284,6 +297,9 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
         elif state == 'ios' and line != '':
             m = TOKEN_PATTERN.match(line)
             if m is None:
+                m = TEXT_EN_PATTERN.match(line)
+                if m is not None:
+                    continue
                 error_line(state, path, line_index, sentence_id, sentence, line)
                 return []
 
@@ -354,9 +370,13 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
                 print('skip(cyclic)', path, sentence_id, file=sys.stderr)
             else:
                 if tokenizer:
-                    retokenize(tokens, tokenizer(
-                        ''.join([t['orth'] + (' ' if t['whitespace'] else '') for t in tokens])
-                    ))
+                    retokenize(
+                        tokens,
+                        tokenizer(
+                            ''.join([t['orth'] + (' ' if t['whitespace'] else '') for t in tokens])
+                        ),
+                        extend_dep_labels,
+                    )
                 offset = 0
                 ent_label = None
                 ent_end = 0
@@ -435,20 +455,26 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents):
     return paragraphs
 
 
-def convert_files(path, tokenizer, paragraph_id_regex, n_sents):
+def convert_files(path, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels):
     docs = []
 
     if type(path) == list:
         print('targets: {}'.format(str(path)), file=sys.stderr)
         for p in path:
-            docs += convert_files(p, tokenizer, paragraph_id_regex, n_sents)
+            docs += convert_files(p, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels)
         print(file=sys.stderr, flush=True)
         return docs
 
     if os.path.isdir(path):
         print('loading {}'.format(str(path)), file=sys.stderr)
         for sub_path in os.listdir(path):
-            docs += convert_files(os.path.join(path, sub_path), tokenizer, paragraph_id_regex, n_sents)
+            docs += convert_files(
+                os.path.join(path, sub_path),
+                tokenizer,
+                paragraph_id_regex,
+                n_sents,
+                extend_dep_labels
+            )
         print(file=sys.stderr)
     else:
         if path == '-':
@@ -456,7 +482,7 @@ def convert_files(path, tokenizer, paragraph_id_regex, n_sents):
         else:
             with open(str(path), 'r') as file:
                 lines = file.readlines()
-        paragraphs = convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents)
+        paragraphs = convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels)
         docs.append({
             'id': str(path),
             'paragraphs': paragraphs,
@@ -535,6 +561,7 @@ def print_json(docs, file=sys.stdout):
 @plac.annotations(
     input_path=("Input path", "positional", None, str),
     retokenize_lang=("Retokenize", "option", "r", str),
+    extend_dep_labels=("Extend dep labels", "option", "e", str),
     paragraph_id_regex=("Regex pattern for paragraph_id (default=r'')", 'option', 'p', str),
     n_sents=("Number of sentences per paragraph (default=10)", "option", "n", int),
     augmentation=("Enable Zenkaku/Hankaku augmentation", "flag", "a"),
@@ -542,6 +569,7 @@ def print_json(docs, file=sys.stdout):
 def main(
         input_path='-',
         retokenize_lang='ja',
+        extend_dep_labels=False,
         paragraph_id_regex=r'^(.*)[\-:][^\-:]*$',
         n_sents=10,
         augmentation=False,
@@ -551,7 +579,7 @@ def main(
     else:
         tokenizer = None
     out = sys.stdout
-    docs = convert_files(input_path, tokenizer, paragraph_id_regex, n_sents)
+    docs = convert_files(input_path, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels)
     if augmentation:
         random.seed(1)
         docs = [{

@@ -19,6 +19,16 @@ SUDACHI_DEFAULT_MODE = 'C'
 SUDACHI_DEFAULT_SPLITMODE = 'C'
 
 
+def try_import_sudachipy_split_mode():
+    try:
+        from sudachipy import tokenizer
+        return tokenizer.Tokenizer.SplitMode
+    except ImportError:
+        raise ImportError(
+            "Japanese support requires SudachiPy distributed with ja language model"
+        )
+
+
 def try_import_sudachipy_dictionary():
     try:
         from sudachipy import dictionary
@@ -51,13 +61,21 @@ class SudachiTokenizer(DummyTokenizer):
         self.vocab = nlp.vocab if nlp is not None else Vocab()
         dictionary = try_import_sudachipy_dictionary()
 
+        split_mode_enum = try_import_sudachipy_split_mode()
+        if mode == 'A':
+            split_mode = split_mode_enum.A
+        elif mode == 'B':
+            split_mode = split_mode_enum.B
+        elif mode == 'C':
+            split_mode = split_mode_enum.C
+        else:
+            raise Exception('mode must be A, B, or C ({})'.format(str(mode)))
         dict_ = dictionary.Dictionary()
-        self.tokenizer = dict_.create()
-        self.mode = mode
+        self.tokenizer = dict_.create(mode=split_mode)
         self.use_sentence_separator = True
 
     def __call__(self, text):
-        result = self.tokenizer.tokenize(text=text, mode=self.mode)
+        result = self.tokenizer.tokenize(text=text)
         morph_spaces = []
         last_morph = None
         for m in result:
@@ -97,8 +115,10 @@ class SudachiTokenizer(DummyTokenizer):
                     token.pos_ = 'VERB'
                 elif next_tag == '助動詞' or next_tag.find('形状詞') >= 0:
                     token.pos_ = 'ADJ'
+            token.lemma_ = morph.normalized_form()
             token._.inf = ','.join(morph.part_of_speech()[4:])
-            token.lemma_ = morph.normalized_form()  # work around: lemma_ must be set after tag_
+            token._.reading = morph.reading_form()
+            token._.sudachi = morph
         if self.use_sentence_separator:
             separate_sentences(doc)
         return doc

@@ -46,7 +46,11 @@ def correct_dep(doc):
                 corrected_pos = label[p + 4:]
                 if len(corrected_pos) > 0:
                     token.pos_ = corrected_pos
-                token.dep_ = label[0:p]
+                dep = label[0:p]
+                if dep == 'root' and token.head.i != token.i:
+                    token.dep_ = 'dep'
+                else:
+                    token.dep_ = dep
             elif label.startswith('as_'):
                 corrected_pos = label[3:]
                 m = merge_range(doc, token)
@@ -54,9 +58,17 @@ def correct_dep(doc):
                     begin, end, head = m
                     tag = head.tag_
                     inf = ex_attr(head).inf
+                    reading = ex_attr(token).reading + ex_attr(doc[i+1]).reading
+                    sudachi = ex_attr(token).sudachi
+                    if isinstance(sudachi, list):
+                        sudachi.append(ex_attr(doc[i+1]).sudachi)
+                    else:
+                        sudachi = [sudachi, ex_attr(doc[i + 1]).sudachi]
                     try:
                         retokenizer.merge(doc[begin:begin + 2], attrs={'POS': corrected_pos, 'TAG': tag})
                         ex_attr(doc[begin]).inf = inf
+                        ex_attr(doc[begin]).reading = reading
+                        ex_attr(doc[begin]).sudachi = sudachi
                         continue
                     except ValueError:
                         pass
@@ -77,7 +89,6 @@ FUNC_DEP = {
 
 def set_bunsetu_bi_type(doc):
     if len(doc) == 0:
-        ex_attr(doc).clauses = []
         return doc
 
     continuous = [None] * len(doc)
@@ -150,9 +161,13 @@ def set_bunsetu_bi_type(doc):
     # print(continuous)
     '''
 
+    index = -1
     for t, bi in zip(doc, ['B'] + [
         'I' if continuous[i - 1] == continuous[i] else 'B' for i in range(1, len(continuous))
     ]):
+        if bi == 'B':
+            index += 1
+        ex_attr(t).bunsetu_index = index
         ex_attr(t).bunsetu_bi_label = bi
 
     position_type = [
