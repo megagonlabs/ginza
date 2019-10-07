@@ -41,6 +41,17 @@ pipインストールアーカイブを[リリースページからダウンロ�
 ```bash
 $ pip install ginza-2.2.0.tar.gz
 ```
+
+インストール時に次のようなエラーメッセージが表示される場合は、`pip`をupgradeする必要があります。
+
+```
+Could not find a version that satisfies the requirement ja_ginza@ http://github.com/ ...  
+```
+
+```bash
+$ pip install --upgrade pip
+```
+
 インストール時にCythonに関するエラーが発生した場合は、次のように環境変数CFLAGSを設定してください。
 ```bash
 $ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
