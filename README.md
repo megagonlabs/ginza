@@ -20,7 +20,7 @@ SudachiPy provides high accuracies for tokenization and pos tagging.
 [SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
 ## Runtime Environment
-This project is developed with Python>=3.6 and pip for it.
+This project is developed with Python>=3.6 and pip>=18 for it.
 We do not recommend to use Anaconda environment because the pip install step may not work properly.
 (We'd like to support Anaconda in near future.)
 
@@ -36,6 +36,16 @@ or download pip install archive from
 and run `pip install` with it.
 ```bash
 $ pip install ginza-2.2.0.tar.gz
+```
+
+If you encountered install error with the message like below, please upgrade `pip`.
+
+```
+Could not find a version that satisfies the requirement ja_ginza@ http://github.com/ ...  
+```
+
+```bash
+$ pip install --upgrade pip
 ```
 
 If you encountered some install problems related to Cython, please try to set the CFLAGS like below.
@@ -113,6 +123,7 @@ Please see [spaCy API documents](https://spacy.io/api/).
     - Apply multitask objectives by using `-pt 'tag,dep'` option of `spacy train`
   - New model file
     - ja_ginza-2.2.0.tar.gz
+
 #### ginza-2.0.0
 - 2019-07-08
 - Add `ginza` command
@@ -132,13 +143,16 @@ Please see [spaCy API documents](https://spacy.io/api/).
     - `token._.inf`
   - Removed
     - `pos_detail` (same value is set to `token.tag_`)
+
 ### version 1.x
 #### ja_ginza_nopn-1.0.2
 - 2019-04-07
 - Set depending token index of root as 0 to meet with conllu format definitions
+
 #### ja_ginza_nopn-1.0.1
 - 2019-04-02
 - Add new Japanese era 'reiwa' to system_core.dic.
+
 #### ja_ginza_nopn-1.0.0
 - 2019-04-01
 - First release version
