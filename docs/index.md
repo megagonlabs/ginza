@@ -52,6 +52,13 @@ Could not find a version that satisfies the requirement ja_ginza@ http://github.
 $ pip install --upgrade pip
 ```
 
+Google Colab 環境ではインストール後にパッケージ情報の再読込が必要です。詳細はリンクの記事をご確認下さい。
+```python
+import pkg_resources, imp
+imp.reload(pkg_resources)
+```
+[【GiNZA】GoogleColabで日本語NLPライブラリGiNZAがloadできない](https://www.sololance.tokyo/2019/10/colab-load-ginza.html)
+
 インストール時にCythonに関するエラーが発生した場合は、次のように環境変数CFLAGSを設定してください。
 ```bash
 $ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
