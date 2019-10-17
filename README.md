@@ -48,6 +48,12 @@ Could not find a version that satisfies the requirement ja_ginza@ http://github.
 $ pip install --upgrade pip
 ```
 
+For Google Colab, you need to reload the package info. 
+```python
+import pkg_resources, imp
+imp.reload(pkg_resources)
+```
+
 If you encountered some install problems related to Cython, please try to set the CFLAGS like below.
 ```bash
 $ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
