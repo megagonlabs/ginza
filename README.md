@@ -89,6 +89,10 @@ $ ginza -f 1
 。	補助記号,句点,*,*,*,*,。,。,	O
 EOS
 ```
+If you need only the tokenization results, please consider to use `sudachipy` command to speed up. Please see [SudachiPy](https://github.com/WorksApplications/SudachiPy/) for details. The SudachiPy is the tokenizer of GiNZA.
+```bash
+$ sudachipy
+```
 ### Coding example
 Following steps shows dependency parsing results with sentence boundary 'EOS'.
 ```python

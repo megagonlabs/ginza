@@ -94,6 +94,11 @@ $ ginza -f 1
 。	補助記号,句点,*,*,*,*,。,。,	O
 EOS
 ```
+※ GiNZAは依存構造解析(または係り受け解析)のためのライブラリです。
+高速に形態素解析だけを実行するには、GiNZAと同時にインストールされる [SudachiPy](https://github.com/WorksApplications/SudachiPy/) または `sudachipy`コマンドを使用して下さい。
+```bash
+$ sudachipy
+```
 ### コーディング例
 次のコードは文単位で依存構造解析結果を出力します。
 ```python
