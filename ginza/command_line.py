@@ -154,8 +154,6 @@ def cabocha_bunsetu_line(token, doc):
     dep_type = 'D'
     for t in doc[token.i:]:
         if bunsetu_index != ex_attr(t).bunsetu_index:
-            if bunsetu_func_index is None:
-                bunsetu_func_index = t.i - token.i
             break
         tbi = ex_attr(t.head).bunsetu_index
         if bunsetu_index != tbi:
@@ -163,11 +161,10 @@ def cabocha_bunsetu_line(token, doc):
             bunsetu_dep_index = tbi
         if bunsetu_func_index is None and ex_attr(t).bunsetu_position_type in {'FUNC', 'SYN_HEAD'}:
             bunsetu_func_index = t.i - token.i
-    else:
-        if bunsetu_func_index is None:
-            bunsetu_func_index = len(doc) - token.i
     if bunsetu_head_index is None:
         bunsetu_head_index = 0
+    if bunsetu_func_index is None:
+        bunsetu_func_index = bunsetu_head_index
     if bunsetu_dep_index is None:
         bunsetu_dep_index = -1
 
