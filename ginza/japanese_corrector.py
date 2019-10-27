@@ -22,59 +22,64 @@ class JapaneseCorrector:
         return doc
 
 
-def merge_range(doc, token):
-    if token.i == token.head.i:
+def _as_range(token):
+    begin = end = token.i
+    pos = None
+    while token.head.i != token.i and token.dep_.startswith('as_'):
+        pos = token.dep_[3:]
+        token = token.head
+        if begin > token.i:
+            begin = token.i
+        if end < token.i:
+            end = token.i
+    if pos is None:
         return None
     else:
-        for i in range(token.i + 1, token.head.i) if token.i < token.head.i else range(token.head.i + 1, token.i):
-            t = doc[i]
-            if t.head.i < token.i or token.head.i < t.head.i or not t.dep == token.dep:
-                return None
-        head = token.head
-        while token.i <= head.head.i <= token.head.i:
-            head = head.head
-        return (token.i, token.head.i + 1, head) if token.i < token.head.i else (token.head.i, token.i + 1, head)
+        return begin, end + 1, token.i, pos
+
+
+def merge_ranges(doc):
+    ranges = None
+    for t in doc:
+        as_range = _as_range(t)
+        if as_range:
+            begin, end, head_i, pos = as_range
+            if ranges is None:
+                ranges = [as_range]
+            else:
+                ranges = [r for r in ranges if r[1] <= begin or end <= r[0]]
+                ranges.append(as_range)
+    return ranges
 
 
 def correct_dep(doc):
-    with doc.retokenize() as retokenizer:
-        for i in range(len(doc)):
-            token = doc[i]
-            label = token.dep_
-            p = label.rfind('_as_')
-            if p >= 0:
-                corrected_pos = label[p + 4:]
-                if len(corrected_pos) > 0:
-                    token.pos_ = corrected_pos
-                dep = label[0:p]
-                if dep == 'root' and token.head.i != token.i:
-                    token.dep_ = 'dep'
-                else:
-                    token.dep_ = dep
-            elif label.startswith('as_'):
-                corrected_pos = label[3:]
-                m = merge_range(doc, token)
-                if m is not None:
-                    begin, end, head = m
-                    tag = head.tag_
-                    inf = ex_attr(head).inf
-                    reading = ex_attr(token).reading + ex_attr(doc[i+1]).reading
-                    sudachi = ex_attr(token).sudachi
-                    if isinstance(sudachi, list):
-                        sudachi.append(ex_attr(doc[i+1]).sudachi)
-                    else:
-                        sudachi = [sudachi, ex_attr(doc[i + 1]).sudachi]
-                    try:
-                        retokenizer.merge(doc[begin:begin + 2], attrs={'POS': corrected_pos, 'TAG': tag})
-                        ex_attr(doc[begin]).inf = inf
-                        ex_attr(doc[begin]).reading = reading
-                        ex_attr(doc[begin]).sudachi = sudachi
-                        continue
-                    except ValueError:
-                        pass
-                token.head.pos_ = corrected_pos
+    for i, token in enumerate(doc):
+        token = doc[i]
+        label = token.dep_
+        p = label.rfind('_as_')
+        if p >= 0:
+            corrected_pos = label[p + 4:]
+            if len(corrected_pos) > 0:
                 token.pos_ = corrected_pos
+            dep = label[0:p]
+            if dep == 'root' and token.head.i != token.i:
                 token.dep_ = 'dep'
+            else:
+                token.dep_ = dep
+
+    ranges = merge_ranges(doc)
+    if ranges:
+        with doc.retokenize() as retokenizer:
+            for begin, end, head_i, pos in ranges:
+                head = doc[head_i]
+                tag = head.tag_
+                inf = ex_attr(head).inf
+                reading = ''.join([ex_attr(t).reading for t in doc[begin:end]])
+                sudachi = [ex_attr(t).sudachi for t in doc[begin:end]]
+                retokenizer.merge(doc[begin:end], attrs={'POS': pos, 'TAG': tag})
+                ex_attr(doc[begin]).inf = inf
+                ex_attr(doc[begin]).reading = reading
+                ex_attr(doc[begin]).sudachi = sudachi
 
 
 FUNC_POS = {
