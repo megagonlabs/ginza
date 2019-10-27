@@ -1,7 +1,7 @@
 ![GiNZA logo](https://github.com/megagonlabs/ginza/releases/download/latest/GINZA_logo_4c_y.png)
 # GiNZAの公開ページ
 
-***GiNZA 'v2.2.0'をインストールする前に [重要な変更](#ginza-211) の記述をご確認ください。***
+***GiNZAをバージョンアップする前に必ず [重要な変更](#ginza-220) の記述をご確認ください。***
 
 ## 発表資料
 - [Universal Dependencies Symposium 2019@国語研での発表スライド](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
@@ -39,7 +39,7 @@ $ pip install "https://github.com/megagonlabs/ginza/releases/download/latest/gin
 pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
 次のように直接指定することもできます。
 ```bash
-$ pip install ginza-2.2.0.tar.gz
+$ pip install ginza-2.2.1.tar.gz
 ```
 
 インストール時に次のようなエラーメッセージが表示される場合は、`pip`をupgradeする必要があります。

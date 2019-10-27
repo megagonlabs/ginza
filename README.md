@@ -3,7 +3,7 @@
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
-***Please read [Important changes](#ginza-211) before you upgrade GiNZA to `v2.2.0`.***
+***Please read the [Important changes](#ginza-220) before you upgrade GiNZA.***
 
 ## License
 GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under
@@ -35,7 +35,7 @@ or download pip install archive from
 [release page](https://github.com/megagonlabs/ginza/releases)
 and run `pip install` with it.
 ```bash
-$ pip install ginza-2.2.0.tar.gz
+$ pip install ginza-2.2.1.tar.gz
 ```
 
 If you encountered install error with the message like below, please upgrade `pip`.
