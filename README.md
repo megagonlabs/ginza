@@ -3,7 +3,7 @@
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
-***Please read [Important changes](#ginza-211) before you upgrade GiNZA to `v2.2.0`.***
+***Please read the [Important changes](#ginza-220) before you upgrade GiNZA.***
 
 ## License
 GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under
@@ -35,7 +35,7 @@ or download pip install archive from
 [release page](https://github.com/megagonlabs/ginza/releases)
 and run `pip install` with it.
 ```bash
-$ pip install ginza-2.2.0.tar.gz
+$ pip install ginza-2.2.1.tar.gz
 ```
 
 If you encountered install error with the message like below, please upgrade `pip`.
@@ -74,7 +74,10 @@ $ ginza
 7	。	。	PUNCT	補助記号-句点	_	5	punct	_	BunsetuBILabel=I|BunsetuPositionType=CONT|SpaceAfter=No
 
 ```
-If you want to use [`cabocha -f1`](https://taku910.github.io/cabocha/) (lattice style) output, add `-f 1` or `-f cabocha` option to `ginza` command.
+If you want to use [`cabocha -f1`](https://taku910.github.io/cabocha/) (lattice style) like output, add `-f 1` or `-f cabocha` option to `ginza` command.
+This option's format is almost same as `cabocha -f1` but the `func_index` field (after the slash) is slightly different.
+Our `func_index` field indicates the boundary where the `自立語` ends in each `文節` (and the `機能語` might start from there).
+And the functional token filter is also slightly different between `cabocha -f1` and ' `ginza -f cabocha`.
 ```bash
 $ ginza -f 1
 銀座七丁目はお洒落だ。
@@ -108,6 +111,14 @@ for sent in doc.sents:
 Please see [spaCy API documents](https://spacy.io/api/).
 ## Releases
 ### version 2.x
+### version 2.x
+#### ginza-2.2.1
+- 2019-10-28
+- Improvements
+  - JapaneseCorrector can merge the `as_*` type dependencies completely
+- Bug fixes
+  - command line tool failed at the specific situations
+
 #### ginza-2.2.0
 - 2019-10-04, Ametrine
 - Important changes
