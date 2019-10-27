@@ -80,6 +80,10 @@ $ ginza
 ```
 日本語係り受け解析器 [CaboCha](https://taku910.github.io/cabocha/) 互換(`cabocha -f1`)のラティス形式で解析結果を出力する場合は
 `-f 1` または `-f cabocha` オプションを追加して下さい。
+このオプションの出力形式は`cabocha -f1`とほぼ同じですが、 
+スラッシュ記号`/`に続く`func_index`フィールドは、
+常に自立語の終了位置（機能語があればその開始位置に一致）を示します。
+また、機能語認定基準も`cabocha -f1`と`ginza -f cabocha`の間で一部異なります。
 ```bash
 $ ginza -f 1
 銀座七丁目はお洒落だ。
@@ -114,6 +118,13 @@ for sent in doc.sents:
 詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 2.x
+#### ginza-2.2.1
+- 2019-10-28
+- 機能改良
+  - JapaneseCorrectorで`as_*`形式の依存構造を完全にマージ可能になった
+- 不具合改修
+  - コマンドラインツールが特定の状況で異常終了していた
+
 #### ginza-2.2.0
 - 2019-10-04, Ametrine
 - 重要な変更
