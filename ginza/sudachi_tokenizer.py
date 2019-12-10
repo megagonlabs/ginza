@@ -121,6 +121,7 @@ class SudachiTokenizer(DummyTokenizer):
             token._.sudachi = morph
         if self.use_sentence_separator:
             separate_sentences(doc)
+        doc.is_tagged = True
         return doc
 
     # add dummy methods for to_bytes, from_bytes, to_disk and from_disk to
