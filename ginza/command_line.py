@@ -121,7 +121,7 @@ def conllu_token_line(token, np_tokens):
         '' if not position_type else 'BunsetuPositionType={}'.format(position_type),
         '' if token.whitespace_ else 'SpaceAfter=No',
         np_tokens.get(token.i, ''),
-        '' if not token.ent_type else 'NE={}_{}'.format(token.ent_type_, token.ent_iob_),
+        '' if not token.ent_type else 'NE={}-{}'.format(token.ent_iob_, token.ent_type_),
     ]))
 
     return '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
