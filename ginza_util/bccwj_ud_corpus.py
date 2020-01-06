@@ -9,7 +9,7 @@ from .parse_tree import Morph, ParsedSentence
 
 
 SID_PATTERN = re.compile(
-    r'^# sent_id = (.+)$'
+    r'^# sent_id = ([^_]+_([^_]+_[^_]+)-.+)$'
 )
 TEXT_PATTERN = re.compile(
     r'^# text = (.+)$'
