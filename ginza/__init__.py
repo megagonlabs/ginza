@@ -7,7 +7,6 @@ from spacy.attrs import LANG
 from spacy.language import Language
 from spacy.tokens import Token
 from spacy.util import get_model_meta
-from spacy.vocab import Vocab
 from spacy.compat import copy_reg
 
 from .stop_words import STOP_WORDS
@@ -43,6 +42,8 @@ class JapaneseDefaults(Language.Defaults):
         Token.set_extension('bunsetu_bi_label', default='')
     if not Token.get_extension('bunsetu_position_type'):
         Token.set_extension('bunsetu_position_type', default='')
+    if not Token.get_extension('ne'):
+        Token.set_extension('ne', default='')
 
     @classmethod
     def create_tokenizer(cls, nlp=None):
