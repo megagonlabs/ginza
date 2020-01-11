@@ -7,7 +7,8 @@ python -m spacy package ${@:2} -m models/${model_dir}/meta.json --force models/$
 set -e
 
 cd target/${model_dir}/
-python setup.py sdist
+
+python setup.py sdist bdist_wheel
 cd ../../
 mv target/${model_dir}/dist/${model_dir}.tar.gz target/
 rm -r target/${model_dir}

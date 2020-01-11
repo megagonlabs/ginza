@@ -1,8 +1,6 @@
 # encoding: utf8
 from __future__ import unicode_literals, print_function
 
-from importlib import import_module
-import json
 from pathlib import Path
 import re
 import sys
@@ -70,7 +68,9 @@ class SudachiTokenizer(DummyTokenizer):
             split_mode = split_mode_enum.C
         else:
             raise Exception('mode must be A, B, or C ({})'.format(str(mode)))
-        dict_ = dictionary.Dictionary()
+        dict_ = dictionary.Dictionary(config_path=str(
+            Path(__file__).parent.parent / 'ja_ginza' / 'sudachidict' / 'sudachi.json'
+        ))
         self.tokenizer = dict_.create(mode=split_mode)
         self.use_sentence_separator = True
 
