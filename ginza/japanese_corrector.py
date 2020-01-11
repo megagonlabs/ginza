@@ -84,11 +84,9 @@ def correct_dep(doc):
 
     for token in doc:
         if token.ent_type:
-            ent_type = ENT_NE_MAPPING[token.ent_type_]
-            if ent_type in OMITTING_NE_TYPES:
-                ex_attr(token).ne = ''
-            else:
-                ex_attr(token).ne = '{}-{}'.format(token.ent_iob_, ent_type)
+            ne_type = ENE_NE_MAPPING[token.ent_type_]
+            if ne_type not in OMITTING_NE_TYPES:
+                ex_attr(token).ne = '{}_{}'.format(token.ent_iob_, ne_type)
 
 
 FUNC_POS = {

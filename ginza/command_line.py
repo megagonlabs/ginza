@@ -58,9 +58,12 @@ def run(
         nlp.tokenizer.mode = OriginalTokenizer.SplitMode.C
     else:
         raise Exception('mode should be A, B or C')
-    print("mode is {}".format(mode), file=sys.stderr)
-    if not use_sentence_separator:
-        print("disabling sentence separator", file=sys.stderr)
+    if mode != SUDACHI_DEFAULT_MODE:
+        print("mode is {}".format(mode), file=sys.stderr)
+
+    if use_sentence_separator:
+        print("enabling sentence separator", file=sys.stderr)
+    else:
         nlp.tokenizer.use_sentence_separator = False
 
     if output_path:
@@ -122,7 +125,7 @@ def conllu_token_line(token, np_tokens):
         '' if not position_type else 'BunsetuPositionType={}'.format(position_type),
         'SpaceAfter=Yes' if token.whitespace_ else 'SpaceAfter=No',
         np_tokens.get(token.i, ''),
-        '' if not token.ent_type else 'ENT={}-{}'.format(token.ent_iob_, token.ent_type_),
+        '' if not token.ent_type else 'ENE7={}_{}'.format(token.ent_iob_, token.ent_type_),
         '' if not ne else 'NE={}'.format(ne),
     ]))
 
