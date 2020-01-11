@@ -1,4 +1,5 @@
 # encoding: utf8
+from .ent_type_mapping import *
 
 __all__ = [
     'ex_attr',
@@ -80,6 +81,12 @@ def correct_dep(doc):
                 ex_attr(doc[begin]).inf = inf
                 ex_attr(doc[begin]).reading = reading
                 ex_attr(doc[begin]).sudachi = sudachi
+
+    for token in doc:
+        if token.ent_type:
+            ne_type = ENE_NE_MAPPING[token.ent_type_]
+            if ne_type not in OMITTING_NE_TYPES:
+                ex_attr(token).ne = '{}_{}'.format(token.ent_iob_, ne_type)
 
 
 FUNC_POS = {
