@@ -1,11 +1,12 @@
 # coding: utf8
+import multiprocessing
 from pathlib import Path
 import plac
 import spacy
 import sys
 from sudachipy.tokenizer import Tokenizer as OriginalTokenizer
 from .japanese_corrector import JapaneseCorrector
-from .sudachi_tokenizer import SUDACHI_DEFAULT_MODE
+from .sudachipy_tokenizer import SudachipyTokenizer, SUDACHIPY_DEFAULT_SPLIT_MODE
 
 
 def ex_attr(token):
@@ -14,20 +15,16 @@ def ex_attr(token):
 
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
-    mode=("sudachi mode", "option", "m", str),
+    sudachipy_mode=("sudachipy mode", "option", "m", str),
     use_sentence_separator=("enable sentence separator", "flag", "s"),
-    disable_pipes=("disable pipes (csv)", "option", "d"),
-    recreate_corrector=("recreate corrector", "flag", "c"),
-    output_format=("output format", "option", "f", str, ['0', 'conllu', '1', 'cabocha']),
     output_path=("output path", "option", "o", Path),
+    output_format=("output format", "option", "f", str, ['0', 'conllu', '1', 'cabocha', '2', 'mecab']),
     require_gpu=("enable require_gpu", "flag", "g"),
 )
 def run(
         model_path=None,
-        mode=SUDACHI_DEFAULT_MODE,
+        sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
         use_sentence_separator=False,
-        disable_pipes='',
-        recreate_corrector=False,
         output_path=None,
         output_format='0',
         require_gpu=False,
@@ -36,35 +33,26 @@ def run(
     if require_gpu:
         spacy.require_gpu()
         print("GPU enabled", file=sys.stderr)
-    if model_path:
+
+    if sudachipy_mode != SUDACHIPY_DEFAULT_SPLIT_MODE:
+        print("sudachipy mode is {}".format(sudachipy_mode), file=sys.stderr)
+
+    if output_format in ['2', 'mecab']:
+        nlp = None
+        tokenizer = SudachipyTokenizer(mode=sudachipy_mode).tokenizer
+    elif model_path:
         nlp = spacy.load(model_path)
+        tokenizer = None
     else:
         nlp = spacy.load('ja_ginza')
-    if disable_pipes:
-        print("disabling pipes: {}".format(disable_pipes), file=sys.stderr)
-        nlp.disable_pipes(disable_pipes)
-        print("using : {}".format(nlp.pipe_names), file=sys.stderr)
-    if recreate_corrector:
-        if 'JapaneseCorrector' in nlp.pipe_names:
-            nlp.remove_pipe('JapaneseCorrector')
-        corrector = JapaneseCorrector(nlp)
-        nlp.add_pipe(corrector, last=True)
+        tokenizer = None
 
-    if mode == 'A':
-        nlp.tokenizer.mode = OriginalTokenizer.SplitMode.A
-    elif mode == 'B':
-        nlp.tokenizer.mode = OriginalTokenizer.SplitMode.B
-    elif mode == 'C':
-        nlp.tokenizer.mode = OriginalTokenizer.SplitMode.C
-    else:
-        raise Exception('mode should be A, B or C')
-    if mode != SUDACHI_DEFAULT_MODE:
-        print("mode is {}".format(mode), file=sys.stderr)
-
-    if use_sentence_separator:
-        print("enabling sentence separator", file=sys.stderr)
-    else:
-        nlp.tokenizer.use_sentence_separator = False
+    if nlp:
+        nlp.tokenizer.set_mode(sudachipy_mode)
+        if use_sentence_separator:
+            print("enabling sentence separator", file=sys.stderr)
+        else:
+            nlp.tokenizer.use_sentence_separator = False
 
     if output_path:
         output = open(str(output_path), 'w')
@@ -77,11 +65,11 @@ def run(
                 with open(path, 'r') as f:
                     lines = f.readlines()
                 for line in lines:
-                    print_result(line, nlp, True, output_format, output)
+                    print_result(line, nlp, tokenizer, True, output_format, output)
         else:
             while True:
                 line = input()
-                print_result(line, nlp, True, output_format, output)
+                print_result(line, nlp, tokenizer, True, output_format, output)
     except EOFError:
         pass
     except KeyboardInterrupt:
@@ -90,15 +78,19 @@ def run(
         output.close()
 
 
-def print_result(line, nlp, print_origin, output_format, file=sys.stdout):
+def print_result(line, nlp, tokenizer, print_origin, output_format, file=sys.stdout):
     if line.startswith('#'):
         print(line, file=file)
         return
-    doc = nlp(line)
     if output_format in ['0', 'conllu']:
+        doc = nlp(line)
         print_conllu(doc, print_origin, file)
     elif output_format in ['1', 'cabocha']:
+        doc = nlp(line)
         print_cabocha(doc, file)
+    elif output_format in ['2', 'mecab']:
+        doc = tokenizer.tokenize(line)
+        print_mecab(doc, file)
     else:
         raise Exception(output_format + ' is not supported')
 
@@ -198,6 +190,23 @@ def cabocha_token_line(token):
         ex_attr(token).reading if ex_attr(token).reading else token.orth_,
         '',
         'O' if token.ent_iob_ == 'O' else '{}-{}'.format(token.ent_iob_, token.ent_type_),
+    )
+
+
+def print_mecab(sudachipy_tokens, file):
+    for t in sudachipy_tokens:
+        print(mecab_token_line(t), file=file)
+    print('EOS', file=file)
+
+
+def mecab_token_line(token):
+    reading = token.reading_form()
+    return '{}\t{},{},{},{}'.format(
+        token.surface(),
+        ','.join(token.part_of_speech()),
+        token.normalized_form(),
+        reading if reading else token.surface(),
+        '',
     )
 
 

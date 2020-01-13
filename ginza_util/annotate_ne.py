@@ -4,7 +4,7 @@ import sys
 import plac
 import spacy
 from sudachipy.tokenizer import Tokenizer as OriginalTokenizer
-from ginza.sudachi_tokenizer import SUDACHI_DEFAULT_MODE
+from ginza.sudachipy_tokenizer import SUDACHI_DEFAULT_MODE
 
 
 SID_PATTERN = re.compile(
