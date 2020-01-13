@@ -57,7 +57,7 @@ def run(
             nlp.tokenizer.use_sentence_separator = False
 
     if parallel <= 0:
-        parallel = multiprocessing.cpu_count() - parallel
+        parallel = max(1, multiprocessing.cpu_count() + parallel)
 
     if output_path:
         output = open(str(output_path), 'w')
@@ -218,8 +218,8 @@ def run_cabocha(
         sudachipy_mode=sudachipy_mode,
         use_sentence_separator=use_sentence_separator,
         output_path=output_path,
-        output_format='mecab',
-        parallel=1,
+        output_format='cabocha',
+        parallel=-1,
         require_gpu=require_gpu,
         *files,
     )
