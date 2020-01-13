@@ -211,42 +211,6 @@ def mecab_token_line(token):
     sudachipy_mode=("sudachipy mode", "option", "m", str),
     use_sentence_separator=("enable sentence separator", "flag", "s"),
     output_path=("output path", "option", "o", Path),
-    output_format=("output format", "option", "f", str, ['0', 'conllu', '1', 'cabocha', '2', 'mecab']),
-    require_gpu=("enable require_gpu", "flag", "g"),
-    parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
-    files=("input files", "positional"),
-)
-def run_ginza(
-        model_path=None,
-        sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
-        use_sentence_separator=False,
-        output_path=None,
-        output_format='conllu',
-        require_gpu=False,
-        parallel=1,
-        *files,
-):
-    run(
-        model_path=model_path,
-        sudachipy_mode=sudachipy_mode,
-        use_sentence_separator=use_sentence_separator,
-        output_path=output_path,
-        output_format=output_format,
-        require_gpu=require_gpu,
-        parallel=parallel,
-        files=files
-    )
-
-
-def main_ginza():
-    plac.call(run_ginza)
-
-
-@plac.annotations(
-    model_path=("model directory path", "option", "b", str),
-    sudachipy_mode=("sudachipy mode", "option", "m", str),
-    use_sentence_separator=("enable sentence separator", "flag", "s"),
-    output_path=("output path", "option", "o", Path),
     require_gpu=("enable require_gpu", "flag", "g"),
     parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
@@ -341,9 +305,43 @@ def main_mecab():
     plac.call(run_mecab)
 
 
-def main():
-    plac.call(run)
+
+
+@plac.annotations(
+    model_path=("model directory path", "option", "b", str),
+    sudachipy_mode=("sudachipy mode", "option", "m", str),
+    use_sentence_separator=("enable sentence separator", "flag", "s"),
+    output_path=("output path", "option", "o", Path),
+    output_format=("output format", "option", "f", str, ['0', 'conllu', '1', 'cabocha', '2', 'mecab']),
+    require_gpu=("enable require_gpu", "flag", "g"),
+    parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
+    files=("input files", "positional"),
+)
+def run_ginza(
+        model_path=None,
+        sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
+        use_sentence_separator=False,
+        output_path=None,
+        output_format='conllu',
+        require_gpu=False,
+        parallel=1,
+        *files,
+):
+    run(
+        model_path=model_path,
+        sudachipy_mode=sudachipy_mode,
+        use_sentence_separator=use_sentence_separator,
+        output_path=output_path,
+        output_format=output_format,
+        require_gpu=require_gpu,
+        parallel=parallel,
+        files=files
+    )
+
+
+def main_ginza():
+    plac.call(run_ginza)
 
 
 if __name__ == '__main__':
-    plac.call(run)
+    plac.call(run_ginza)
