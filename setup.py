@@ -10,8 +10,9 @@ setup(
         "spacy_languages": ["ja = ginza:Japanese"],
         "console_scripts": [
             "ginza = ginza.command_line:main",
-            "ginza_cabocha = ginza.command_line:main_cabocha",
-            "ginza_mecab = ginza.command_line:main_mecab",
+            "ginzap = ginza.command_line:main_parallel",
+            "ginzac = ginza.command_line:main_cabocha",
+            "ginzam = ginza.command_line:main_mecab",
         ],
     },
     install_requires=[

@@ -13,15 +13,6 @@ def ex_attr(token):
     return token._
 
 
-@plac.annotations(
-    model_path=("model directory path", "option", "b", str),
-    sudachipy_mode=("sudachipy mode", "option", "m", str),
-    use_sentence_separator=("enable sentence separator", "flag", "s"),
-    output_path=("output path", "option", "o", Path),
-    output_format=("output format", "option", "f", str, ['0', 'conllu', '1', 'cabocha', '2', 'mecab']),
-    require_gpu=("enable require_gpu", "flag", "g"),
-    parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
-)
 def run(
         model_path=None,
         sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
@@ -30,7 +21,7 @@ def run(
         output_format='0',
         require_gpu=False,
         parallel=1,
-        *files,
+        files=None,
 ):
     if require_gpu:
         spacy.require_gpu()
@@ -198,37 +189,6 @@ def cabocha_token_line(token):
     )
 
 
-@plac.annotations(
-    model_path=("model directory path", "option", "b", str),
-    sudachipy_mode=("sudachipy mode", "option", "m", str),
-    use_sentence_separator=("enable sentence separator", "flag", "s"),
-    output_path=("output path", "option", "o", Path),
-    require_gpu=("enable require_gpu", "flag", "g"),
-)
-def run_cabocha(
-        model_path=None,
-        sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
-        use_sentence_separator=False,
-        output_path=None,
-        require_gpu=False,
-        *files,
-):
-    run(
-        model_path=model_path,
-        sudachipy_mode=sudachipy_mode,
-        use_sentence_separator=use_sentence_separator,
-        output_path=output_path,
-        output_format='cabocha',
-        parallel=-1,
-        require_gpu=require_gpu,
-        *files,
-    )
-
-
-def main_cabocha():
-    plac.call(run_cabocha)
-
-
 def print_mecab(sudachipy_tokens, file):
     for t in sudachipy_tokens:
         print(mecab_token_line(t), file=file)
@@ -249,21 +209,131 @@ def mecab_token_line(token):
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
     sudachipy_mode=("sudachipy mode", "option", "m", str),
+    use_sentence_separator=("enable sentence separator", "flag", "s"),
     output_path=("output path", "option", "o", Path),
+    output_format=("output format", "option", "f", str, ['0', 'conllu', '1', 'cabocha', '2', 'mecab']),
+    require_gpu=("enable require_gpu", "flag", "g"),
+    parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
+    files=("input files", "positional"),
 )
-def run_mecab(
+def run_ginza(
         model_path=None,
         sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
+        use_sentence_separator=False,
         output_path=None,
+        output_format='conllu',
+        require_gpu=False,
+        parallel=1,
         *files,
 ):
     run(
         model_path=model_path,
         sudachipy_mode=sudachipy_mode,
+        use_sentence_separator=use_sentence_separator,
         output_path=output_path,
-        output_format='mecab',
+        output_format=output_format,
+        require_gpu=require_gpu,
+        parallel=parallel,
+        files=files
+    )
+
+
+def main_ginza():
+    plac.call(run_ginza)
+
+
+@plac.annotations(
+    model_path=("model directory path", "option", "b", str),
+    sudachipy_mode=("sudachipy mode", "option", "m", str),
+    use_sentence_separator=("enable sentence separator", "flag", "s"),
+    output_path=("output path", "option", "o", Path),
+    require_gpu=("enable require_gpu", "flag", "g"),
+    parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
+    files=("input files", "positional"),
+)
+def run_parallel(
+        model_path=None,
+        sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
+        use_sentence_separator=False,
+        output_path=None,
+        require_gpu=False,
         parallel=-1,
         *files,
+):
+    run(
+        model_path=model_path,
+        sudachipy_mode=sudachipy_mode,
+        use_sentence_separator=use_sentence_separator,
+        output_path=output_path,
+        output_format='conllu',
+        require_gpu=require_gpu,
+        parallel=parallel,
+        files=files
+    )
+
+
+def main_parallel():
+    plac.call(run_parallel)
+
+
+@plac.annotations(
+    model_path=("model directory path", "option", "b", str),
+    sudachipy_mode=("sudachipy mode", "option", "m", str),
+    use_sentence_separator=("enable sentence separator", "flag", "s"),
+    output_path=("output path", "option", "o", Path),
+    require_gpu=("enable require_gpu", "flag", "g"),
+    parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
+    files=("input files", "positional"),
+)
+def run_cabocha(
+        model_path=None,
+        sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
+        use_sentence_separator=False,
+        output_path=None,
+        require_gpu=False,
+        parallel=-1,
+        *files,
+):
+    print(files)
+    run(
+        model_path=model_path,
+        sudachipy_mode=sudachipy_mode,
+        use_sentence_separator=use_sentence_separator,
+        output_path=output_path,
+        output_format='cabocha',
+        require_gpu=require_gpu,
+        parallel=parallel,
+        files=files
+    )
+
+
+def main_cabocha():
+    plac.call(run_cabocha)
+
+
+@plac.annotations(
+    model_path=("model directory path", "option", "b", str),
+    sudachipy_mode=("sudachipy mode", "option", "m", str),
+    output_path=("output path", "option", "o", Path),
+    parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
+    files=("input files", "positional"),
+)
+def run_mecab(
+        model_path=None,
+        sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
+        output_path=None,
+        parallel=-1,
+        *files,
+):
+    run(
+        model_path=model_path,
+        sudachipy_mode=sudachipy_mode,
+        use_sentence_separator=False,
+        output_path=output_path,
+        output_format='mecab',
+        require_gpu=False,
+        parallel=parallel,
+        files=files,
     )
 
 
