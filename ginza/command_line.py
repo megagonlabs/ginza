@@ -20,6 +20,7 @@ def ex_attr(token):
     output_path=("output path", "option", "o", Path),
     output_format=("output format", "option", "f", str, ['0', 'conllu', '1', 'cabocha', '2', 'mecab']),
     require_gpu=("enable require_gpu", "flag", "g"),
+    parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
 )
 def run(
         model_path=None,
@@ -28,6 +29,7 @@ def run(
         output_path=None,
         output_format='0',
         require_gpu=False,
+        parallel=1,
         *files,
 ):
     if require_gpu:
@@ -53,6 +55,9 @@ def run(
             print("enabling sentence separator", file=sys.stderr)
         else:
             nlp.tokenizer.use_sentence_separator = False
+
+    if parallel <= 0:
+        parallel = multiprocessing.cpu_count() - parallel
 
     if output_path:
         output = open(str(output_path), 'w')
@@ -193,6 +198,37 @@ def cabocha_token_line(token):
     )
 
 
+@plac.annotations(
+    model_path=("model directory path", "option", "b", str),
+    sudachipy_mode=("sudachipy mode", "option", "m", str),
+    use_sentence_separator=("enable sentence separator", "flag", "s"),
+    output_path=("output path", "option", "o", Path),
+    require_gpu=("enable require_gpu", "flag", "g"),
+)
+def run_cabocha(
+        model_path=None,
+        sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
+        use_sentence_separator=False,
+        output_path=None,
+        require_gpu=False,
+        *files,
+):
+    run(
+        model_path=model_path,
+        sudachipy_mode=sudachipy_mode,
+        use_sentence_separator=use_sentence_separator,
+        output_path=output_path,
+        output_format='mecab',
+        parallel=1,
+        require_gpu=require_gpu,
+        *files,
+    )
+
+
+def main_cabocha():
+    plac.call(run_cabocha)
+
+
 def print_mecab(sudachipy_tokens, file):
     for t in sudachipy_tokens:
         print(mecab_token_line(t), file=file)
@@ -208,6 +244,31 @@ def mecab_token_line(token):
         reading if reading else token.surface(),
         '',
     )
+
+
+@plac.annotations(
+    model_path=("model directory path", "option", "b", str),
+    sudachipy_mode=("sudachipy mode", "option", "m", str),
+    output_path=("output path", "option", "o", Path),
+)
+def run_mecab(
+        model_path=None,
+        sudachipy_mode=SUDACHIPY_DEFAULT_SPLIT_MODE,
+        output_path=None,
+        *files,
+):
+    run(
+        model_path=model_path,
+        sudachipy_mode=sudachipy_mode,
+        output_path=output_path,
+        output_format='mecab',
+        parallel=-1,
+        *files,
+    )
+
+
+def main_mecab():
+    plac.call(run_mecab)
 
 
 def main():

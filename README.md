@@ -19,6 +19,13 @@ SudachiPy provides high accuracies for tokenization and pos tagging.
 [Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
 [SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
+## Training Data-sets
+
+### UD_Japanese-BCCWJ v2.4
+
+### GSK2014-A (2019)
+
+
 ## Runtime Environment
 This project is developed with Python>=3.6 and pip>=18 for it.
 We do not recommend to use Anaconda environment because the pip install step may not work properly.

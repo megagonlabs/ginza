@@ -8,7 +8,11 @@ setup(
     entry_points={
         "spacy_factories": ["JapaneseCorrector = ginza:JapaneseCorrector"],
         "spacy_languages": ["ja = ginza:Japanese"],
-        "console_scripts": ["ginza = ginza.command_line:main"],
+        "console_scripts": [
+            "ginza = ginza.command_line:main",
+            "ginza_cabocha = ginza.command_line:main_cabocha",
+            "ginza_mecab = ginza.command_line:main_mecab",
+        ],
     },
     install_requires=[
         "spacy>=2.2.3",
