@@ -178,6 +178,8 @@ def analyze(nlp, hash_comment, output_format, line):
             return line,
         elif hash_comment == 'skip':
             return (),
+    if line == '':
+        return '',
     if output_format in ['0', 'conllu']:
         doc = nlp(line)
         return analyze_conllu(doc)
