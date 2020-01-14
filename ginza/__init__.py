@@ -14,7 +14,7 @@ from .syntax_iterators import SYNTAX_ITERATORS
 from .tag_map import TAG_MAP
 
 from .japanese_corrector import JapaneseCorrector
-from .sudachi_tokenizer import SudachiTokenizer
+from .sudachipy_tokenizer import SudachipyTokenizer
 
 
 ShortUnitWord = namedtuple("ShortUnitWord", ["surface", "lemma", "pos"])
@@ -47,7 +47,7 @@ class JapaneseDefaults(Language.Defaults):
 
     @classmethod
     def create_tokenizer(cls, nlp=None):
-        return SudachiTokenizer(nlp)
+        return SudachipyTokenizer(nlp)
 
     @classmethod
     def create_lemmatizer(cls, nlp=None, lookups=None):
@@ -57,7 +57,7 @@ class JapaneseDefaults(Language.Defaults):
 class Japanese(Language):
     lang = "ja"
     Defaults = JapaneseDefaults
-    Tokenizer = SudachiTokenizer
+    Tokenizer = SudachipyTokenizer
 
     def make_doc(self, text):
         return self.tokenizer(text)

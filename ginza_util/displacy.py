@@ -10,7 +10,7 @@ from ginza.japanese_corrector import JapaneseCorrector
 from .bccwj_ud_corpus import convert_files
 from .corpus import *
 from ginza.japanese_corrector import correct_dep
-from ginza.sudachi_tokenizer import SUDACHI_DEFAULT_MODE
+from ginza.sudachipy_tokenizer import SUDACHI_DEFAULT_MODE
 
 
 @plac.annotations(

@@ -1,0 +1,27 @@
+{
+    "systemDict" : "system.dic",
+    "characterDefinitionFile" : "char.def",
+    "inputTextPlugin" : [
+        { "class" : "sudachipy.plugin.input_text.DefaultInputTextPlugin" },
+        { "class" : "sudachipy.plugin.input_text.ProlongedSoundMarkInputTextPlugin",
+          "prolongedSoundMarks": ["ー", "-", "⁓", "〜", "〰"],
+          "replacementSymbol": "ー"}
+    ],
+    "oovProviderPlugin" : [
+        { "class" : "sudachipy.plugin.oov.MeCabOovProviderPlugin",
+          "charDef" : "char.def",
+          "unkDef" : "unk.def" },
+        { "class" : "sudachipy.plugin.oov.SimpleOovProviderPlugin",
+          "oovPOS" : [ "補助記号", "一般", "*", "*", "*", "*" ],
+          "leftId" : 5968,
+          "rightId" : 5968,
+          "cost" : 3857 }
+    ],
+    "pathRewritePlugin" : [
+        { "class" : "sudachipy.plugin.path_rewrite.JoinNumericPlugin",
+          "enableNormalize" : true },
+        { "class" : "sudachipy.plugin.path_rewrite.JoinKatakanaOovPlugin",
+          "oovPOS" : [ "名詞", "普通名詞", "一般", "*", "*", "*" ],
+          "minLength": 3 }
+    ]
+}
