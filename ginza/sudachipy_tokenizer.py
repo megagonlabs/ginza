@@ -36,6 +36,10 @@ def try_import_sudachipy_dictionary():
         )
 
 
+def model_config_path(path):
+    return str(Path(path) / 'sudachidict' / 'sudachi.json')
+
+
 # see https://spacy.io/usage/processing-pipelines#component-example1
 def separate_sentences(doc):
     for i, token in enumerate(doc[:-2]):
@@ -73,7 +77,7 @@ class SudachipyTokenizer(DummyTokenizer):
 
         split_mode = sudachipy_split_mode(mode)
         if not config_path:
-            config_path = str(Path(__file__).parent.parent / 'ja_ginza' / 'sudachidict' / 'sudachi.json')
+            config_path = model_config_path(Path(__file__).parent.parent / 'ja_ginza')
         dict_ = dictionary.Dictionary(config_path=config_path)
         self.tokenizer = dict_.create(mode=split_mode)
         self._mode = mode
