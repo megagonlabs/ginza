@@ -1,9 +1,16 @@
 ![GiNZA logo](https://github.com/megagonlabs/ginza/releases/download/latest/GINZA_logo_4c_y.png)
 # GiNZAの公開ページ
 
-***GiNZAをバージョンアップする前に必ず [重要な変更](#ginza-220) の記述をご確認ください。***
+## What's new in v3.0!
+- `$ pip install ginza` でGiNZAをインストールできるようになりました
+- 形態素解析のみを高速に実行する `ginzame` コマンドを追加しました
+- 固有表現抽出モデルが改良されました
+- `sudachipy`コマンドの実行にはSudachi辞書を別途インストールする必要があります
+
+***GiNZAをアップグレードする際は必ず [重要な変更](#ginza-300) の記述をご確認ください。***
 
 ## 発表資料
+- NLP2020論文 (coming soon)
 - [Universal Dependencies Symposium 2019@国語研での発表スライド](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
 - [NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf)
 ([発表スライド](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-139011245))
@@ -24,9 +31,25 @@ GiNZAはトークン化（形態素解析）処理にSudachiPyを使用するこ
 [Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
 [SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
+## 訓練コーパス
+
+### UD Japanese BCCWJ v2.4
+GiNZA v3.0 の依存構造解析モデルは
+[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) v2.4
+([Omura and Asahara:2018](https://www.aclweb.org/anthology/W18-6014/))
+から新聞系文書を除外して学習しています。
+本モデルは国立国語研究所とMegagon Labsの共同研究成果です。
+
+### GSK2014-A (2019) BCCWJ版(新聞系文書を除外)
+GiNZA v3.0 の固有表現抽出モデルは
+[GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ版
+([橋本・乾・村上:2008](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf))
+から新聞系文書を除外して学習しています。
+本モデルは国立国語研究所とMegagon Labsの共同研究成果です。
+
 ## 実行環境
 このプロジェクトは Python 3.6以上（および対応するpip）で動作検証を行っています。
-Anaconda環境ではpipによるインストールが正常に行えない場合があります。
+Anaconda環境等ではpipによるインストールが正常に行えない場合があります。
 (Anaconda環境は将来のバージョンでサポートする予定です)
 
 [(開発環境についての詳細はこちら)](#development-environment)
@@ -34,25 +57,15 @@ Anaconda環境ではpipによるインストールが正常に行えない場合
 #### 1. GiNZA NLPライブラリと日本語Universal Dependenciesモデルのインストール
 最新版をインストールするにはコンソールで次のコマンドを実行します。
 ```bash
-$ pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
+$ pip install -U ginza
 ```
 pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
 次のように直接指定することもできます。
 ```bash
-$ pip install ginza-2.2.1.tar.gz
+$ pip install -U ginza-3.0.0.tar.gz
 ```
 
-インストール時に次のようなエラーメッセージが表示される場合は、`pip`をupgradeする必要があります。
-
-```
-Could not find a version that satisfies the requirement ja_ginza@ http://github.com/ ...  
-```
-
-```bash
-$ pip install --upgrade pip
-```
-
-Google Colab 環境ではインストール後にパッケージ情報の再読込が必要です。詳細はリンクの記事をご確認下さい。
+Google Colab 環境ではインストール後にパッケージ情報の再読込が必要な場合があります。詳細はリンクの記事をご確認下さい。
 ```python
 import pkg_resources, imp
 imp.reload(pkg_resources)
@@ -61,62 +74,133 @@ imp.reload(pkg_resources)
 
 インストール時にCythonに関するエラーが発生した場合は、次のように環境変数CFLAGSを設定してください。
 ```bash
-$ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
+$ CFLAGS='-stdlib=libc++' pip install ginza
 ```
 #### 2. ginzaコマンドの実行
 コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、[CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) 形式で解析結果が出力されます。
 ```bash
 $ ginza
-銀座七丁目はお洒落だ。
-# text = 銀座七丁目はお洒落だ。
-1	銀座	銀座	PROPN	名詞-固有名詞-地名-一般	_	3	compound	_	BunsetuBILabel=B|BunsetuPositionType=CONT|SpaceAfter=No|NP_B|NE=LOC_B
-2	七	7	NUM	名詞-数詞	NumType=Card	3	nummod	_	BunsetuBILabel=I|BunsetuPositionType=CONT|SpaceAfter=No|NE=LOC_I
-3	丁目	丁目	NOUN	名詞-普通名詞-助数詞可能	_	5	nsubj	_	BunsetuBILabel=I|BunsetuPositionType=SEM_HEAD|SpaceAfter=No|NP_B|NE=LOC_I
-4	は	は	ADP	助詞-係助詞	_	3	case	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
-5	お洒落	御洒落	ADJ	名詞-普通名詞-サ変形状詞可能	_	0	root	_	BunsetuBILabel=B|BunsetuPositionType=ROOT|SpaceAfter=No
-6	だ	だ	AUX	助動詞	_	5	cop	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
-7	。	。	PUNCT	補助記号-句点	_	5	punct	_	BunsetuBILabel=I|BunsetuPositionType=CONT|SpaceAfter=No
+銀座でランチをご一緒しましょう。
+# text = 銀座でランチをご一緒しましょう。
+1	銀座	銀座	PROPN	名詞-固有名詞-地名-一般	_	6	compound	_	BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|SpaceAfter=No|NP_B|ENE7=B_City|NE=B_GPE
+2	で	で	ADP	助詞-格助詞	_	1	case	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
+3	ランチ	ランチ	NOUN	名詞-普通名詞-一般	_	6	obj	_	BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|SpaceAfter=No|NP_B
+4	を	を	ADP	助詞-格助詞	_	3	case	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
+5	ご	御	NOUN	接頭辞	_	6	compound	_	BunsetuBILabel=B|BunsetuPositionType=CONT|SpaceAfter=No|NP_B
+6	一緒	一緒	VERB	名詞-普通名詞-サ変可能	_	0	root	_	BunsetuBILabel=I|BunsetuPositionType=ROOT|SpaceAfter=No
+7	し	為る	AUX	動詞-非自立可能	_	6	aux	_	BunsetuBILabel=I|BunsetuPositionType=FUNC|SpaceAfter=No
+8	ましょう	ます	AUX	助動詞	_	6	aux	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
+9	。	。	PUNCT	補助記号-句点	_	6	punct	_	BunsetuBILabel=I|BunsetuPositionType=CONT|SpaceAfter=No
 
 ```
-日本語係り受け解析器 [CaboCha](https://taku910.github.io/cabocha/) 互換(`cabocha -f1`)のラティス形式で解析結果を出力する場合は
-`-f 1` または `-f cabocha` オプションを追加して下さい。
-このオプションの出力形式は`cabocha -f1`とほぼ同じですが、 
-スラッシュ記号`/`に続く`func_index`フィールドは、
-常に自立語の終了位置（機能語があればその開始位置に一致）を示します。
-また、機能語認定基準も`cabocha -f1`と`ginza -f cabocha`の間で一部異なります。
+`ginzame`コマンドでオープンソース形態素解析エンジン [MeCab](https://taku910.github.io/mecab/) の`mecab`コマンドに近い形式で解析結果を出力することができます。
+`ginzame`コマンドは形態素解析処理のみをマルチプロセスで高速に実行します。
+このコマンドと`mecab`の出力形式の相違点として、 
+最終フィールド（発音）が常に`*`となることに注意して下さい。
+```bash
+$ ginzame
+銀座でランチをご一緒しましょう。
+銀座	名詞,固有名詞,地名,一般,*,*,銀座,ギンザ,*
+で	助詞,格助詞,*,*,*,*,で,デ,*
+ランチ	名詞,普通名詞,一般,*,*,*,ランチ,ランチ,*
+を	助詞,格助詞,*,*,*,*,を,ヲ,*
+ご	接頭辞,*,*,*,*,*,御,ゴ,*
+一緒	名詞,普通名詞,サ変可能,*,*,*,一緒,イッショ,*
+し	動詞,非自立可能,*,*,サ行変格,連用形-一般,為る,シ,*
+ましょう	助動詞,*,*,*,助動詞-マス,意志推量形,ます,マショウ,*
+。	補助記号,句点,*,*,*,*,。,。,*
+EOS
+
+```
+日本語係り受け解析器 [CaboCha](https://taku910.github.io/cabocha/) の`cabocha -f1`のラティス形式に近い解析結果を出力する場合は
+`ginza -f 1` または `ginza -f cabocha` を実行して下さい。
+このオプションと`cabocha -f1`の出力形式の相違点として、 
+スラッシュ記号`/`に続く`func_index`フィールドが常に自立語の終了位置（機能語があればその開始位置に一致）を示すこと、
+機能語認定基準が一部異なること、
+に注意して下さい。
 ```bash
 $ ginza -f 1
-銀座七丁目はお洒落だ。
-* 0 1D 2/3 0.000000
-銀座	名詞,固有名詞,地名,一般,*,*,銀座,ギンザ,	B-LOC
-七	名詞,数詞,*,*,*,*,7,ナナ,	I-LOC
-丁目	名詞,普通名詞,助数詞可能,*,*,*,丁目,チョウメ,	I-LOC
-は	助詞,係助詞,*,*,*,*,は,ハ,	O
-* 1 -1D 0/1 0.000000
-お洒落	名詞,普通名詞,サ変形状詞可能,*,*,*,御洒落,オシャレ,	O
-だ	助動詞,*,*,*,助動詞-ダ,終止形-一般,だ,ダ,	O
-。	補助記号,句点,*,*,*,*,。,。,	O
+銀座でランチをご一緒しましょう。
+* 0 2D 0/1 0.000000
+銀座	名詞,固有名詞,地名,一般,*,*,銀座,ギンザ,*	B-City
+で	助詞,格助詞,*,*,*,*,で,デ,*	O
+* 1 2D 0/1 0.000000
+ランチ	名詞,普通名詞,一般,*,*,*,ランチ,ランチ,*	O
+を	助詞,格助詞,*,*,*,*,を,ヲ,*	O
+* 2 -1D 0/2 0.000000
+ご	接頭辞,*,*,*,*,*,御,ゴ,*	O
+一緒	名詞,普通名詞,サ変可能,*,*,*,一緒,イッショ,*	O
+し	動詞,非自立可能,*,*,サ行変格,連用形-一般,為る,シ,*	O
+ましょう	助動詞,*,*,*,助動詞-マス,意志推量形,ます,マショウ,*	O
+。	補助記号,句点,*,*,*,*,。,。,*	O
 EOS
+
 ```
-※ GiNZAは依存構造解析(または係り受け解析)のためのライブラリです。
-高速に形態素解析だけを実行するには、GiNZAと同時にインストールされる [SudachiPy](https://github.com/WorksApplications/SudachiPy/) または `sudachipy`コマンドを使用して下さい。
-```bash
-$ sudachipy
-```
+### マルチプロセス実行 (Experimental)
+GiNZA v3.0 で追加された `-p NUM_PROCESS` オプションで解析処理のマルチプロセス実行が可能になります。
+`NUM_PROCESS`には並列実行するプロセス数を整数で指定します。
+0以下の値は`実行環境のCPUコア数＋NUM_PROCESS`を指定したのと等価になります。
+
+`ginza -f mecab`とそのエイリアスである`ginzame`以外で`-p NUM_PROCESS`オプションを使用する場合は、
+実行環境の空きメモリ容量が十分あることを事前に確認してください。
+マルチプロセス実行では1プロセスあたり約130MBのメモリが必要です。(今後のリリースで改善予定)
+
 ### コーディング例
 次のコードは文単位で依存構造解析結果を出力します。
 ```python
 import spacy
 nlp = spacy.load('ja_ginza')
-doc = nlp('依存構造解析の実験を行っています。')
+doc = nlp('銀座でランチをご一緒しましょう。')
 for sent in doc.sents:
     for token in sent:
         print(token.i, token.orth_, token.lemma_, token.pos_, token.tag_, token.dep_, token.head.i)
     print('EOS')
 ```
 ### API
-詳細は[spaCy API documents](https://spacy.io/api/)を参照してください。
+基本的な解析APIは[spaCy API documents](https://spacy.io/api/)を参照してください。
+その他、詳細についてはドキュメントが整備されるまでお手数ですがソースコードをご確認ください。
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
+### version 3.x
+#### ginza-3.0.0
+- 2020-01-15
+- 重要な変更
+  - パッケージの配布元をPyPIに変更
+    - `pip install ginza` を実行するだけで解析モデルを含めてインストールが完結
+    - 解析モデルの`ja_ginza`もPyPIから配布 (`ja_ginza.setup.py`実行中に形態素解析辞書もダウンロード)
+  - 解析モデルの改良
+    - 固有表現抽出モデルの訓練コーパスを GSK2014-A (2019) BCCWJ版(新聞系文書を除外)に変更
+      - 固有表現抽出精度が再現性・適合性の両面で大きく向上
+      - `token.ent_type_`を「関根の拡張固有表現階層バージョン7」のラベルに変更
+        - `ginza`コマンド出力の最終フィールドに`ENE7`属性を追加
+      - OntoNotes5体系の固有表現ラベルを`token._.ne`に移動
+        - OntoNotes5体系には`PHONE`, `EMAIL`, `URL`, `PET_NAME`のラベルを追加
+    - `spacy pretrain`のエポック数を100回以上とすることで依存構造解析精度が向上
+      - `spacy train`コマンドで依存構造解析と固有表現抽出をマルチタスク学習することでさらに精度が向上
+    - 形態素解析辞書を`SudachiDict_core-20191224`にアップグレード
+  - `ginzame`コマンドの追加
+    - `sudachipy`のみをマルチプロセスで高速に実行し結果を`mecab`形式で出力
+    - 形態素解析辞書を独自にインストールする形に変更したため`sudachipy`コマンドの実行にはSudachi辞書のインストールが別途必要
+- Breaking API Changes
+  - commands
+    - `ginza` (`ginza.command_line.main_ginza`)
+      - change option `mode` to `sudachipy_mode`
+      - drop options: `disable_pipes` and `recreate_corrector`
+      - add options: `hash_comment`, `parallel`, `files`
+      - add `mecab` to the choices for the argument of `-f` option
+      - add `parallel NUM_PROCESS` option (EXPERIMENTAL)
+      - add `ENE7` attribute to conllu miscellaneous field
+        - `ginza.ent_type_mapping.ENE_NE_MAPPING` is used to convert `ENE7` label to `NE`
+    - add `ginzame` (`ginza.command_line.main_ginzame`)
+      - a multi-process tokenizer providing `mecab` like output format
+  - spaCy field extensions
+    - add `token._.ne` for ner label
+  - `ginza/sudachipy_tokenizer.py`
+    - change `SudachiTokenizer` to `SudachipyTokenizer`
+    - use `SUDACHI_DEFAULT_SPLIT_MODE` instead of `SUDACHI_DEFAULT_SPLITMODE` or `SUDACHI_DEFAULT_MODE`
+- Dependencies
+  - upgrade `spacy` to v2.2.3
+  - upgrade `sudachipy` to v0.4.2
+
 ### version 2.x
 #### ginza-2.2.1
 - 2019-10-28
