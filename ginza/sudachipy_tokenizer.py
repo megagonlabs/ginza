@@ -130,6 +130,7 @@ class SudachipyTokenizer(DummyTokenizer):
             token._.sudachi = morph
         if self.use_sentence_separator:
             separate_sentences(doc)
+        doc.is_tagged = True
         return doc
 
     def set_mode(self, mode):
