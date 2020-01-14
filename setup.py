@@ -10,7 +10,7 @@ setup(
         "spacy_languages": ["ja = ginza:Japanese"],
         "console_scripts": [
             "ginza = ginza.command_line:main_ginza",
-            "ginzame = ginza.command_line:main_mecab",
+            "ginzame = ginza.command_line:main_ginzame",
         ],
     },
     install_requires=[
