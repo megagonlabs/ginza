@@ -1,8 +1,6 @@
 # encoding: utf8
 from __future__ import unicode_literals, print_function
 
-from importlib import import_module
-import json
 from pathlib import Path
 import re
 import sys
@@ -15,8 +13,7 @@ from spacy.util import DummyTokenizer
 from .tag_map import TAG_MAP
 
 
-SUDACHI_DEFAULT_MODE = 'C'
-SUDACHI_DEFAULT_SPLITMODE = 'C'
+SUDACHIPY_DEFAULT_SPLIT_MODE = 'C'
 
 
 def try_import_sudachipy_split_mode():
@@ -39,6 +36,10 @@ def try_import_sudachipy_dictionary():
         )
 
 
+def model_config_path(path):
+    return str(Path(path) / 'sudachidict' / 'sudachi.json')
+
+
 # see https://spacy.io/usage/processing-pipelines#component-example1
 def separate_sentences(doc):
     for i, token in enumerate(doc[:-2]):
@@ -55,23 +56,31 @@ def morph_tag(tag_array):
     ])
 
 
-class SudachiTokenizer(DummyTokenizer):
-    def __init__(self, nlp=None, mode=SUDACHI_DEFAULT_SPLITMODE):
+def sudachipy_split_mode(mode):
+    split_mode_enum = try_import_sudachipy_split_mode()
+    if mode == 'A':
+        split_mode = split_mode_enum.A
+    elif mode == 'B':
+        split_mode = split_mode_enum.B
+    elif mode == 'C':
+        split_mode = split_mode_enum.C
+    else:
+        raise Exception('mode must be A, B, or C ({})'.format(str(mode)))
+    return split_mode
+
+
+class SudachipyTokenizer(DummyTokenizer):
+    def __init__(self, nlp=None, mode=SUDACHIPY_DEFAULT_SPLIT_MODE, config_path=None):
         self.nlp = nlp
         self.vocab = nlp.vocab if nlp is not None else Vocab()
         dictionary = try_import_sudachipy_dictionary()
 
-        split_mode_enum = try_import_sudachipy_split_mode()
-        if mode == 'A':
-            split_mode = split_mode_enum.A
-        elif mode == 'B':
-            split_mode = split_mode_enum.B
-        elif mode == 'C':
-            split_mode = split_mode_enum.C
-        else:
-            raise Exception('mode must be A, B, or C ({})'.format(str(mode)))
-        dict_ = dictionary.Dictionary()
+        split_mode = sudachipy_split_mode(mode)
+        if not config_path:
+            config_path = model_config_path(Path(__file__).parent.parent / 'ja_ginza')
+        dict_ = dictionary.Dictionary(config_path=config_path)
         self.tokenizer = dict_.create(mode=split_mode)
+        self._mode = mode
         self.use_sentence_separator = True
 
     def __call__(self, text):
@@ -121,7 +130,13 @@ class SudachiTokenizer(DummyTokenizer):
             token._.sudachi = morph
         if self.use_sentence_separator:
             separate_sentences(doc)
+        doc.is_tagged = True
         return doc
+
+    def set_mode(self, mode):
+        split_mode = sudachipy_split_mode(mode)
+        self.tokenizer._mode = split_mode
+        self._mode = mode
 
     # add dummy methods for to_bytes, from_bytes, to_disk and from_disk to
     # allow serialization (see #1557)

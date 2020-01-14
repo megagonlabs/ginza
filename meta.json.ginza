@@ -1,6 +1,6 @@
 {
   "author":"Megagon Labs, Tokyo.",
-  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ v2.4 + KWDLC. Assigns word2vec token vectors, POS tags, dependency parse and named entities.",
+  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ v2.4 + GSK2014-A(2019). Assigns word2vec token vectors, POS tags, dependency parse and named entities.",
   "email":"ginza@megagon.ai",
   "lang":"ja",
   "license":"MIT",
@@ -8,10 +8,11 @@
   "parent_package":"spacy",
   "sources":[
     "SudachiPy",
+    "SudachiDict_core",
     "jawiki-cirrussearch-content",
     "UD-Japanese BCCWJ v2.4",
     "UD_Japanese-PUD v2.4",
-    "KWDLC"
+    "GSK2014-A(2019)"
   ],
   "url":"https://github.com/megagonlabs/ginza"
 }

@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 
+
 setup(
     author="Megagon Labs, Tokyo.",
     author_email="ginza@megagon.ai",
@@ -7,17 +8,19 @@ setup(
     entry_points={
         "spacy_factories": ["JapaneseCorrector = ginza:JapaneseCorrector"],
         "spacy_languages": ["ja = ginza:Japanese"],
-        "console_scripts": ["ginza = ginza.command_line:main"],
+        "console_scripts": [
+            "ginza = ginza.command_line:main_ginza",
+            "ginzame = ginza.command_line:main_ginzame",
+        ],
     },
     install_requires=[
-        "spacy>=2.2.0",
-        "SudachiPy>=0.4.0 ; python_version >= '3.5'",
-        "SudachiDict_core @ https://github.com/megagonlabs/ginza/releases/download/v2.2.0/SudachiDict_core-20190927.tar.gz ; python_version >= '3.5'",
-        "ja_ginza @ https://github.com/megagonlabs/ginza/releases/download/v2.2.0/ja_ginza-2.2.0.tar.gz",
+        "spacy>=2.2.3",
+        "SudachiPy>=0.4.2 ; python_version >= '3.5'",
+        "ja_ginza<3.1.0,>=3.0.0",
     ],
     license="MIT",
     name="ginza",
     packages=find_packages(include=["ginza"]),
     url="https://github.com/megagonlabs/ginza",
-    version="2.2.0",
+    version='3.0.0',
 )

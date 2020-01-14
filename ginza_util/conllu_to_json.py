@@ -31,6 +31,7 @@ TEXT_EN_PATTERN = re.compile(
 TOKEN_PATTERN = re.compile(
     r'^([1-9][0-9]*)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([0-9]*)\t([^\t]+)\t(_)\t([^\t]+)$'
 )
+NE_PATTERN = re.compile(r'NE=([^|]+)([|]|$)')
 
 
 def rewrite_with_tokens(gold_tokens, rewriting_gold_index, tokens, extend_dep_labels):
@@ -241,6 +242,7 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
     sentence_id = None
     sentence = ''
     tokens = []
+    ent_target = False
     ents = []
     ent_start_char = None
     ent_label = None
@@ -291,7 +293,6 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
                 return []
 
             sentence = m.group(1)
-            raw += sentence
             state = 'ios'
 
         elif state == 'ios' and line != '':
@@ -324,28 +325,44 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
                 'head': head_id - token_id,
                 'whitespace': whitespace,
             })
-            m = re.search(r'NE=([^|]+)', options)
+            m = NE_PATTERN.search(options)
             if m:
+                ent_target = True
                 label = m.group(1)
                 if label.startswith('B-'):
                     if ent_label:
-                        ents.append({
-                            'start': ent_start_char,
-                            'end': offset,
-                            'label': ent_label,
-                        })
+                        raise Exception('Bad NE label: ' + line)
                     ent_start_char = offset
                     ent_label = label[2:]
-                elif not label.startswith('I-') or not ent_label:
+                elif label.startswith('I-'):
+                    if not ent_label or ent_label != label[2:]:
+                        raise Exception('Bad NE label: ' + line)
+                elif label.startswith('L-'):
+                    if not ent_label or ent_label != label[2:]:
+                        raise Exception('Bad NE label: ' + line)
+                    ents.append({
+                        'start': ent_start_char,
+                        'end': offset + len(orth),
+                        'label': ent_label,
+                    })
+                    ent_start_char = None
+                    ent_label = None
+                elif label.startswith('U-'):
+                    if ent_label:
+                        raise Exception('Bad NE label: ' + line)
+                    ents.append({
+                        'start': offset,
+                        'end': offset + len(orth),
+                        'label': label[2:],
+                    })
+                    ent_start_char = None
+                elif label == 'O':
+                    if ent_label:
+                        raise Exception('Bad NE label: ' + line)
+                else:
                     raise Exception('Bad NE label: ' + line)
             elif ent_label:
-                ents.append({
-                    'start': ent_start_char,
-                    'end': offset,
-                    'label': ent_label,
-                })
-                ent_start_char = None
-                ent_label = None
+                raise Exception('NE label not terminated: ' + line)
             offset += len(orth)
             if whitespace:
                 offset += 1
@@ -355,11 +372,7 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
                 error_line(state, path, line_index, sentence_id, sentence, line)
                 return []
             if ent_label:
-                ents.append({
-                    'start': ent_start_char,
-                    'end': offset,
-                    'label': ent_label,
-                })
+                raise Exception('NE label not terminated')
 
             heads = [t['id'] + t['head'] for t in tokens]
             if is_nonproj_tree(heads):
@@ -377,49 +390,51 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
                         ),
                         extend_dep_labels,
                     )
-                offset = 0
-                ent_label = None
-                ent_end = 0
-                ent_queue = []
-                for t in tokens:
-                    end = offset + len(t['orth'])
-                    if t['whitespace']:
-                        end += 1
+                if ent_target:
+                    offset = 0
+                    ent_label = None
+                    ent_end = 0
+                    ent_queue = []
+                    for t in tokens:
+                        end = offset + len(t['orth'])
+                        if t['whitespace']:
+                            end += 1
+                        if ent_end > 0:
+                            if offset < ent_end:
+                                ent_queue.append(t)
+                                offset = end
+                                continue
+                            if end >= ent_end:
+                                if len(ent_queue) == 1:
+                                    ent_queue[0]['ner'] = 'U-' + ent_label
+                                else:
+                                    ent_queue[0]['ner'] = 'B-' + ent_label
+                                    for et in ent_queue[1:-1]:
+                                        et['ner'] = 'I-' + ent_label
+                                    ent_queue[-1]['ner'] = 'L-' + ent_label
+                                ent_label = None
+                                ent_end = 0
+                                ent_queue.clear()
+                        for ent in ents:
+                            if ent['start'] < end and offset < ent['end']:
+                                ent_label = ent['label']
+                                ent_end = ent['end']
+                                ent_queue.append(t)
+                                break
+                        offset = end
                     if ent_end > 0:
-                        if offset < ent_end:
-                            ent_queue.append(t)
-                            offset = end
-                            continue
-                        if end >= ent_end:
-                            if len(ent_queue) == 1:
-                                ent_queue[0]['ner'] = 'U-' + ent_label
-                            else:
-                                ent_queue[0]['ner'] = 'B-' + ent_label
-                                for et in ent_queue[1:-1]:
-                                    et['ner'] = 'I-' + ent_label
-                                ent_queue[-1]['ner'] = 'L-' + ent_label
-                            ent_label = None
-                            ent_end = 0
-                            ent_queue.clear()
-                    for ent in ents:
-                        if ent['start'] < end and offset < ent['end']:
-                            ent_label = ent['label']
-                            ent_end = ent['end']
-                            ent_queue.append(t)
-                            break
-                    offset = end
-                if ent_end > 0:
-                    if len(ent_queue) == 1:
-                        ent_queue[0]['ner'] = 'U-' + ent_label
-                    else:
-                        ent_queue[0]['ner'] = 'B-' + ent_label
-                        for et in ent_queue[1:-1]:
-                            et['ner'] = 'I-' + ent_label
-                        ent_queue[-1]['ner'] = 'L-' + ent_label
-                for t in tokens:
-                    if 'ner' not in t:
-                        t['ner'] = 'O'
+                        if len(ent_queue) == 1:
+                            ent_queue[0]['ner'] = 'U-' + ent_label
+                        else:
+                            ent_queue[0]['ner'] = 'B-' + ent_label
+                            for et in ent_queue[1:-1]:
+                                et['ner'] = 'I-' + ent_label
+                            ent_queue[-1]['ner'] = 'L-' + ent_label
+                    for t in tokens:
+                        if 'ner' not in t:
+                            t['ner'] = 'O'
 
+                raw += sentence
                 sentences.append({'tokens': tokens})
                 if len(sentences) >= n_sents:
                     paragraphs.append({
@@ -432,6 +447,7 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
             sentence_id = None
             sentence = ""
             tokens = []
+            ent_target = False
             ents = []
             ent_start_char = None
             ent_label = None
@@ -560,22 +576,22 @@ def print_json(docs, file=sys.stdout):
 
 @plac.annotations(
     input_path=("Input path", "positional", None, str),
-    retokenize_lang=("Retokenize", "option", "r", str),
-    extend_dep_labels=("Extend dep labels", "option", "e", str),
+    retokenize=("Retokenize", "flag", "r"),
+    extend_dep_labels=("Extend dep labels", "flag", "e"),
     paragraph_id_regex=("Regex pattern for paragraph_id (default=r'')", 'option', 'p', str),
     n_sents=("Number of sentences per paragraph (default=10)", "option", "n", int),
     augmentation=("Enable Zenkaku/Hankaku augmentation", "flag", "a"),
 )
 def main(
         input_path='-',
-        retokenize_lang='ja',
+        retokenize=False,
         extend_dep_labels=False,
         paragraph_id_regex=r'^(.*)[\-:][^\-:]*$',
         n_sents=10,
         augmentation=False,
 ):
-    if retokenize_lang:
-        tokenizer = get_lang_class(retokenize_lang)()
+    if retokenize:
+        tokenizer = get_lang_class('ja')()
     else:
         tokenizer = None
     out = sys.stdout
