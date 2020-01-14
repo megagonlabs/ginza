@@ -34,17 +34,20 @@ GiNZAはトークン化（形態素解析）処理にSudachiPyを使用するこ
 ## 訓練コーパス
 
 ### UD Japanese BCCWJ v2.4
-GiNZA v3.0 の依存構造解析モデルは
+GiNZA v3 の依存構造解析モデルは
 [UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) v2.4
 ([Omura and Asahara:2018](https://www.aclweb.org/anthology/W18-6014/))
 から新聞系文書を除外して学習しています。
 本モデルは国立国語研究所とMegagon Labsの共同研究成果です。
 
-### GSK2014-A (2019) BCCWJ版(新聞系文書を除外)
-GiNZA v3.0 の固有表現抽出モデルは
+### GSK2014-A (2019) BCCWJ版
+GiNZA v3 の固有表現抽出モデルは
 [GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ版
 ([橋本・乾・村上:2008](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf))
 から新聞系文書を除外して学習しています。
+固有表現抽出ラベル体系は[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html、
+および、[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)
+を独自に拡張したものを併用しています。
 本モデルは国立国語研究所とMegagon Labsの共同研究成果です。
 
 ## 実行環境
@@ -170,9 +173,9 @@ for sent in doc.sents:
   - 解析モデルの改良
     - 固有表現抽出モデルの訓練コーパスを GSK2014-A (2019) BCCWJ版(新聞系文書を除外)に変更
       - 固有表現抽出精度が再現性・適合性の両面で大きく向上
-      - `token.ent_type_`を「関根の拡張固有表現階層バージョン7」のラベルに変更
+      - `token.ent_type_`を[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)のラベルに変更
         - `ginza`コマンド出力の最終フィールドに`ENE7`属性を追加
-      - OntoNotes5体系の固有表現ラベルを`token._.ne`に移動
+      - [OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)体系の固有表現ラベルを`token._.ne`に移動
         - OntoNotes5体系には`PHONE`, `EMAIL`, `URL`, `PET_NAME`のラベルを追加
     - `spacy pretrain`のエポック数を100回以上とすることで依存構造解析精度が向上
       - `spacy train`コマンドで依存構造解析と固有表現抽出をマルチタスク学習することでさらに精度が向上
