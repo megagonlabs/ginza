@@ -21,7 +21,7 @@ if xz_path.exists() and sys.argv[1] != 'sdist':
 setup(
     author="Megagon Labs, Tokyo.",
     author_email="ginza@megagon.ai",
-    description="sudachidict for ja_ginza",
+    description="SudachiDict for ja_ginza (SudachiDict is originally developed by Works Applications Tokushima Laboratory of AI and NLP)",
     license="MIT",
     name=PACKAGE_NAME,
     packages=[PACKAGE_NAME],
