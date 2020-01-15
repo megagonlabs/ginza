@@ -1,5 +1,5 @@
 # GiNZA NLP Library
-![GiNZA logo](https://github.com/megagonlabs/ginza/releases/download/latest/GINZA_logo_4c_y.png)
+![GiNZA logo](https://github.com/megagonlabs/ginza/raw/static/docs/images/GiNZA_logo_4c_y.png)
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
