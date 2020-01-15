@@ -2,8 +2,10 @@
 from __future__ import unicode_literals, print_function
 
 from pathlib import Path
+import os
 import re
 import sys
+import tarfile
 
 from spacy.symbols import POS
 from spacy.tokens import Doc
@@ -14,6 +16,9 @@ from .tag_map import TAG_MAP
 
 
 SUDACHIPY_DEFAULT_SPLIT_MODE = 'C'
+
+MODEL_NAME = 'ja_ginza'
+DICT_NAME = 'ja_ginza_dict'
 
 
 def try_import_sudachipy_split_mode():
@@ -36,8 +41,24 @@ def try_import_sudachipy_dictionary():
         )
 
 
-def model_config_path(path):
-    return str(Path(path) / 'sudachidict' / 'sudachi.json')
+def dict_package_path():
+    from importlib import import_module
+    dict_package = import_module(DICT_NAME)
+    return Path(dict_package.__file__).parent / 'sudachidict'
+
+
+def init_dict():
+    dict_dir = dict_package_path()
+    xz_path = dict_dir / 'system.dic.tar.xz'
+    if not xz_path.exists():
+        print('system.dic is already extracted: ' + str(xz_path), file=sys.stderr)
+        return
+    print('extracting', xz_path, file=sys.stderr)
+    with tarfile.open(str(xz_path), 'r:xz') as xz:
+        xz.extractall(str(dict_dir))
+    print('extracted', dict_dir / 'system.dic', file=sys.stderr)
+    os.remove(str(xz_path))
+    print('deleted', xz_path, file=sys.stderr)
 
 
 # see https://spacy.io/usage/processing-pipelines#component-example1
@@ -77,7 +98,7 @@ class SudachipyTokenizer(DummyTokenizer):
 
         split_mode = sudachipy_split_mode(mode)
         if not config_path:
-            config_path = model_config_path(Path(__file__).parent.parent / 'ja_ginza')
+            config_path = dict_package_path() / 'sudachi.json'
         dict_ = dictionary.Dictionary(config_path=config_path)
         self.tokenizer = dict_.create(mode=split_mode)
         self._mode = mode

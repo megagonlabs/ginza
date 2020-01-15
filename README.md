@@ -53,7 +53,12 @@ or download pip install archive from
 [release page](https://github.com/megagonlabs/ginza/releases)
 and run `pip install` with it.
 ```bash
-$ pip install ginza-3.0.0.tar.gz
+$ pip install ginza-3.1.0.tar.gz
+```
+If you found a error message, `ValueError: cannot mmap an empty file` from `ginza` command,
+please execute following step once to initialize `ja_gina_dict` package.
+```bash
+$ ginza -i
 ```
 
 For Google Colab, you need to reload the package info. 
@@ -64,7 +69,7 @@ imp.reload(pkg_resources)
 
 If you encountered some install problems related to Cython, please try to set the CFLAGS like below.
 ```bash
-$ CFLAGS='-stdlib=libc++' pip install "https://github.com/megagonlabs/ginza/releases/download/latest/ginza-latest.tar.gz"
+$ CFLAGS='-stdlib=libc++' pip install ginza
 ```
 #### 2. Execute ginza from command line
 Run `ginza` command from the console, then input some Japanese text.
@@ -145,6 +150,14 @@ Please see [spaCy API documents](https://spacy.io/api/) for general analyzing fu
 Or please refer the source codes of GiNZA on github until we'd write the documents.
 ## Releases
 ### version 3.x
+#### ginza-3.1.0
+- 2020-01-16
+- Important changes
+  - Distribute `ja_ginza_dict` from PyPI
+- API Changes
+  - commands
+    - `ginza` and `ginzame`
+      - add `-i` option to initialize the files of `ja_ginza_dict`
 #### ginza-3.0.0
 - 2020-01-15
 - Important changes
