@@ -183,6 +183,7 @@ for sent in doc.sents:
   - commands
     - `ginza` and `ginzame`
       - add `-i` option to initialize the files of `ja_ginza_dict`
+
 #### ginza-3.0.0
 - 2020-01-15
 - 重要な変更
