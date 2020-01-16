@@ -6,6 +6,9 @@
   "license":"MIT",
   "name":"ginza",
   "parent_package":"spacy",
+  "requirements": [
+    "ja_ginza_dict<3.2.0,>=3.1.0"
+  ],
   "sources":[
     "SudachiPy",
     "SudachiDict_core",

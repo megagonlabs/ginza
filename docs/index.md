@@ -1,6 +1,11 @@
 ![GiNZA logo](https://github.com/megagonlabs/ginza/releases/download/latest/GINZA_logo_4c_y.png)
 # GiNZAの公開ページ
 
+## What's new in v3.1!
+- `$ pip install ginza` 実行時に一部の環境(pipenvを含む)で形態素辞書が正しく展開されない問題に対処するためのオプションを追加しました
+  - `ginza` コマンドが `ValueError: cannot mmap an empty file` で異常終了する場合は `$ ginza -i` を一度だけ実行して辞書ファイルを初期化してください
+- ja_ginza_dict(形態素解析辞書)パッケージをPyPI経由で配布するよう変更しました
+
 ## What's new in v3.0!
 - `$ pip install ginza` でGiNZAをインストールできるようになりました
 - 形態素解析のみを高速に実行する `ginzame` コマンドを追加しました
@@ -65,8 +70,13 @@ $ pip install -U ginza
 pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
 次のように直接指定することもできます。
 ```bash
-$ pip install -U ginza-3.0.0.tar.gz
+$ pip install -U ginza-3.1.0.tar.gz
 ```
+インストールの後、`ginza` コマンド実行時に `ValueError: cannot mmap an empty file` が表示されて `ginza` が異常終了する場合は、
+```bash
+$ ginza -i
+```
+を一度だけ実行して辞書ファイルを初期化してください。
 
 Google Colab 環境ではインストール後にパッケージ情報の再読込が必要な場合があります。詳細はリンクの記事をご確認下さい。
 ```python
@@ -162,8 +172,17 @@ for sent in doc.sents:
 ### API
 基本的な解析APIは[spaCy API documents](https://spacy.io/api/)を参照してください。
 その他、詳細についてはドキュメントが整備されるまでお手数ですがソースコードをご確認ください。
+
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 3.x
+#### ginza-3.1.0
+- 2020-01-16
+- 重要な変更
+  - 形態素辞書パッケージ(ja_ginza_dict)の配布元をPyPIに変更
+- API Changes
+  - commands
+    - `ginza` and `ginzame`
+      - add `-i` option to initialize the files of `ja_ginza_dict`
 #### ginza-3.0.0
 - 2020-01-15
 - 重要な変更

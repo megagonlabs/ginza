@@ -4,7 +4,7 @@ from pathlib import Path
 import plac
 import spacy
 import sys
-from .sudachipy_tokenizer import SudachipyTokenizer, SUDACHIPY_DEFAULT_SPLIT_MODE
+from .sudachipy_tokenizer import init_dict, SudachipyTokenizer, SUDACHIPY_DEFAULT_SPLIT_MODE
 
 MINI_BATCH_SIZE = 100
 
@@ -22,8 +22,12 @@ def run(
         output_format='0',
         require_gpu=False,
         parallel=1,
+        init_resource=False,
         files=None,
 ):
+    if init_resource:
+        init_dict()
+
     if require_gpu:
         print("GPU enabled", file=sys.stderr)
 
@@ -314,6 +318,7 @@ def mecab_token_line(token):
     hash_comment=("hash comment", "option", "c", str, ['print', 'skip', 'analyze']),
     output_path=("output path", "option", "o", Path),
     parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
+    init_resource=("initialize resources", "flag", "i"),
     files=("input files", "positional"),
 )
 def run_ginzame(
@@ -322,6 +327,7 @@ def run_ginzame(
         hash_comment='print',
         output_path=None,
         parallel=-1,
+        init_resource=False,
         *files,
 ):
     run(
@@ -333,6 +339,7 @@ def run_ginzame(
         output_format='mecab',
         require_gpu=False,
         parallel=parallel,
+        init_resource=init_resource,
         files=files,
     )
 
@@ -350,6 +357,7 @@ def main_ginzame():
     output_format=("output format", "option", "f", str, ['0', 'conllu', '1', 'cabocha', '2', 'mecab']),
     require_gpu=("enable require_gpu", "flag", "g"),
     parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
+    init_resource=("initialize resources", "flag", "i"),
     files=("input files", "positional"),
 )
 def run_ginza(
@@ -361,6 +369,7 @@ def run_ginza(
         output_format='conllu',
         require_gpu=False,
         parallel=1,
+        init_resource=False,
         *files,
 ):
     run(
@@ -372,6 +381,7 @@ def run_ginza(
         output_format=output_format,
         require_gpu=require_gpu,
         parallel=parallel,
+        init_resource=init_resource,
         files=files,
     )
 
