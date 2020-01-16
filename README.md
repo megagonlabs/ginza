@@ -158,6 +158,7 @@ Or please refer the source codes of GiNZA on github until we'd write the documen
   - commands
     - `ginza` and `ginzame`
       - add `-i` option to initialize the files of `ja_ginza_dict`
+
 #### ginza-3.0.0
 - 2020-01-15
 - Important changes
