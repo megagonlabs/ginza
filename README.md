@@ -56,7 +56,7 @@ and run `pip install` with it.
 $ pip install ginza-3.1.0.tar.gz
 ```
 If you found a error message, `ValueError: cannot mmap an empty file` from `ginza` command,
-please execute following step once to initialize `ja_gina_dict` package.
+please execute following step once to initialize `ja_ginza_dict` package.
 ```bash
 $ ginza -i
 ```
