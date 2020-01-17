@@ -48,11 +48,9 @@ GiNZA v3 の依存構造解析モデルは
 ### GSK2014-A (2019) BCCWJ版
 GiNZA v3 の固有表現抽出モデルは
 [GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ版
-(
-[橋本・乾・村上(2008)](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf)
-)
+([橋本・乾・村上(2008)](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf))
 から新聞系文書を除外して学習しています。
-固有表現抽出ラベル体系は[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html、
+固有表現抽出ラベル体系は[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)、
 および、[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)
 を独自に拡張したものを併用しています。
 本モデルは国立国語研究所とMegagon Labsの共同研究成果です。
