@@ -71,6 +71,7 @@ If you encountered some install problems related to Cython, please try to set th
 ```bash
 $ CFLAGS='-stdlib=libc++' pip install ginza
 ```
+
 #### 2. Execute ginza from command line
 Run `ginza` command from the console, then input some Japanese text.
 After pressing enter key, you will get the parsed results with [CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) format.
@@ -145,9 +146,20 @@ for sent in doc.sents:
         print(token.i, token.orth_, token.lemma_, token.pos_, token.tag_, token.dep_, token.head.i)
     print('EOS')
 ```
+
 ### APIs
 Please see [spaCy API documents](https://spacy.io/api/) for general analyzing functions.
 Or please refer the source codes of GiNZA on github until we'd write the documents.
+
+### User Dictionary
+The user dictionary files should be set to `userDict` field of `sudachi.json` in the installed package directory of`ja_ginza_dict` package.
+The `sudachi.json` is located at below path.  
+`${python_library_path}/ja_ginza_dict/sudachidict/sudachi.json`
+
+Please read the official documents to compile user dictionaries with `sudachipy` command.  
+[SudachiPy - User defined Dictionary](https://github.com/WorksApplications/SudachiPy#user-defined-dictionary)  
+[Sudachi ユーザー辞書作成方法 (Japanese Only)](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)
+
 ## Releases
 ### version 3.x
 #### ginza-3.1.0
@@ -273,10 +285,16 @@ Or please refer the source codes of GiNZA on github until we'd write the documen
 ```bash
 $ git clone 'https://github.com/megagonlabs/ginza.git'
 ```
+
 #### 2. Run python setup.py
 For normal environment:
 ```bash
 $ python setup.sh develop
 ```
-### Training
-To be described
+
+### 3. Set uoo system.dic
+Copy `system.dic` from installed package directory of `ja_ginza_dict` to `./ja_ginza_dict/sudachidict/`.
+
+### Training models
+The script below is used to train `ja_ginza` models.
+[shell/train_pipeline.sh](https://github.com/megagonlabs/ginza/blob/develop/shell/train_pipeline.sh)
