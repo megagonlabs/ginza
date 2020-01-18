@@ -89,6 +89,7 @@ imp.reload(pkg_resources)
 ```bash
 $ CFLAGS='-stdlib=libc++' pip install ginza
 ```
+
 #### 2. ginzaコマンドの実行
 コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、[CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) 形式で解析結果が出力されます。
 ```bash
@@ -169,9 +170,23 @@ for sent in doc.sents:
         print(token.i, token.orth_, token.lemma_, token.pos_, token.tag_, token.dep_, token.head.i)
     print('EOS')
 ```
+
 ### API
 基本的な解析APIは[spaCy API documents](https://spacy.io/api/)を参照してください。
 その他、詳細についてはドキュメントが整備されるまでお手数ですがソースコードをご確認ください。
+
+### ユーザ辞書の使用
+GiNZAはTokenizer(形態素解析レイヤ)にSudachiPyを使用しています。
+GiNZAでユーザ辞書を使用するにはSudachiPyの辞書設定ファイル `sudachi.json` の `userDict` フィールドに、
+コンパイル済みのユーザ辞書ファイルのパスのリストを指定します。
+
+GiNZAで使用するSudachiPyの `sudachi.json` は、
+GiNZAで使用するpython環境の `ja_ginza_dict` パッケージのインストールディレクトリ配下にあります。  
+`${python_library_path}/ja_ginza_dict/sudachidict/sudachi.json`
+
+SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSudachiPyのGitHubリポジトリで公開されているドキュメントを参照してください。  
+[SudachiPy - User defined Dictionary](https://github.com/WorksApplications/SudachiPy#user-defined-dictionary)  
+[Sudachi ユーザー辞書作成方法](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)
 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 3.x
@@ -297,10 +312,16 @@ for sent in doc.sents:
 ```bash
 $ git clone 'https://github.com/megagonlabs/ginza.git'
 ```
+
 #### 2. ./setup.sh の実行
 通常の開発環境はこちらを実行。
 ```bash
 $ python setup.sh develop
 ```
+
+### 3. system.dic の配置
+PyPIから取得したja_ginza_dictパッケージのディレクトリから`system.dic`を`./ja_ginza_dict/sudachidict/`にコピーします。
+
 ### 訓練の実行
-記述予定
+GiNZAの解析モデル `ja_ginza` のトレーニングには次のスクリプトを使用しています。
+[shell/train_pipeline.sh](https://github.com/megagonlabs/ginza/blob/develop/shell/train_pipeline.sh)
