@@ -48,9 +48,9 @@ GiNZA v3 の依存構造解析モデルは
 ### GSK2014-A (2019) BCCWJ版
 GiNZA v3 の固有表現抽出モデルは
 [GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ版
-([橋本・乾・村上:2008](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf))
+([橋本・乾・村上(2008)](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf))
 から新聞系文書を除外して学習しています。
-固有表現抽出ラベル体系は[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html、
+固有表現抽出ラベル体系は[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)、
 および、[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)
 を独自に拡張したものを併用しています。
 本モデルは国立国語研究所とMegagon Labsの共同研究成果です。
@@ -89,6 +89,7 @@ imp.reload(pkg_resources)
 ```bash
 $ CFLAGS='-stdlib=libc++' pip install ginza
 ```
+
 #### 2. ginzaコマンドの実行
 コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、[CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) 形式で解析結果が出力されます。
 ```bash
@@ -169,9 +170,23 @@ for sent in doc.sents:
         print(token.i, token.orth_, token.lemma_, token.pos_, token.tag_, token.dep_, token.head.i)
     print('EOS')
 ```
+
 ### API
 基本的な解析APIは[spaCy API documents](https://spacy.io/api/)を参照してください。
 その他、詳細についてはドキュメントが整備されるまでお手数ですがソースコードをご確認ください。
+
+### ユーザ辞書の使用
+GiNZAはTokenizer(形態素解析レイヤ)にSudachiPyを使用しています。
+GiNZAでユーザ辞書を使用するにはSudachiPyの辞書設定ファイル `sudachi.json` の `userDict` フィールドに、
+コンパイル済みのユーザ辞書ファイルのパスのリストを指定します。
+
+GiNZAで使用するSudachiPyの `sudachi.json` は、
+GiNZAで使用するpython環境の `ja_ginza_dict` パッケージのインストールディレクトリ配下にあります。  
+`${python_library_path}/ja_ginza_dict/sudachidict/sudachi.json`
+
+SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSudachiPyのGitHubリポジトリで公開されているドキュメントを参照してください。  
+[SudachiPy - User defined Dictionary](https://github.com/WorksApplications/SudachiPy#user-defined-dictionary)  
+[Sudachi ユーザー辞書作成方法](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)
 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 3.x
@@ -297,10 +312,16 @@ for sent in doc.sents:
 ```bash
 $ git clone 'https://github.com/megagonlabs/ginza.git'
 ```
+
 #### 2. ./setup.sh の実行
 通常の開発環境はこちらを実行。
 ```bash
 $ python setup.sh develop
 ```
+
+### 3. system.dic の配置
+PyPIから取得したja_ginza_dictパッケージのディレクトリから`system.dic`を`./ja_ginza_dict/sudachidict/`にコピーします。
+
 ### 訓練の実行
-記述予定
+GiNZAの解析モデル `ja_ginza` のトレーニングには次のスクリプトを使用しています。
+[shell/train_pipeline.sh](https://github.com/megagonlabs/ginza/blob/develop/shell/train_pipeline.sh)
