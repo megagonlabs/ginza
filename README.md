@@ -162,6 +162,18 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 
 ## Releases
 ### version 3.x
+
+#### ginza-3.1.1
+- 2020-01-19
+- API Changes
+  - Extension fields
+    - The values of Token._.sudachi field would be set after calling SudachipyTokenizer.enable_ex_sudachi(True), to avoid pickling errors
+```
+import spacy
+nlp = spacy.laod('ja_ginza')
+nlp.tokenizer.enable_ex_sudachi(True)
+```
+
 #### ginza-3.1.0
 - 2020-01-16
 - Important changes

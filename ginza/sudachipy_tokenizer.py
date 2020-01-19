@@ -103,6 +103,7 @@ class SudachipyTokenizer(DummyTokenizer):
         self.tokenizer = dict_.create(mode=split_mode)
         self._mode = mode
         self.use_sentence_separator = True
+        self.enable_ex_sudachi = True
 
     def __call__(self, text):
         result = self.tokenizer.tokenize(text=text)
@@ -148,7 +149,8 @@ class SudachipyTokenizer(DummyTokenizer):
             token.lemma_ = morph.normalized_form()
             token._.inf = ','.join(morph.part_of_speech()[4:])
             token._.reading = morph.reading_form()
-            token._.sudachi = morph
+            if self.enable_ex_sudachi:
+                token._.sudachi = morph
         if self.use_sentence_separator:
             separate_sentences(doc)
         doc.is_tagged = True
@@ -158,6 +160,9 @@ class SudachipyTokenizer(DummyTokenizer):
         split_mode = sudachipy_split_mode(mode)
         self.tokenizer._mode = split_mode
         self._mode = mode
+
+    def set_enable_ex_sudachi(self, value):
+        self.enable_ex_sudachi = value
 
     # add dummy methods for to_bytes, from_bytes, to_disk and from_disk to
     # allow serialization (see #1557)

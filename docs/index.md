@@ -5,6 +5,7 @@
 - `$ pip install ginza` 実行時に一部の環境(pipenvを含む)で形態素辞書が正しく展開されない問題に対処するためのオプションを追加しました
   - `ginza` コマンドが `ValueError: cannot mmap an empty file` で異常終了する場合は `$ ginza -i` を一度だけ実行して辞書ファイルを初期化してください
 - ja_ginza_dict(形態素解析辞書)パッケージをPyPI経由で配布するよう変更しました
+- 解析結果をpickle化する際のエラーを回避するため`token._.sudachi`を使用するためには[明示的な設定](#ginza-311)が必要になりました (v3.1.1)
 
 ## What's new in v3.0!
 - `$ pip install ginza` でGiNZAをインストールできるようになりました
@@ -190,6 +191,17 @@ SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSu
 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 3.x
+#### ginza-3.1.1
+- 2020-01-19
+- API Changes
+  - Extension fields
+    - The values of Token._.sudachi field would	be set after calling SudachipyTokenizer.enable_ex_sudachi(True), to avoid pickling errors
+```
+import spacy
+nlp = spacy.laod('ja_ginza')
+nlp.tokenizer.enable_ex_sudachi(True)
+```
+
 #### ginza-3.1.0
 - 2020-01-16
 - 重要な変更
