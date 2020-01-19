@@ -5,7 +5,7 @@
 - `$ pip install ginza` 実行時に一部の環境(pipenvを含む)で形態素辞書が正しく展開されない問題に対処するためのオプションを追加しました
   - `ginza` コマンドが `ValueError: cannot mmap an empty file` で異常終了する場合は `$ ginza -i` を一度だけ実行して辞書ファイルを初期化してください
 - ja_ginza_dict(形態素解析辞書)パッケージをPyPI経由で配布するよう変更しました
-- 解析結果をpickle化する際のエラーを回避するため`token._.sudachi`を使用するためには[明示的な設定](#ginza-311)が必要になりました (v3.1.1)
+- 解析結果をserializeする際のエラーを回避するため`token._.sudachi`を使用するためには[明示的な設定](#ginza-311)が必要になりました (v3.1.1)
 
 ## What's new in v3.0!
 - `$ pip install ginza` でGiNZAをインストールできるようになりました
@@ -199,13 +199,17 @@ SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSu
 ```
 import spacy
 import pickle
-nlp = spacy.laod('ja_ginza')
+nlp = spacy.load('ja_ginza')
+doc1 = nlp('この例は正しくserializeされます。')
+doc1.to_bytes()
 with open('sample1.pickle', 'wb') as f:
-    pickle.dump(nlp('この例は正しくpickle化されます。'), f)
+    pickle.dump(doc1, f)
 
-nlp.tokenizer.enable_ex_sudachi(True)
+nlp.tokenizer.set_enable_ex_sudachi(True)
+doc2 = nlp('この例ではserialize時にエラーが発生します。')
+doc2.to_bytes()
 with open('sample2.pickle', 'wb') as f:
-    pickle.dump(nlp('この例ではpickle化でエラーが発生します。'), f)
+    pickle.dump(doc2, f)
 ```
 
 #### ginza-3.1.0

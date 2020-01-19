@@ -167,17 +167,21 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 - 2020-01-19
 - API Changes
   - Extension fields
-    - The values of Token._.sudachi field would be set after calling SudachipyTokenizer.enable_ex_sudachi(True), to avoid pickling errors
+    - The values of Token._.sudachi field would be set after calling SudachipyTokenizer.enable_ex_sudachi(True), to avoid serializtion errors
 ```
 import spacy
 import pickle
-nlp = spacy.laod('ja_ginza')
+nlp = spacy.load('ja_ginza')
+doc1 = nlp('This example will be serialized correctly.')
+doc1.to_bytes()
 with open('sample1.pickle', 'wb') as f:
-    pickle.dump(nlp('この例は正しくpickle化されます。'), f)
+    pickle.dump(doc1, f)
 
-nlp.tokenizer.enable_ex_sudachi(True)
+nlp.tokenizer.set_enable_ex_sudachi(True)
+doc2 = nlp('This example will cause a serialization error.')
+doc2.to_bytes()
 with open('sample2.pickle', 'wb') as f:
-    pickle.dump(nlp('この例ではpickle化でエラーが発生します。'), f)
+    pickle.dump(doc2, f)
 ```
 
 #### ginza-3.1.0
