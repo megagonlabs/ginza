@@ -170,8 +170,14 @@ Please read the official documents to compile user dictionaries with `sudachipy`
     - The values of Token._.sudachi field would be set after calling SudachipyTokenizer.enable_ex_sudachi(True), to avoid pickling errors
 ```
 import spacy
+import pickle
 nlp = spacy.laod('ja_ginza')
+with open('sample1.pickle', 'wb') as f:
+    pickle.dump(nlp('この例は正しくpickle化されます。'), f)
+
 nlp.tokenizer.enable_ex_sudachi(True)
+with open('sample2.pickle', 'wb') as f:
+    pickle.dump(nlp('この例ではpickle化でエラーが発生します。'), f)
 ```
 
 #### ginza-3.1.0

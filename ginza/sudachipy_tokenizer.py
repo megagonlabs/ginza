@@ -103,7 +103,7 @@ class SudachipyTokenizer(DummyTokenizer):
         self.tokenizer = dict_.create(mode=split_mode)
         self._mode = mode
         self.use_sentence_separator = True
-        self.enable_ex_sudachi = True
+        self.enable_ex_sudachi = False
 
     def __call__(self, text):
         result = self.tokenizer.tokenize(text=text)
