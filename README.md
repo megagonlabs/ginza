@@ -314,7 +314,7 @@ For normal environment:
 $ python setup.sh develop
 ```
 
-### 3. Set uoo system.dic
+### 3. Set up system.dic
 Copy `system.dic` from installed package directory of `ja_ginza_dict` to `./ja_ginza_dict/sudachidict/`.
 
 ### Training models

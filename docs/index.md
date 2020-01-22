@@ -196,6 +196,7 @@ SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSu
 - API Changes
   - Extension fields
     - The values of Token._.sudachi field would	be set after calling SudachipyTokenizer.enable_ex_sudachi(True), to avoid pickling errors
+
 ```
 import spacy
 import pickle
