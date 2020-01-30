@@ -5,6 +5,9 @@ An Open Source Japanese NLP Library, based on Universal Dependencies
 
 ***Please read the [Important changes](#ginza-300) before you upgrade GiNZA.***
 
+[![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza/week)
+[![Tweet](https://abs.twimg.com/favicons/favicon.ico)](https://twitter.com/intent/tweet?text=GiNZA%20-%20Japanese%20NLP%20Library%20https%3A%2F%2Fgithub.com%2Fmegagonlabs%2Fginza)
+
 ## License
 GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under
 [The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE).
@@ -167,7 +170,7 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 - 2020-01-19
 - API Changes
   - Extension fields
-    - The values of Token._.sudachi field would be set after calling SudachipyTokenizer.enable_ex_sudachi(True), to avoid serializtion errors
+    - The values of Token._.sudachi field would be set after calling SudachipyTokenizer.set_enable_ex_sudachi(True), to avoid serializtion errors
 ```
 import spacy
 import pickle
