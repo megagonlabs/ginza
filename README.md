@@ -1,12 +1,13 @@
-# GiNZA NLP Library
 ![GiNZA logo](https://github.com/megagonlabs/ginza/raw/static/docs/images/GiNZA_logo_4c_y.png)
+
+# GiNZA NLP Library
+[![Tweet](https://abs.twimg.com/favicons/favicon.ico)](https://twitter.com/intent/tweet?text=GiNZA%20-%20Japanese%20NLP%20Library%20https%3A%2F%2Fgithub.com%2Fmegagonlabs%2Fginza)
+&emsp;
+[![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza/week)
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
 ***Please read the [Important changes](#ginza-300) before you upgrade GiNZA.***
-
-[![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza/week)
-[![Tweet](https://abs.twimg.com/favicons/favicon.ico)](https://twitter.com/intent/tweet?text=GiNZA%20-%20Japanese%20NLP%20Library%20https%3A%2F%2Fgithub.com%2Fmegagonlabs%2Fginza)
 
 ## License
 GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under

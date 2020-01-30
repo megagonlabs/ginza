@@ -1,7 +1,8 @@
-![GiNZA logo](https://github.com/megagonlabs/ginza/releases/download/latest/GINZA_logo_4c_y.png)
+![GiNZA logo](https://github.com/megagonlabs/ginza/raw/static/docs/images/GiNZA_logo_4c_y.png)
 # GiNZAの公開ページ
-[![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza/week)
 [![Tweet](https://abs.twimg.com/favicons/favicon.ico)](https://twitter.com/intent/tweet?text=GiNZA%20-%20Japanese%20NLP%20Library%20https%3A%2F%2Fmegagonlabs.github.io%2Fginza%2F)
+&emsp;
+[![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza/week)
 
 ## What's new in v3.1!
 - `$ pip install ginza` 実行時に一部の環境(pipenvを含む)で形態素辞書が正しく展開されない問題に対処するためのオプションを追加しました
