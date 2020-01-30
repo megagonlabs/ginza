@@ -74,7 +74,7 @@ $ pip install -U ginza
 pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
 次のように直接指定することもできます。
 ```bash
-$ pip install -U ginza-3.1.0.tar.gz
+$ pip install -U ginza-3.1.1.tar.gz
 ```
 インストールの後、`ginza` コマンド実行時に `ValueError: cannot mmap an empty file` が表示されて `ginza` が異常終了する場合は、
 ```bash
