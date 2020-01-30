@@ -57,7 +57,7 @@ or download pip install archive from
 [release page](https://github.com/megagonlabs/ginza/releases)
 and run `pip install` with it.
 ```bash
-$ pip install ginza-3.1.0.tar.gz
+$ pip install ginza-3.1.1.tar.gz
 ```
 If you found a error message, `ValueError: cannot mmap an empty file` from `ginza` command,
 please execute following step once to initialize `ja_ginza_dict` package.
