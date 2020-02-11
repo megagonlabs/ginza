@@ -282,14 +282,11 @@ def cabocha_bunsetu_line(token, doc):
 
 
 def cabocha_token_line(token):
-    sudachi = ex_attr(token).sudachi
-    if isinstance(sudachi, list):
-        part_of_speech = sudachi[0].part_of_speech()
-    else:
-        part_of_speech = sudachi.part_of_speech()
+    part_of_speech = token.tag_.replace('-', ',')
+    part_of_speech += ',*' * (3 - part_of_speech.count(',')) + ',' + ex_attr(token).inf
     return '{}\t{},{},{},{}\t{}'.format(
         token.orth_,
-        ','.join(part_of_speech),
+        part_of_speech,
         token.lemma_,
         ex_attr(token).reading if ex_attr(token).reading else token.orth_,
         '*',
