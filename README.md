@@ -53,7 +53,7 @@ or download pip install archive from
 [release page](https://github.com/megagonlabs/ginza/releases)
 and run `pip install` with it.
 ```bash
-$ pip install ginza-3.1.0.tar.gz
+$ pip install ginza-3.1.2.tar.gz
 ```
 If you found a error message, `ValueError: cannot mmap an empty file` from `ginza` command,
 please execute following step once to initialize `ja_ginza_dict` package.
@@ -162,6 +162,11 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 
 ## Releases
 ### version 3.x
+
+#### ginza-3.1.2
+- 2020-02-12
+- Debug
+  - Fix: degrade of cabocha mode
 
 #### ginza-3.1.1
 - 2020-01-19
