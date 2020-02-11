@@ -337,7 +337,7 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
                 elif label.startswith('I-'):
                     if not ent_label or ent_label != label[2:]:
                         raise Exception('Bad NE label: ' + line)
-                elif label.startswith('L-'):
+                elif label.startswith('E-'):
                     if not ent_label or ent_label != label[2:]:
                         raise Exception('Bad NE label: ' + line)
                     ents.append({

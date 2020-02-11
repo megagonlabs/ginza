@@ -74,7 +74,7 @@ $ pip install -U ginza
 pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
 次のように直接指定することもできます。
 ```bash
-$ pip install -U ginza-3.1.1.tar.gz
+$ pip install -U ginza-3.1.2.tar.gz
 ```
 インストールの後、`ginza` コマンド実行時に `ValueError: cannot mmap an empty file` が表示されて `ginza` が異常終了する場合は、
 ```bash
@@ -194,6 +194,12 @@ SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSu
 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 3.x
+
+#### ginza-3.1.2
+- 2020-02-12
+- Debug
+  - Fix: degrade of cabocha mode
+
 #### ginza-3.1.1
 - 2020-01-19
 - API Changes
