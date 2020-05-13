@@ -1,6 +1,6 @@
 plac<1.0.0,>=0.9.6
 gensim>=3.6.0
 msgpack==0.5.6
-spacy>=2.2.3
-SudachiPy>=0.4.2
-ja_ginza<3.2.0,>=3.1.0
+spacy>=2.2.4
+SudachiPy>=0.4.3
+ja_ginza<3.3.0,>=3.2.0
