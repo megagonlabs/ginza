@@ -27,5 +27,5 @@ setup(
     packages=[PACKAGE_NAME],
     package_data={PACKAGE_NAME: ['sudachidict/*']},
     url="https://github.com/megagonlabs/ginza",
-    version='3.1.0',
+    version='3.2.0',
 )

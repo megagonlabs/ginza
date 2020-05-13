@@ -14,7 +14,7 @@ setup(
         ],
     },
     install_requires=[
-        "spacy>=2.2.3",
+        "spacy>=2.2.4",
         "SudachiPy>=0.4.2 ; python_version >= '3.5'",
         "ja_ginza<3.2.0,>=3.1.0",
     ],
@@ -22,5 +22,5 @@ setup(
     name="ginza",
     packages=find_packages(include=["ginza"]),
     url="https://github.com/megagonlabs/ginza",
-    version='3.1.2',
+    version='3.2.0',
 )
