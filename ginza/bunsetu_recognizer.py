@@ -35,6 +35,21 @@ POS_PHRASE_MAP = {
 }
 
 
+def span_head(span):
+    outer_head = None
+    head = None
+    for t in span:
+        if t.head.i == -1 or t.head.i < span.start or span.end <= t.head.i:
+            if head is None:
+                outer_head = t.head.i
+                head = t.i
+            elif outer_head == t.head.i:
+                head = t.i
+            else:
+                return None
+    return head
+
+
 def bunsetu_heads(span):
     doc = span.doc
     heads = doc.user_data.get("bunsetu_heads", None)
@@ -125,6 +140,13 @@ class BunsetuRecognizer:
                         print(list((t.i + 1, t.orth_, t.head.i + 1) for t, is_head in zip(doc, heads) if is_head))
                     t = t.head
                 heads[t.head.i] = True
+
+        for ent in doc.ents:  # removing head inside ents
+            head = span_head(ent)
+            if head is not None:
+                for t in ent:
+                    if t.i != head:
+                        heads[t.i] = False
 
         """
         for t in doc:
