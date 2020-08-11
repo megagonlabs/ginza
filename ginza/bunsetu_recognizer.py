@@ -123,7 +123,7 @@ def bunsetu_phrase_span(bunsetu_head_token: Token, phrase_relations: List[str] =
 
 
 class BunsetuRecognizer:
-    def __init__(self, nlp: Language, **cfg) -> None:
+    def __init__(self, nlp: Language, **_cfg) -> None:
         self.nlp = nlp
 
     def __call__(self, doc: Doc, debug: bool = False) -> Doc:

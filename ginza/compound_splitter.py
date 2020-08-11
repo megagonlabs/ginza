@@ -79,11 +79,11 @@ class CompoundSplitter:
                 deps = [tag_dep_map(dtoken.tag) for dtoken in sub_tokens[:-1]] + [token.dep_]
                 last = len(sub_tokens) - 1
                 if token.head.i == token.i:
-                    heads = [(token, last) for i in range(last + 1)]
+                    heads = [(token, last) for _ in range(last + 1)]
                 elif compounds:
-                    heads = [token.head for i in range(len(sub_tokens))]
+                    heads = [token.head for _ in range(len(sub_tokens))]
                 else:
-                    heads = [(token, last) for i in range(last)] + [token.head]
+                    heads = [(token, last) for _ in range(last)] + [token.head]
                 surfaces = [dtoken.surface for dtoken in sub_tokens]
                 attrs = {
                     "TAG": [dtoken.tag for dtoken in sub_tokens],
@@ -145,11 +145,11 @@ class CompoundSplitter:
         )
         return config
 
-    def _set_config(self, config={}):
-        self.split_mode = config.get("split_mode", None)
+    def _set_config(self, config=None):
+        self.split_mode = config.get("split_mode", None) if config else None
         assert self.split_mode in (None, "A", "B"), 'split_mode should be "A", "B, or None'
 
-    def to_bytes(self, **kwargs):
+    def to_bytes(self, **_kwargs):
         serializers = OrderedDict(
             (
                 ("cfg", lambda: srsly.json_dumps(self._get_config())),
@@ -157,7 +157,7 @@ class CompoundSplitter:
         )
         return util.to_bytes(serializers, [])
 
-    def from_bytes(self, data, **kwargs):
+    def from_bytes(self, data, **_kwargs):
         deserializers = OrderedDict(
             (
                 ("cfg", lambda b: self._set_config(srsly.json_loads(b))),
@@ -166,7 +166,7 @@ class CompoundSplitter:
         util.from_bytes(data, deserializers, [])
         return self
 
-    def to_disk(self, path, **kwargs):
+    def to_disk(self, path, **_kwargs):
         path = util.ensure_path(path)
         serializers = OrderedDict(
             (
@@ -175,7 +175,7 @@ class CompoundSplitter:
         )
         return util.to_disk(path, serializers, [])
 
-    def from_disk(self, path, **kwargs):
+    def from_disk(self, path, **_kwargs):
         path = util.ensure_path(path)
         serializers = OrderedDict(
             (

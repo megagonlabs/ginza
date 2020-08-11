@@ -5,7 +5,6 @@ from spacy.tokens import Token
 from spacy.lang.ja import DetailedToken
 
 from .bunsetu_recognizer import *
-from .compound_splitter import CompoundSplitter
 from .ene_ontonotes_mapper import ENE_ONTONOTES_MAPPING
 
 
@@ -130,7 +129,7 @@ U = TypeVar('U')
 @singledispatch
 def sub_tokens(
         mode: str = "A",
-        sub_element_func: Callable[[dict], S] = lambda sub_token: sub_token,
+        sub_element_func: Callable[[DetailedToken], S] = lambda sub_token: sub_token,
         join_func: Callable[[List[S]], T] = lambda lst: lst,
 ) -> Callable[[Token], T]:
     return lambda token: join_func([
