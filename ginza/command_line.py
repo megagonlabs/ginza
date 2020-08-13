@@ -9,7 +9,7 @@ import spacy
 
 from spacy.lang.ja import JapaneseDefaults
 
-from . import inflection, reading_form, ent_label_ene, ent_label_ontonotes
+from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes
 from .bunsetu_recognizer import bunsetu_head_list, bunsetu_phrase_span, bunsetu_bi_labels
 
 MINI_BATCH_SIZE = 100
@@ -17,7 +17,7 @@ MINI_BATCH_SIZE = 100
 
 def run(
         model_path=None,
-        split_compounds=False,
+        split_mode=False,
         use_sentence_separator=False,
         hash_comment="print",
         output_path=None,
@@ -34,7 +34,7 @@ def run(
 
     analyzer = Analyzer(
         model_path,
-        split_compounds,
+        split_mode,
         use_sentence_separator,
         hash_comment,
         output_format,
@@ -144,14 +144,14 @@ class Analyzer:
     def __init__(
             self,
             model_path,
-            split_compunds,
+            split_mode,
             use_sentence_separator,
             hash_comment,
             output_format,
             require_gpu,
     ):
         self.model_path = model_path
-        self.split_compounds = split_compunds
+        self.split_mode = split_mode
         self.use_sentence_separator = use_sentence_separator
         self.hash_comment = hash_comment
         self.output_format = output_format
@@ -167,7 +167,7 @@ class Analyzer:
 
         if self.output_format in ["2", "mecab"]:
             nlp = JapaneseDefaults.create_tokenizer(config={
-                "split_mode": "A" if self.split_compounds else "C"
+                "split_mode": self.split_mode
             }).tokenizer
         else:
             # TODO: Work-around for pickle error. Need to share model data.
@@ -176,13 +176,8 @@ class Analyzer:
             else:
                 nlp = spacy.load("ja_ginza")
 
-            if self.split_compounds:
-                if "CompoundSplitter" in nlp.pipe_names:
-                    splitter = nlp.get_pipe("CompoundSplitter")
-                else:
-                    splitter = nlp.create_pipe("CompoundSplitter")
-                    nlp.add_pipe(splitter, after="ner")
-                splitter.split_mode = "A"
+            if self.split_mode:
+                set_split_mode(nlp, self.split_mode)
 
             if not self.use_sentence_separator:  # TODO use Sentencizer
                 nlp.tokenizer.use_sentence_separator = False
@@ -400,7 +395,7 @@ def mecab_token_line(token):
 
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
-    split_compounds=("split compounds", "flag", "s"),
+    split_mode=("split mode", "option", "s", str, ["A", "B", "C", None]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
     parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
@@ -408,7 +403,7 @@ def mecab_token_line(token):
 )
 def run_ginzame(
         model_path=None,
-        split_compounds=False,
+        split_mode=None,
         hash_comment="print",
         output_path=None,
         parallel=-1,
@@ -416,7 +411,7 @@ def run_ginzame(
 ):
     run(
         model_path=model_path,
-        split_compounds=split_compounds,
+        split_mode=split_mode,
         hash_comment=hash_comment,
         output_path=output_path,
         output_format="mecab",
@@ -432,7 +427,7 @@ def main_ginzame():
 
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
-    split_compounds=("split compounds", "flag", "s"),
+    split_mode=("split mode", "option", "s", str, ["A", "B", "C", None]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
     output_format=("output format", "option", "f", str, ["0", "conllu", "1", "cabocha", "2", "mecab", "3", "json"]),
@@ -442,7 +437,7 @@ def main_ginzame():
 )
 def run_ginza(
         model_path=None,
-        split_compounds=False,
+        split_mode=None,
         hash_comment="print",
         output_path=None,
         output_format="conllu",
@@ -452,7 +447,7 @@ def run_ginza(
 ):
     run(
         model_path=model_path,
-        split_compounds=split_compounds,
+        split_mode=split_mode,
         hash_comment=hash_comment,
         output_path=output_path,
         output_format=output_format,
