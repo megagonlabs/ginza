@@ -4,9 +4,6 @@ from spacy.language import Language
 from spacy.tokens import Doc, Span, Token
 
 __all__ = [
-    "BUNSETU_HEAD_SUFFIX",
-    "PHRASE_RELATIONS",
-    "POS_PHRASE_MAP",
     "bunsetu_span",
     "bunsetu_phrase_span",
     "bunsetu_head_list",
@@ -14,6 +11,9 @@ __all__ = [
     "bunsetu_bi_labels",
     "BunsetuRecognizer",
     "append_bunsetu_head_dep_suffix",
+    "BUNSETU_HEAD_SUFFIX",
+    "PHRASE_RELATIONS",
+    "POS_PHRASE_MAP",
 ]
 
 
@@ -40,13 +40,25 @@ POS_PHRASE_MAP = {
 def bunsetu_head_list(span: Span) -> List[int]:
     doc = span.doc
     heads = doc.user_data["bunsetu_heads"]
-    return [i - span.start for i in heads if span.start <= i < span.end]
+    if isinstance(span, Doc):
+        start = 0
+        end = len(span)
+    else:
+        start = span.start
+        end = span.end
+    return [i - start for i in heads if start <= i < end]
 
 
 def bunsetu_head_tokens(span: Span) -> List[Token]:
     doc = span.doc
     heads = doc.user_data["bunsetu_heads"]
-    return [span[i - span.start] for i in heads if span.start <= i < span.end]
+    if isinstance(span, Doc):
+        start = 0
+        end = len(span)
+    else:
+        start = span.start
+        end = span.end
+    return [span[i - start] for i in heads if start <= i < end]
 
 
 def bunsetu_spans(span: Span) -> List[Span]:
@@ -57,14 +69,14 @@ def bunsetu_spans(span: Span) -> List[Span]:
 
 def bunsetu_span(bunsetu_head_token: Token) -> Span:
     bunsetu_bi_list = bunsetu_bi_labels(bunsetu_head_token.doc)
-    begin = bunsetu_head_token.i
-    end = begin + 1
-    for idx in range(begin, 0, -1):
+    start = bunsetu_head_token.i
+    end = start + 1
+    for idx in range(start, 0, -1):
         if bunsetu_bi_list[idx] == "B":
-            begin = idx
+            start = idx
             break
     else:
-        begin = 0
+        start = 0
     doc_len = len(bunsetu_head_token.doc)
     for idx in range(end, doc_len):
         if bunsetu_bi_list[idx] == "B":
@@ -74,7 +86,7 @@ def bunsetu_span(bunsetu_head_token: Token) -> Span:
         end = doc_len
 
     doc = bunsetu_head_token.doc
-    return doc[begin:end]
+    return doc[start:end]
 
 
 def bunsetu_phrase_span(bunsetu_head_token: Token, phrase_relations: List[str] = PHRASE_RELATIONS) -> Span:
@@ -87,18 +99,22 @@ def bunsetu_phrase_span(bunsetu_head_token: Token, phrase_relations: List[str] =
     heads = [t.i for t in bunsetu_head_tokens(bunsetu_head_token.doc)]
     phrase_tokens = []
     _traverse(bunsetu_head_token, phrase_tokens)
-    begin = min(phrase_tokens)
+    start = min(phrase_tokens)
     end = max(phrase_tokens) + 1
     doc = bunsetu_head_token.doc
-    span = doc[begin:end]
-    span.label_ = POS_PHRASE_MAP.get(bunsetu_head_token.pos_, None)
-    return span
+    return Span(doc, start=start, end=end, label=POS_PHRASE_MAP.get(bunsetu_head_token.pos_, None))
 
 
 def bunsetu_bi_labels(span: Span) -> List[str]:
     doc = span.doc
     bunsetu_bi = doc.user_data["bunsetu_bi_labels"]
-    return bunsetu_bi[span.start:span.end]
+    if isinstance(span, Doc):
+        start = 0
+        end = len(span)
+    else:
+        start = span.start
+        end = span.end
+    return bunsetu_bi[start:end]
 
 
 class BunsetuRecognizer:
@@ -127,7 +143,7 @@ class BunsetuRecognizer:
             head = ent.root
             if head is not None:
                 for t in ent:
-                    if t.i != head:
+                    if t.i != head.i:
                         heads[t.i] = False
 
         """
@@ -167,7 +183,7 @@ class BunsetuRecognizer:
                 right = sub
             next_begin = right.i + 1
 
-        doc.user_data["bunsetu_heads"] = bunsetu_head_list
+        doc.user_data["bunsetu_heads"] = bunsetu_heads
         doc.user_data["bunsetu_bi_labels"] = bunsetu_bi
 
         return doc
