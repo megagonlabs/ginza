@@ -10,7 +10,7 @@ import spacy
 from spacy.lang.ja import JapaneseDefaults
 
 from . import inflection, reading_form, ent_label_ene, ent_label_ontonotes
-from .bunsetu_recognizer import bunsetu_heads, bunsetu_phrase, bunsetu_bi_labels
+from .bunsetu_recognizer import bunsetu_head_list, bunsetu_phrase_span, bunsetu_bi_labels
 
 MINI_BATCH_SIZE = 100
 
@@ -234,17 +234,17 @@ def bunsetu_info(doc):
     '''
 
     np_labels = [""] * len(doc)
-    bunsetu_head_list = bunsetu_heads(doc)
+    bunsetu_heads = bunsetu_head_list(doc)
     bunsetu_bi_list = bunsetu_bi_labels(doc)
     if bunsetu_head_list:
-        for head_i in bunsetu_head_list:
+        for head_i in bunsetu_heads:
             bunsetu_head_token = doc[head_i]
             # for idx in range(begin, end):
             #     bunsetu_position_types[idx] = None  TODO implementation
-            phrase_begin, phrase_end, phrase_type = bunsetu_phrase(bunsetu_head_token)
-            if phrase_type == "NP":
-                for idx in range(phrase_begin, phrase_end):
-                    np_labels[idx] = "NP_B" if idx == phrase_begin else "NP_I"
+            phrase = bunsetu_phrase_span(bunsetu_head_token)
+            if phrase.label_ == "NP":
+                for idx in range(phrase.start, phrase.end):
+                    np_labels[idx] = "NP_B" if idx == phrase.start else "NP_I"
     return bunsetu_bi_list, bunsetu_position_types, np_labels
 
 

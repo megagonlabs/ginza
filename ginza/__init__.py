@@ -297,7 +297,7 @@ def sub_phrases(
         (
             t.dep_,
             phrase_func(t),
-        ) for t in bunsetu_head_token.children if t.i in bunsetu_heads(bunsetu_head_token.doc) and condition_func(t)
+        ) for t in bunsetu_head_token.children if t.i in bunsetu_head_list(bunsetu_head_token.doc) and condition_func(t)
     ]
 
 
@@ -323,12 +323,10 @@ __all__ = [
     "phrase", "sub_phrases",
     # from bunsetu_recognizer
     "bunsetu",
-    "bunsetu_heads",
+    "bunsetu_head_list",
     "bunsetu_head_tokens",
     "bunsetu_bi_labels",
-    "bunsetu_bounds",
     "bunsetu_span",
-    "bunsetu_phrase",
     "bunsetu_phrase_span",
     "BUNSETU_HEAD_SUFFIX",
     "PHRASE_RELATIONS",
