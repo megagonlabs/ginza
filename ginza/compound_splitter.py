@@ -8,6 +8,7 @@ from spacy.lang.ja import resolve_pos
 
 __all__ = [
     "CompoundSplitter",
+    "tag_to_pos",
 ]
 
 
@@ -42,7 +43,7 @@ def tag_to_pos(sub_tokens, next_token_tag):
     return pos_list
 
 
-def replace_list_entries(lst, index, inserting_list):
+def _replace_list_entries(lst, index, inserting_list):
     return lst[:index] + inserting_list + lst[index + 1:]
 
 
@@ -50,17 +51,23 @@ class CompoundSplitter:
     def __init__(self, nlp, **cfg):
         self.nlp = nlp
         self.split_mode = cfg.get("split_mode", None)
-        assert self.split_mode in (None, "A", "B"), 'split_mode should be "A", "B, or None'
 
     def __call__(self, doc):
-        if self.split_mode is not None:
-            sub_tokens_index = 0 if self.split_mode == "A" else 1
-            sub_tokens_list = [
-                sub_tokens[sub_tokens_index] if sub_tokens else None for sub_tokens in doc.user_data["sub_tokens"]
-            ]
+        if self._split_mode is None:
+            return doc
+        elif self._split_mode == "C":
+            del doc.user_data["sub_tokens"]
+            return doc
+        elif self._split_mode == "B":
+            sub_tokens_index = 1
+        elif self._split_mode == "A":
+            sub_tokens_index = 0
         else:
-            sub_tokens_index = None
-            sub_tokens_list = [None] * len(doc)
+            raise Exception("invalid split_mode: " + self._split_mode)
+
+        sub_tokens_list = [
+            sub_tokens[sub_tokens_index] if sub_tokens else None for sub_tokens in doc.user_data["sub_tokens"]
+        ]
 
         for token_i, sub_tokens in reversed(tuple(zip(range(len(doc)), sub_tokens_list))):
             token = doc[token_i]
@@ -122,13 +129,13 @@ class CompoundSplitter:
                         t.ent_type = token_ent_type
 
                 if "inflections" in doc.user_data:
-                    doc.user_data["inflections"] = replace_list_entries(
+                    doc.user_data["inflections"] = _replace_list_entries(
                         doc.user_data["inflections"],
                         token_i,
                         tuple(dtoken.inf for dtoken in sub_tokens),
                     )
                 if "reading_forms" in doc.user_data:
-                    doc.user_data["reading_forms"] = replace_list_entries(
+                    doc.user_data["reading_forms"] = _replace_list_entries(
                         doc.user_data["reading_forms"],
                         token_i,
                         tuple(dtoken.reading for dtoken in sub_tokens),
@@ -137,17 +144,25 @@ class CompoundSplitter:
         del doc.user_data["sub_tokens"]
         return doc
 
+    @property
+    def split_mode(self) -> str:
+        return self._split_mode
+
+    @split_mode.setter
+    def split_mode(self, mode: str):
+        assert mode in (None, "A", "B", "C"), 'split_mode should be "A", "B", "C", or None'
+        self._split_mode = mode
+
     def _get_config(self):
         config = OrderedDict(
             (
-                ("split_mode", self.split_mode),
+                ("split_mode", self._split_mode),
             )
         )
         return config
 
     def _set_config(self, config=None):
         self.split_mode = config.get("split_mode", None) if config else None
-        assert self.split_mode in (None, "A", "B"), 'split_mode should be "A", "B, or None'
 
     def to_bytes(self, **_kwargs):
         serializers = OrderedDict(
