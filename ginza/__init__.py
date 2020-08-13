@@ -1,14 +1,47 @@
 from functools import singledispatch
 from typing import Callable, List, TypeVar
 
-from spacy.tokens import Token
 from spacy.lang.ja import DetailedToken
+from spacy.language import Language
+from spacy.tokens import Token
 
 from .bunsetu_recognizer import *
+from .compound_splitter import *
 from .ene_ontonotes_mapper import ENE_ONTONOTES_MAPPING
 
 
-SEP = "+"
+__all__ = [
+    "set_split_mode",
+    "token_i", "text", "text_with_ws", "orth", "orth_",
+    "ent_type", "ent_type_", "ent_iob", "ent_iob_",
+    "lemma", "lemma_", "norm", "norm_",
+    "pos", "pos_", "tag", "tag_", "dep", "dep_",
+    "is_stop", "is_not_stop",
+    "ent_label_ene", "ent_label_ontonotes",
+    "reading_form", "inflection",
+    "SEP",
+    "sub_tokens",
+    "head", "ancestors", "children", "subtree", "traverse",
+    "phrase", "sub_phrases",
+    # from bunsetu_recognizer
+    "bunsetu",
+    "bunsetu_head_list",
+    "bunsetu_head_tokens",
+    "bunsetu_bi_labels",
+    "bunsetu_span",
+    "bunsetu_phrase_span",
+    "BUNSETU_HEAD_SUFFIX",
+    "PHRASE_RELATIONS",
+    "POS_PHRASE_MAP",
+    # from bunsetu_recognizer
+    "CompoundSplitter",
+    "tag_to_pos",
+]
+
+
+def set_split_mode(nlp: Language, mode: str):
+    splitter = nlp.get_pipe("CompoundSplitter")
+    splitter.split_mode = mode
 
 
 # token field getters
@@ -119,6 +152,9 @@ def reading_form(token: Token) -> str:
 
 def inflection(token: Token) -> str:
     return token.doc.user_data["inflections"][token.i]
+
+
+SEP = "+"
 
 
 S = TypeVar('S')
@@ -308,27 +344,3 @@ def sub_phrases_t(
         condition_func: Callable[[Token], bool] = is_not_stop,
 ) -> List[T]:
     return sub_phrases(phrase_func, condition_func)(token)
-
-
-__all__ = [
-    "token_i", "text", "text_with_ws", "orth", "orth_",
-    "ent_type", "ent_type_", "ent_iob", "ent_iob_",
-    "lemma", "lemma_", "norm", "norm_",
-    "pos", "pos_", "tag", "tag_", "dep", "dep_",
-    "is_stop", "is_not_stop",
-    "ent_label_ene", "ent_label_ontonotes",
-    "reading_form", "inflection",
-    "sub_tokens",
-    "head", "ancestors", "children", "subtree", "traverse",
-    "phrase", "sub_phrases",
-    # from bunsetu_recognizer
-    "bunsetu",
-    "bunsetu_head_list",
-    "bunsetu_head_tokens",
-    "bunsetu_bi_labels",
-    "bunsetu_span",
-    "bunsetu_phrase_span",
-    "BUNSETU_HEAD_SUFFIX",
-    "PHRASE_RELATIONS",
-    "POS_PHRASE_MAP",
-]
