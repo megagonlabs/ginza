@@ -217,16 +217,7 @@ def analyze(nlp, hash_comment, output_format, line):
 
 
 def bunsetu_info(doc):
-    bunsetu_position_types = [""] * len(doc)
-    '''
-    doc.user_data["bunsetu_position_funcs"] = tuple(
-        'ROOT' if heads[t.i] else (
-            'NO_HEAD' if t.dep_ == 'punct' else 'SEM_HEAD'
-        ) if t.i == c else
-        'FUNC' if t.i > c and t.pos_ in FUNC_POS else
-        'CONT' for t in doc
-    ]
-    '''
+    position_types = doc.user_data["bunsetu_position_types"]
 
     np_labels = [""] * len(doc)
     bunsetu_heads = bunsetu_head_list(doc)
@@ -234,13 +225,11 @@ def bunsetu_info(doc):
     if bunsetu_head_list:
         for head_i in bunsetu_heads:
             bunsetu_head_token = doc[head_i]
-            # for idx in range(begin, end):
-            #     bunsetu_position_types[idx] = None  TODO implementation
             phrase = bunsetu_phrase_span(bunsetu_head_token)
             if phrase.label_ == "NP":
                 for idx in range(phrase.start, phrase.end):
                     np_labels[idx] = "NP_B" if idx == phrase.start else "NP_I"
-    return bunsetu_bi_list, bunsetu_position_types, np_labels
+    return bunsetu_bi_list, position_types, np_labels
 
 
 def analyze_json(doc):

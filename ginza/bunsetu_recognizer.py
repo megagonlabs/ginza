@@ -124,11 +124,24 @@ def bunsetu_bi_labels(span: Span) -> List[str]:
     return bunsetu_bi[start:end]
 
 
+def bunsetu_position_types(span: Span) -> List[str]:
+    doc = span.doc
+    position_types = doc.user_data["bunsetu_position_types"]
+    if isinstance(span, Doc):
+        start = 0
+        end = len(span)
+    else:
+        start = span.start
+        end = span.end
+    return position_types[start:end]
+
+
 class BunsetuRecognizer:
     def __init__(self, nlp: Language, **_cfg) -> None:
         self.nlp = nlp
 
-    def __call__(self, doc: Doc, debug: bool = False) -> Doc:
+    def __call__(self, doc: Doc) -> Doc:
+        debug = False
         heads = [False] * len(doc)
         for t in doc:
             if t.dep_ == "ROOT":
@@ -192,6 +205,31 @@ class BunsetuRecognizer:
 
         doc.user_data["bunsetu_heads"] = bunsetu_heads
         doc.user_data["bunsetu_bi_labels"] = bunsetu_bi
+
+        position_types = [None] * len(doc)
+        for head in bunsetu_heads:
+            phrase = bunsetu_phrase_span(doc[head])
+            for t in phrase:
+                if t.i == t.head.i:
+                    position_types[t.i] = "ROOT"
+                elif t.i == head:
+                    position_types[t.i] = "NO_HEAD" if t.dep_ == "punct" else "SEM_HEAD"
+                else:
+                    position_types[t.i] = "CONT"
+        first_func = True
+        for t, bi, position_type in reversed(list(zip(doc, bunsetu_bi, position_types))):
+            if bi:
+                first_func = True
+            if position_type is None:
+                if t.pos_ in {'AUX', 'ADP', 'SCONJ', 'CCONJ', 'PART'}:
+                    if first_func:
+                        position_types[t.i] = "SYN_HEAD"
+                        first_func = False
+                    else:
+                        position_types[t.i] = "FUNC"
+                else:
+                    position_types[t.i] = "CONT"
+        doc.user_data["bunsetu_position_types"] = position_types
         return doc
 
 
