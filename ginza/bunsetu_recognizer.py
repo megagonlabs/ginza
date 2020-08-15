@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterable, List
 
 from spacy.language import Language
 from spacy.tokens import Doc, Span, Token
@@ -39,7 +39,7 @@ POS_PHRASE_MAP = {
 }
 
 
-def bunsetu_head_list(span: Span) -> List[int]:
+def bunsetu_head_list(span: Span) -> Iterable[int]:
     doc = span.doc
     heads = doc.user_data["bunsetu_heads"]
     if isinstance(span, Doc):
@@ -51,7 +51,7 @@ def bunsetu_head_list(span: Span) -> List[int]:
     return [i - start for i in heads if start <= i < end]
 
 
-def bunsetu_head_tokens(span: Span) -> List[Token]:
+def bunsetu_head_tokens(span: Span) -> Iterable[Token]:
     doc = span.doc
     heads = doc.user_data["bunsetu_heads"]
     if isinstance(span, Doc):
@@ -63,7 +63,7 @@ def bunsetu_head_tokens(span: Span) -> List[Token]:
     return [span[i - start] for i in heads if start <= i < end]
 
 
-def bunsetu_spans(span: Span) -> List[Span]:
+def bunsetu_spans(span: Span) -> Iterable[Span]:
     return [
         bunsetu_span(head) for head in bunsetu_head_tokens(span)
     ]
@@ -91,13 +91,13 @@ def bunsetu_span(token: Token) -> Span:
     return Span(doc, start=start, end=end, label=POS_PHRASE_MAP.get(doc[start:end].root.pos_, ""))
 
 
-def bunsetu_phrase_spans(span: Span, phrase_relations: List[str] = PHRASE_RELATIONS) -> List[Span]:
+def bunsetu_phrase_spans(span: Span, phrase_relations: Iterable[str] = PHRASE_RELATIONS) -> Iterable[Span]:
     return [
         bunsetu_phrase_span(head, phrase_relations) for head in bunsetu_head_tokens(span)
     ]
 
 
-def bunsetu_phrase_span(token: Token, phrase_relations: List[str] = PHRASE_RELATIONS) -> Span:
+def bunsetu_phrase_span(token: Token, phrase_relations: Iterable[str] = PHRASE_RELATIONS) -> Span:
     def _traverse(head, _bunsetu, result):
         for t in head.children:
             if _bunsetu.start <= t.i < _bunsetu.end:

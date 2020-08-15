@@ -1,9 +1,9 @@
 from functools import singledispatch
-from typing import Callable, List, TypeVar
+from typing import Callable, Iterable, Union, Tuple, TypeVar
 
 from spacy.lang.ja import DetailedToken
 from spacy.language import Language
-from spacy.tokens import Token
+from spacy.tokens import Doc, Span, Token
 
 from .bunsetu_recognizer import *
 from .compound_splitter import *
@@ -16,12 +16,13 @@ __all__ = [
     "ent_type", "ent_type_", "ent_iob", "ent_iob_",
     "lemma", "lemma_", "norm", "norm_",
     "pos", "pos_", "tag", "tag_", "dep", "dep_",
-    "is_stop", "is_not_stop",
+    "is_sent_start", "is_stop", "is_not_stop",
     "ent_label_ene", "ent_label_ontonotes",
     "reading_form", "inflection",
     "SEP", "default_join_func",
-    "head", "ancestors", "conjuncts", "children", "subtree",
-    "bunsetu", "phrase", "sub_phrases",
+    "traverse",
+    "head", "ancestors", "conjuncts", "children", "lefts", "rights", "subtree",
+    "bunsetu", "phrase", "sub_phrases", "phrases",
     "sub_tokens",
     # from bunsetu_recognizer
     "bunsetu_span",
@@ -121,6 +122,10 @@ def dep_(token: Token) -> str:
     return token.dep_
 
 
+def is_sent_start(token: Token) -> bool:
+    return token.is_sent_start
+
+
 def is_stop(token: Token) -> bool:
     return token.is_stop
 
@@ -160,207 +165,181 @@ def default_join_func(elements):
     return SEP.join([element if isinstance(element, str) else str(element) for element in elements])
 
 
-S = TypeVar('S')
 T = TypeVar('T')
 U = TypeVar('U')
+V = TypeVar('V')
 
 
-# curried function: ex. head(lemma_)(token)
+# curried function: ex. traverse(children, lemma_)(token)
 @singledispatch
-def head(element_func: Callable[[Token], T]) -> T:
-    return lambda token: element_func(token.head)
-
-
-# overload: ex. head(token, lemma_)
-@head.register
-def _head(token: Token, element_func: Callable[[Token], T] = lambda token: token) -> T:
-    return head(element_func)(token)
-
-
-def _traverse(
-        traverse_func: Callable[[Token], List[Token]],
-        element_func: Callable[[Token], S] = lambda token: token,
+def traverse(
+        traverse_func: Callable[[Token], Iterable[Token]],
+        element_func: Callable[[Token], T] = lambda token: token,
         condition_func: Callable[[Token], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = lambda tokens: tokens,
-) -> Callable[[Token], U]:
+        join_func: Callable[[Iterable[T]], U] = lambda lst: lst,
+) -> Callable[[Union[Token, Span]], U]:
     return lambda token: join_func([element_func(t) for t in traverse_func(token) if condition_func(t)])
 
 
-# curried function: ex. ancestors(lemma_)(token)
-@singledispatch
-def ancestors(
-        element_func: Callable[[Token], S] = lambda token: token,
-        condition_func: Callable[[Token], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = lambda tokens: tokens,
-) -> Callable[[Token], U]:
-    return _traverse(lambda t: t.ancestors, element_func, condition_func, join_func)
-
-
-# overload: ex. ancestors(token, lemma_)
-@ancestors.register
-def _ancestors(
+# overload: ex. traverse(token, children, lemma_)
+@traverse.register
+def _traverse(
         token: Token,
-        element_func: Callable[[Token], S] = lambda token: token,
+        traverse_func: Callable[[Token], Iterable[Token]],
+        element_func: Callable[[Token], T] = lambda token: token,
         condition_func: Callable[[Token], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = lambda tokens: tokens,
-) -> Callable[[Token], U]:
-    return ancestors(element_func, condition_func, join_func)(token)
+        join_func: Callable[[Iterable[T]], U] = lambda lst: lst,
+) -> U:
+    return traverse(traverse_func, element_func, condition_func, join_func)(token)
 
 
-# curried function: ex. conjuncts(lemma_)(token)
-@singledispatch
-def conjuncts(
-        element_func: Callable[[Token], S] = lambda token: token,
-        condition_func: Callable[[Token], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = lambda tokens: tokens,
-) -> Callable[[Token], U]:
-    return _traverse(lambda t: t.conjuncts, element_func, condition_func, join_func)
+def head(token: Token) -> Token:
+    return token.head
 
 
-# overload: ex. conjuncts(token, lemma_)
-@ancestors.register
-def _conjuncts(
-        token: Token,
-        element_func: Callable[[Token], S] = lambda token: token,
-        condition_func: Callable[[Token], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = lambda tokens: tokens,
-) -> Callable[[Token], U]:
-    return conjuncts(element_func, condition_func, join_func)(token)
+def ancestors(token: Token) -> Iterable[Token]:
+    return token.ancestors
 
 
-# curried function: ex. children(lemma_)(token)
-@singledispatch
-def children(
-        element_func: Callable[[T], S] = lambda token: token,
-        condition_func: Callable[[T], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = lambda tokens: tokens,
-) -> Callable[[Token], U]:
-    return _traverse(lambda t: t.children, element_func, condition_func, join_func)
+def conjuncts(token: Token) -> Tuple[Token]:
+    return token.conjuncts
 
 
-# overload: ex. children(token, lemma_)
-@children.register
-def _children(
-        token: Token,
-        element_func: Callable[[Token], S] = lambda token: token,
-        condition_func: Callable[[Token], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = lambda tokens: tokens,
-) -> Callable[[Token], U]:
-    return children(element_func, condition_func, join_func)(token)
+def children(token: Token) -> Iterable[Token]:
+    return token.children
 
 
-# curried function: ex. subtree()(token)
-@singledispatch
-def subtree(
-        element_func: Callable[[T], S] = lambda token: token,
-        condition_func: Callable[[T], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = lambda tokens: tokens,
-) -> Callable[[Token], U]:
-    return _traverse(lambda token: token.subtree, element_func, condition_func, join_func)
+def lefts(token: Token) -> Iterable[Token]:
+    return token.lefts
 
 
-# overload: ex. subtree(token, lemma_)
-@subtree.register
-def _subtree(
-        token: Token,
-        element_func: Callable[[Token], S] = lambda token: token,
-        condition_func: Callable[[Token], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = lambda tokens: tokens,
-) -> Callable[[Token], U]:
-    return subtree(element_func, condition_func, join_func)(token)
+def rights(token: Token) -> Iterable[Token]:
+    return token.rights
+
+
+def subtree(token: Token) -> Iterable[Token]:
+    return token.subtree
 
 
 # curried function: ex. bunsetu(lemma_)(token)
 @singledispatch
 def bunsetu(
-        element_func: Callable[[T], S] = lambda token: token,
-        condition_func: Callable[[T], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = default_join_func,
+        element_func: Callable[[Token], T] = lambda token: token,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
 ) -> Callable[[Token], U]:
-    return lambda token: join_func([
-        element_func(t) for t in bunsetu_span(token) if condition_func(t)
-    ])
+    return traverse(bunsetu_span, element_func, condition_func, join_func)
 
 
 # overload: ex. bunsetu(token, lemma_)
 @bunsetu.register
 def _bunsetu(
         token: Token,
-        element_func: Callable[[T], S] = lambda token: token,
-        condition_func: Callable[[T], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = default_join_func,
-) -> Callable[[Token], U]:
-    return bunsetu(element_func, condition_func, join_func)(token)
+        element_func: Callable[[Token], T] = lambda token: token,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
+) -> U:
+    return traverse(bunsetu_span, element_func, condition_func, join_func)(token)
 
 
 # curried function: ex. phrase(lemma_)(token)
 @singledispatch
 def phrase(
-        element_func: Callable[[T], S] = lambda token: token,
-        condition_func: Callable[[T], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = default_join_func,
+        element_func: Callable[[Token], T] = lambda token: token,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
 ) -> Callable[[Token], U]:
-    return lambda token: join_func([
-        element_func(t) for t in bunsetu_phrase_span(token) if condition_func(t)
-    ])
+    return traverse(bunsetu_phrase_span, element_func, condition_func, join_func)
 
 
-# overload: ex. phrase(token, lemma_)
+# overload: ex. phrase(token)
 @phrase.register
 def _phrase(
         token: Token,
-        element_func: Callable[[T], S] = lambda token: token,
-        condition_func: Callable[[T], bool] = lambda token: True,
-        join_func: Callable[[List[S]], U] = default_join_func,
-) -> Callable[[Token], U]:
-    return phrase(element_func, condition_func, join_func)(token)
+        element_func: Callable[[Token], T] = lambda token: token,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
+) -> U:
+    return traverse(bunsetu_phrase_span, element_func, condition_func, join_func)(token)
 
 
 # curried function: ex. sub_phrases(lemma_)(token)
 @singledispatch
 def sub_phrases(
-        phrase_func: Callable[[Token], T] = phrase,
-        condition_func: Callable[[Token], bool] = is_not_stop,
-        join_func: Callable[[List[S]], U] = lambda phrases: phrases,
-) -> Callable[[Token], List[T]]:
-    return lambda token: join_func([
-        (
-            t.dep_,
-            phrase_func(t),
-        ) for t in token.children if t.i in bunsetu_head_list(token.doc) and condition_func(t)
-    ])
+        phrase_func: Callable[[Token], U] = _phrase,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+) -> Callable[[Token], Iterable[Tuple[str, U]]]:
+    return lambda token: _sub_phrases(
+        token,
+        phrase_func,
+        condition_func,
+    )
 
 
 # overload: ex. sub_phrases(token, lemma_)
 @sub_phrases.register
 def _sub_phrases(
         token: Token,
-        phrase_func: Callable[[Token], T] = phrase,
-        condition_func: Callable[[Token], bool] = is_not_stop,
-        join_func: Callable[[List[S]], U] = lambda phrases: phrases,
-) -> List[T]:
-    return sub_phrases(phrase_func, condition_func, join_func)(token)
+        phrase_func: Callable[[Token], U] = _phrase,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+) -> Iterable[Tuple[str, U]]:
+    return [
+        (
+            t.dep_,
+            phrase_func(t),
+        ) for t in bunsetu_span(token).root.children if t.i in bunsetu_head_list(token.doc) and condition_func(t)
+    ]
+
+
+# curried function: ex. phrases(lemma_)(sent)
+@singledispatch
+def phrases(
+        phrase_func: Callable[[Token], U] = _phrase,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+) -> Callable[[Span], Iterable[U]]:
+    return lambda sent: _phrases_span(
+        sent,
+        phrase_func,
+        condition_func,
+    ) if isinstance(sent, Span) else _phrases_doc(
+        sent,
+        phrase_func,
+        condition_func,
+    )
+
+
+# overload: ex. phrases(sent, lemma_)
+@phrases.register
+def _phrases_span(
+        sent: Span,
+        phrase_func: Callable[[Token], U] = _phrase,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+) -> Iterable[U]:
+    return [
+        phrase_func(t) for t in bunsetu_head_tokens(sent) if condition_func(t)
+    ]
+
+
+# overload: ex. phrases(doc, lemma_)
+@phrases.register
+def _phrases_doc(
+        doc: Doc,
+        phrase_func: Callable[[Token], U] = _phrase,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+) -> Iterable[U]:
+    return [
+        phrase_func(t) for t in bunsetu_head_tokens(doc[:]) if condition_func(t)
+    ]
 
 
 # curried function: ex. sub_tokens("B", lambda sub_token: sub_token.lemma)(token)
 @singledispatch
 def sub_tokens(
         mode: str = "A",  # "A" or "B"
-        sub_element_func: Callable[[DetailedToken], S] = lambda sub_token: sub_token,
-        join_func: Callable[[List[S]], T] = default_join_func,
-) -> Callable[[Token], T]:
-    return lambda token: join_func([
-        sub_element_func(t) for t in token.doc.user_data["sub_tokens"][token.i][{"A": 0, "B": 1}[mode]]
-    ] if token.doc.user_data["sub_tokens"][token.i] else [
-        sub_element_func(DetailedToken(
-            token.orth_,
-            token.tag_,
-            inflection(token),
-            token.lemma_,
-            reading_form(token),
-            None,
-        ))
-    ])
+        sub_token_func: Callable[[DetailedToken], T] = lambda sub_token: sub_token,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
+) -> Callable[[Token], U]:
+    return lambda token: _sub_tokens(token, mode, sub_token_func, join_func)
 
 
 # overload: ex. sub_tokens(token, "B", lambda sub_token: sub_token.lemma)
@@ -368,7 +347,22 @@ def sub_tokens(
 def _sub_tokens(
         token: Token,
         mode: str = "A",  # "A" or "B"
-        sub_element_func: Callable[[DetailedToken], S] = lambda sub_token: sub_token,
-        join_func: Callable[[List[S]], T] = default_join_func,
-) -> List[dict]:
-    return sub_tokens(mode, sub_element_func, join_func)(token)
+        sub_token_func: Callable[[DetailedToken], T] = lambda sub_token: sub_token.surface,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
+) -> U:
+    if token.doc.user_data["sub_tokens"][token.i]:
+        elements = token.doc.user_data["sub_tokens"][token.i][{"A": 0, "B": 1}[mode]]
+    else:
+        elements = [
+            DetailedToken(
+                token.orth_,
+                token.tag_,
+                inflection(token),
+                token.lemma_,
+                reading_form(token),
+                None,
+            )
+        ]
+    return join_func([
+        sub_token_func(element) for element in elements
+    ])
