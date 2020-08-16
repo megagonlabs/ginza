@@ -6,11 +6,13 @@ import sys
 
 import plac
 import spacy
+from spacy.tokens import Span
 
 from spacy.lang.ja import JapaneseDefaults
 
-from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes
-from .bunsetu_recognizer import bunsetu_head_list, bunsetu_phrase_span, bunsetu_bi_labels
+from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes,\
+    bunsetu_bi_label, bunsetu_position_type
+from .bunsetu_recognizer import bunsetu_head_list, bunsetu_phrase_span
 
 MINI_BATCH_SIZE = 100
 
@@ -18,7 +20,6 @@ MINI_BATCH_SIZE = 100
 def run(
         model_path=None,
         split_mode=False,
-        use_sentence_separator=False,
         hash_comment="print",
         output_path=None,
         output_format="0",
@@ -29,13 +30,9 @@ def run(
     if require_gpu:
         print("GPU enabled", file=sys.stderr)
 
-    if use_sentence_separator:
-        print("enabling sentence separator", file=sys.stderr)
-
     analyzer = Analyzer(
         model_path,
         split_mode,
-        use_sentence_separator,
         hash_comment,
         output_format,
         require_gpu,
@@ -73,17 +70,19 @@ def run(
             analyzer.set_nlp()
             while True:
                 line = input()
-                for ol in analyzer.analyze_line(line):
-                    output_json_open()
-                    print(ol, file=output)
+                for sent in analyzer.analyze_line(line):
+                    for ol in sent:
+                        output_json_open()
+                        print(ol, file=output)
         elif parallel == 1:
             analyzer.set_nlp()
             for path in files:
                 with open(path, "r") as f:
                     for line in f:
-                        for ol in analyzer.analyze_line(line):
-                            output_json_open()
-                            print(ol, file=output)
+                        for sent in analyzer.analyze_line(line):
+                            for ol in sent:
+                                output_json_open()
+                                print(ol, file=output)
         else:
             buffer = []
             for file_idx, path in enumerate(files):
@@ -96,9 +95,10 @@ def run(
                             if len(buffer) <= MINI_BATCH_SIZE:  # enough for single process
                                 analyzer.set_nlp()
                                 for line in buffer:
-                                    for ol in analyzer.analyze_line(line):
-                                        output_json_open()
-                                        print(ol, file=output)
+                                    for sent in analyzer.analyze_line(line):
+                                        for ol in sent:
+                                            output_json_open()
+                                            print(ol, file=output)
                                 break  # continue to next file
                             parallel = (len(buffer) - 1) // MINI_BATCH_SIZE + 1
                             pool = Pool(parallel)
@@ -108,10 +108,11 @@ def run(
                             buffer[idx * mini_batch_size:(idx + 1) * mini_batch_size] for idx in range(parallel)
                         ]
                         for mini_batch_result in pool.map(analyzer.analyze_lines_mp, mini_batches):
-                            for lines in mini_batch_result:
-                                for ol in lines:
-                                    output_json_open()
-                                    print(ol, file=output)
+                            for sents in mini_batch_result:
+                                for lines in sents:
+                                    for ol in lines:
+                                        output_json_open()
+                                        print(ol, file=output)
 
                         buffer.clear()  # process remaining part of current file
 
@@ -145,14 +146,12 @@ class Analyzer:
             self,
             model_path,
             split_mode,
-            use_sentence_separator,
             hash_comment,
             output_format,
             require_gpu,
     ):
         self.model_path = model_path
         self.split_mode = split_mode
-        self.use_sentence_separator = use_sentence_separator
         self.hash_comment = hash_comment
         self.output_format = output_format
         self.require_gpu = require_gpu
@@ -170,7 +169,7 @@ class Analyzer:
                 "split_mode": self.split_mode
             }).tokenizer
         else:
-            # TODO: Work-around for pickle error. Need to share model data.
+            # Work-around for pickle error. Need to share model data.
             if self.model_path:
                 nlp = spacy.load(self.model_path)
             else:
@@ -179,8 +178,6 @@ class Analyzer:
             if self.split_mode:
                 set_split_mode(nlp, self.split_mode)
 
-            if not self.use_sentence_separator:  # TODO use Sentencizer
-                nlp.tokenizer.use_sentence_separator = False
         self.nlp = nlp
 
     def analyze_lines_mp(self, lines):
@@ -202,41 +199,25 @@ def analyze(nlp, hash_comment, output_format, line):
         return "",
     if output_format in ["0", "conllu"]:
         doc = nlp(line)
-        return analyze_conllu(doc)
+        return [analyze_conllu(sent) for sent in doc.sents]
     elif output_format in ["1", "cabocha"]:
         doc = nlp(line)
-        return analyze_cabocha(doc)
+        return [analyze_cabocha(sent) for sent in doc.sents]
     elif output_format in ["2", "mecab"]:
         doc = nlp.tokenize(line)
-        return analyze_mecab(doc)
+        return [analyze_mecab(doc)]
     elif output_format in ["3", "json"]:
         doc = nlp(line)
-        return analyze_json(doc)
+        return [analyze_json(sent) for sent in doc.sents]
     else:
         raise Exception(output_format + " is not supported")
 
 
-def bunsetu_info(doc):
-    position_types = doc.user_data["bunsetu_position_types"]
-
-    np_labels = [""] * len(doc)
-    bunsetu_heads = bunsetu_head_list(doc)
-    bunsetu_bi_list = bunsetu_bi_labels(doc)
-    if bunsetu_head_list:
-        for head_i in bunsetu_heads:
-            bunsetu_head_token = doc[head_i]
-            phrase = bunsetu_phrase_span(bunsetu_head_token)
-            if phrase.label_ == "NP":
-                for idx in range(phrase.start, phrase.end):
-                    np_labels[idx] = "NP_B" if idx == phrase.start else "NP_I"
-    return bunsetu_bi_list, position_types, np_labels
-
-
-def analyze_json(doc):
+def analyze_json(sent: Span):
     tokens = []
-    for token in doc:
+    for token in sent:
         t = {
-            "id": token.i + 1,
+            "id": token.i - sent.start + 1,
             "orth": token.orth_,
             "tag": token.tag_,
             "pos": token.pos_,
@@ -264,24 +245,30 @@ def analyze_json(doc):
    }}
   ]
  }}""".format(
-        doc.text,
+        sent.text,
         tokens,
     )
 
 
-def analyze_conllu(doc, print_origin=True):
-    bunsetu = bunsetu_info(doc)
+def analyze_conllu(sent: Span, print_origin=True):
     if print_origin:
-        yield "# text = {}".format(doc.text)
-    for token, (bunsetu_bi, position_type, np_label) in zip(
-            doc,
-            zip(*bunsetu),
-    ):
-        yield conllu_token_line(token, bunsetu_bi, position_type, np_label)
+        yield "# text = {}".format(sent.text)
+    np_labels = [""] * len(sent)
+    if bunsetu_head_list:
+        for head_i in bunsetu_head_list(sent):
+            bunsetu_head_token = sent[head_i]
+            phrase = bunsetu_phrase_span(bunsetu_head_token)
+            if phrase.label_ == "NP":
+                for idx in range(phrase.start - sent.start, phrase.end - sent.start):
+                    np_labels[idx] = "NP_B" if idx == phrase.start else "NP_I"
+    for token, np_label in zip(sent, np_labels):
+        yield conllu_token_line(token, np_label)
     yield ""
 
 
-def conllu_token_line(token, bunsetu_bi, position_type, np_label):
+def conllu_token_line(token, np_label):
+    bunsetu_bi = bunsetu_bi_label(token)
+    position_type = bunsetu_position_type(token)
     inf = inflection(token)
     reading = reading_form(token)
     ne = ent_label_ontonotes(token)
@@ -311,42 +298,49 @@ def conllu_token_line(token, bunsetu_bi, position_type, np_label):
     ])
 
 
-def analyze_cabocha(doc):
-    bunsetu_bi_labels, bunsetu_position_types, np_labels = bunsetu_info(doc)
+def analyze_cabocha(sent: Span):
+    bunsetu_index_list = {}
+    bunsetu_index = -1
+    for token in sent:
+        if bunsetu_bi_label(token) == "B":
+            bunsetu_index += 1
+        bunsetu_index_list[token.i] = bunsetu_index
+
     lines = []
-    for bunsetu_index, bunsetu in enumerate(doc.user_data["bunsetu"]):
-        lines.append(cabocha_bunsetu_line(bunsetu["tokens"][0], bunsetu_index, doc))
-        for token in bunsetu["tokens"]:
-            lines.append(cabocha_token_line(token))
+    for token in sent:
+        if bunsetu_bi_label(token) == "B":
+            lines.append(cabocha_bunsetu_line(sent, bunsetu_index_list, token))
+        lines.append(cabocha_token_line(token))
     lines.append("EOS")
     lines.append("")
     return lines
 
 
-def cabocha_bunsetu_line(token, bunsetu_index, bunsetu_head_index, bunsetu_dep_index, bunsetu_func_index, dep_type):
-    """
+def cabocha_bunsetu_line(sent: Span, bunsetu_index_list, token):
+    bunsetu_head_index = None
+    bunsetu_dep_index = None
+    bunsetu_func_index = None
     dep_type = "D"
-    for t in doc[token.i:]:
-        if bunsetu_index != ex_attr(t).bunsetu_index:
+    for t in token.doc[token.i:sent.end]:
+        if bunsetu_index_list[t.i] != bunsetu_index_list[token.i]:
             if bunsetu_func_index is None:
                 bunsetu_func_index = t.i - token.i
             break
-        tbi = ex_attr(t.head).bunsetu_index
-        if bunsetu_index != tbi:
+        tbi = bunsetu_index_list[t.head.i]
+        if bunsetu_index_list[t.i] != tbi:
             bunsetu_head_index = t.i - token.i
             bunsetu_dep_index = tbi
-        if bunsetu_func_index is None and ex_attr(t).bunsetu_position_type in {"FUNC", "SYN_HEAD"}:
+        if bunsetu_func_index is None and bunsetu_position_type(t) in {"FUNC", "SYN_HEAD"}:
             bunsetu_func_index = t.i - token.i
     else:
         if bunsetu_func_index is None:
-            bunsetu_func_index = len(doc) - token.i
+            bunsetu_func_index = len(sent) - token.i
     if bunsetu_head_index is None:
         bunsetu_head_index = 0
     if bunsetu_dep_index is None:
         bunsetu_dep_index = -1
-    """
     return "* {} {}{} {}/{} 0.000000".format(
-        bunsetu_index,
+        bunsetu_index_list[token.i],
         bunsetu_dep_index,
         dep_type,
         bunsetu_head_index,
@@ -354,9 +348,10 @@ def cabocha_bunsetu_line(token, bunsetu_index, bunsetu_head_index, bunsetu_dep_i
     )
 
 
-def cabocha_token_line(token, inf, reading):
+def cabocha_token_line(token):
     part_of_speech = token.tag_.replace("-", ",")
-    part_of_speech += ",*" * (3 - part_of_speech.count(",")) + "," + inf
+    part_of_speech += ",*" * (3 - part_of_speech.count(",")) + "," + inflection(token)
+    reading = reading_form(token)
     return "{}\t{},{},{},{}\t{}".format(
         token.orth_,
         part_of_speech,

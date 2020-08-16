@@ -11,6 +11,7 @@ __all__ = [
     "bunsetu_head_list",
     "bunsetu_head_tokens",
     "bunsetu_bi_labels",
+    "bunsetu_position_types",
     "BunsetuRecognizer",
     "append_bunsetu_head_dep_suffix",
     "BUNSETU_HEAD_SUFFIX",
@@ -43,12 +44,11 @@ def bunsetu_head_list(span: Span) -> Iterable[int]:
     doc = span.doc
     heads = doc.user_data["bunsetu_heads"]
     if isinstance(span, Doc):
-        start = 0
-        end = len(span)
+        return heads
     else:
         start = span.start
         end = span.end
-    return [i - start for i in heads if start <= i < end]
+        return [i - start for i in heads if start <= i < end]
 
 
 def bunsetu_head_tokens(span: Span) -> Iterable[Token]:
@@ -116,24 +116,22 @@ def bunsetu_bi_labels(span: Span) -> List[str]:
     doc = span.doc
     bunsetu_bi = doc.user_data["bunsetu_bi_labels"]
     if isinstance(span, Doc):
-        start = 0
-        end = len(span)
+        return bunsetu_bi
     else:
         start = span.start
         end = span.end
-    return bunsetu_bi[start:end]
+        return bunsetu_bi[start:end]
 
 
 def bunsetu_position_types(span: Span) -> List[str]:
     doc = span.doc
     position_types = doc.user_data["bunsetu_position_types"]
     if isinstance(span, Doc):
-        start = 0
-        end = len(span)
+        return position_types
     else:
         start = span.start
         end = span.end
-    return position_types[start:end]
+        return position_types[start:end]
 
 
 class BunsetuRecognizer:

@@ -19,6 +19,7 @@ __all__ = [
     "is_sent_start", "is_stop", "is_not_stop",
     "ent_label_ene", "ent_label_ontonotes",
     "reading_form", "inflection",
+    "bunsetu_bi_label", "bunsetu_position_type", "is_bunsetu_head",
     "SEP", "default_join_func",
     "traverse",
     "head", "ancestors", "conjuncts", "children", "lefts", "rights", "subtree",
@@ -32,6 +33,7 @@ __all__ = [
     "bunsetu_head_list",
     "bunsetu_head_tokens",
     "bunsetu_bi_labels",
+    "bunsetu_position_types",
     "BunsetuRecognizer",
     # from compound_splitter
     "CompoundSplitter",
@@ -156,6 +158,20 @@ def reading_form(token: Token) -> str:
 
 def inflection(token: Token) -> str:
     return token.doc.user_data["inflections"][token.i]
+
+
+# bunsetu related field getters for Doc.user_data
+
+def bunsetu_bi_label(token: Token):
+    return bunsetu_bi_labels(token.doc)[token.i]
+
+
+def bunsetu_position_type(token: Token):
+    return bunsetu_position_types(token.doc)[token.i]
+
+
+def is_bunsetu_head(token: Token):
+    return token.i in token.doc.user_data["bunsetu_heads"]
 
 
 SEP = "+"
