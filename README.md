@@ -182,7 +182,7 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 ### version 4.x
 
 #### ginza-4.0.0
-- 2020-08-16
+- 2020-08-16, Chrysoberyl
 - Important changes
   - Replace Japanese model with `spacy.lang.ja` of spaCy v2.3
     - Replace values of `Token.lemma_` with the output of SudachiPy's `Morpheme.dictionary_form()`
@@ -254,7 +254,7 @@ with open('sample2.pickle', 'wb') as f:
       - add `-i` option to initialize the files of `ja_ginza_dict`
 
 #### ginza-3.0.0
-- 2020-01-15
+- 2020-01-15, Benitoite
 - Important changes
   - Distribute `ginza` and `ja_ginza` from PyPI
     - Simple installation; `pip install ginza`, and run `ginza`
