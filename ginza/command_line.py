@@ -262,11 +262,11 @@ def analyze_conllu(sent: Span, print_origin=True):
                 for idx in range(phrase.start - sent.start, phrase.end - sent.start):
                     np_labels[idx] = "NP_B" if idx == phrase.start else "NP_I"
     for token, np_label in zip(sent, np_labels):
-        yield conllu_token_line(token, np_label)
+        yield conllu_token_line(sent, token, np_label)
     yield ""
 
 
-def conllu_token_line(token, np_label):
+def conllu_token_line(sent, token, np_label):
     bunsetu_bi = bunsetu_bi_label(token)
     position_type = bunsetu_position_type(token)
     inf = inflection(token)
@@ -285,13 +285,13 @@ def conllu_token_line(token, np_label):
     )))
 
     return "\t".join([
-        str(token.i + 1),
+        str(token.i - sent.start + 1),
         token.orth_,
         token.lemma_,
         token.pos_,
         token.tag_.replace(",*", "").replace(",", "-"),
         "NumType=Card" if token.pos_ == "NUM" else "_",
-        "0" if token.head.i == token.i else str(token.head.i + 1),
+        "0" if token.head.i == token.i else str(token.head.i - sent.start + 1),
         token.dep_.lower() if token.dep_ else "_",
         "_",
         misc if misc else "_",
