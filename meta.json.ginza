@@ -1,20 +1,18 @@
 {
   "author":"Megagon Labs, Tokyo.",
-  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ v2.4 + GSK2014-A(2019). Assigns word2vec token vectors, POS tags, dependency parse and named entities.",
+  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ v2.6 + GSK2014-A(2019). Assigns word2vec token vectors, POS tags, dependency parse and named entities.",
   "email":"ginza@megagon.ai",
   "lang":"ja",
   "license":"MIT",
   "name":"ginza",
   "parent_package":"spacy",
   "requirements": [
-    "ja_ginza_dict<3.2.0,>=3.1.0"
   ],
   "sources":[
     "SudachiPy",
     "SudachiDict_core",
     "jawiki-cirrussearch-content",
-    "UD-Japanese BCCWJ v2.4",
-    "UD_Japanese-PUD v2.4",
+    "UD-Japanese BCCWJ v2.6",
     "GSK2014-A(2019)"
   ],
   "url":"https://github.com/megagonlabs/ginza"

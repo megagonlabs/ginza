@@ -1,16 +1,11 @@
-import json
-import sys
+# encoding: utf8
 
 __all__ = [
-    'OMITTING_NE_TYPES',
-    'ENE_NE_MAPPING',
+    "ENE_ONTONOTES_MAPPING",
 ]
 
-OMITTING_NE_TYPES = {
-    'OTHERS',
-}
 
-ENE_NE_MAPPING = {
+ENE_ONTONOTES_MAPPING = {
     "Person": "PERSON",
     "God": "PERSON",
 
@@ -58,7 +53,7 @@ ENE_NE_MAPPING = {
     "Election": "EVENT",
     "Religious_Festival": "EVENT",
     "Competition": "EVENT",
-    "Game": "EVENT",  # used in v7 ('Competition' in v8)
+    "Game": "EVENT",  # used in v7 ("Competition" in v8)
     "Conference": "EVENT",
     "Incident": "EVENT",
     "Incident_Other": "EVENT",
@@ -77,7 +72,7 @@ ENE_NE_MAPPING = {
     "Tomb": "FAC",
     "FOE": "FAC",
     "FOE_Other": "FAC",
-    "GOE_Other": "FAC",  # used in v7 ('FOE_Other' in v8)
+    "GOE_Other": "FAC",  # used in v7 ("FOE_Other" in v8)
     "Military_Base": "FAC",
     "Power_Plant": "FAC",
     "Park": "FAC",
@@ -118,14 +113,14 @@ ENE_NE_MAPPING = {
     "Family": "ORG",
     "Sports_Organization": "ORG",
     "Sports_Organization_Other": "ORG",
-    "Pro_Sports_Organization": "ORG",  # used in v7 ('Sports_Organization' in v8)
+    "Pro_Sports_Organization": "ORG",  # used in v7 ("Sports_Organization" in v8)
     "Sports_Federation": "ORG",
     "Sports_League": "ORG",
     "Sports_Team": "ORG",
     "Juridical_Person": "ORG",
     "Juridical_Person_Other": "ORG",
     "Channel": "ORG",
-    "Corporation_Other": "ORG",  # used in v7 ('Juridical_Person_Other' in v8)
+    "Corporation_Other": "ORG",  # used in v7 ("Juridical_Person_Other" in v8)
     "Nonprofit_Organization": "ORG",
     "Company": "ORG",
     "Company_Group": "ORG",
@@ -206,7 +201,7 @@ ENE_NE_MAPPING = {
 
     "Unit_Other": "QUANTITY",
     "Latitude_Longitude": "QUANTITY",
-    "Latitude_Longtitude": "QUANTITY",  # used in v7 ('Latitude_Longitude' in v8)
+    "Latitude_Longtitude": "QUANTITY",  # used in v7 ("Latitude_Longitude" in v8)
     "Measurement": "QUANTITY",
     "Measurement_Other": "QUANTITY",
     "Physical_Extent": "QUANTITY",
@@ -265,7 +260,7 @@ ENE_NE_MAPPING = {
     "Living_Thing_Other": "OTHERS",
     "Fungus": "OTHERS",
     "Mollusk_Arthropod": "OTHERS",
-    "Mollusc_Arthropod": "OTHERS",  # used in v7 ('Mollusk_Arthropod' in v8)
+    "Mollusc_Arthropod": "OTHERS",  # used in v7 ("Mollusk_Arthropod" in v8)
     "Insect": "OTHERS",
     "Fish": "OTHERS",
     "Amphibia": "OTHERS",
@@ -581,22 +576,25 @@ ENE8_LABELS = {
     "N_Flora": "3.13.7.2",
 }
 
+"""
+import json
+import sys
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for ne, idx in ENE8_LABELS.items():
         if ne not in ENE_NE_MAPPING:
-            print(idx, ne, 'not in mapping')
-    with open(sys.argv[1], 'r') as f:
+            print(idx, ne, "not in mapping")
+    with open(sys.argv[1], "r") as f:
         meta_json = json.load(f)
-    for ne in meta_json['labels']['ner']:
+    for ne in meta_json["labels"]["ner"]:
         if ne not in ENE_NE_MAPPING:
-            print(ne, 'not in mapping')
+            print(ne, "not in mapping")
     for ent, idx in ENE_NE_MAPPING.items():
-        if ent not in ENE8_LABELS and ent not in meta_json['labels']['ner']:
-            print(idx, ent, 'not used')
-    '''
+        if ent not in ENE8_LABELS and ent not in meta_json["labels"]["ner"]:
+            print(idx, ent, "not used")
+
     for ne, idx, ent in sorted([
-        (ne, ENE8_LABELS[ent] if ent in ENE8_LABELS else '_', ent) for ent, ne in ENT_NE_MAPPING.items()
+        (ne, ENE8_LABELS[ent] if ent in ENE8_LABELS else "_", ent) for ent, ne in ENT_NE_MAPPING.items()
     ]):
-        print('\t"{}": "{}",'.format(ent, ne))
-    '''
+        print("\t"{}": "{}",".format(ent, ne))
+"""
