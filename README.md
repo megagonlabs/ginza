@@ -380,5 +380,5 @@ Copy `system.dic` from installed package directory of `ja_ginza_dict` to `./ja_g
 ### Training models
 The analysis model of GiNZA is trained by `spacy train` command.
 ```bash
-$ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/ja_ginza-ud-dev.json -b ja_vectors_chive_mc90_35k/ --learn-token -ovl 0.3 -n 100 -V 4.0.0
+$ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/ja_ginza-ud-dev.json -b ja_vectors_chive_mc90_35k/ -ovl 0.3 -n 100 -m meta.json.ginza -V 4.0.0
 ```

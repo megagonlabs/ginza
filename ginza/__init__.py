@@ -152,8 +152,11 @@ def ent_label_ontonotes(token: Token) -> str:
 
 # token field getters for Doc.user_data
 
-def reading_form(token: Token) -> str:
-    return token.doc.user_data["reading_forms"][token.i]
+def reading_form(token: Token, use_orth_if_none=True) -> str:
+    reading = token.doc.user_data["reading_forms"][token.i]
+    if not reading and use_orth_if_none:
+        reading = token.orth_
+    return reading
 
 
 def inflection(token: Token) -> str:

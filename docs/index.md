@@ -422,5 +422,5 @@ $ pip install -U thinc[cuda101]
 ### 訓練の実行
 GiNZAの解析モデル `ja_ginza` はspaCy標準コマンドを使用して学習を行っています。
 ```bash
-$ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/ja_ginza-ud-dev.json -b ja_vectors_chive_mc90_35k/ --learn-token -ovl 0.3 -n 100 -V 4.0.0
+$ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/ja_ginza-ud-dev.json -b ja_vectors_chive_mc90_35k/ -ovl 0.3 -n 100 -m meta.json.ginza -V 4.0.0
 ```
