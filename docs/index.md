@@ -4,25 +4,27 @@
 &emsp;
 [![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza/week)
 
-## What's new in v3.1!
-- `$ pip install ginza` 実行時に一部の環境(pipenvを含む)で形態素辞書が正しく展開されない問題に対処するためのオプションを追加しました
-  - `ginza` コマンドが `ValueError: cannot mmap an empty file` で異常終了する場合は `$ ginza -i` を一度だけ実行して辞書ファイルを初期化してください
-- ja_ginza_dict(形態素解析辞書)パッケージをPyPI経由で配布するよう変更しました
-- 解析結果をserializeする際のエラーを回避するため`token._.sudachi`を使用するためには[明示的な設定](#ginza-311)が必要になりました (v3.1.1)
-
-## What's new in v3.0!
-- `$ pip install ginza` でGiNZAをインストールできるようになりました
-- 形態素解析のみを高速に実行する `ginzame` コマンドを追加しました
-- 固有表現抽出モデルが改良されました
-- `sudachipy`コマンドの実行にはSudachi辞書を別途インストールする必要があります
-
-***GiNZAをアップグレードする際は必ず [重要な変更](#ginza-300) の記述をご確認ください。***
+***GiNZAをアップグレードする際は [重要な変更](#ginza-400) の記述をご確認ください。***
+## Breaking Changes in v4.0
+- 解析モデルを`spaCy v2.3`の`spacy.lang.ja`に変更
+  - SudachiPy辞書をPyPI(SudachiDict-core)の公式パッケージに変更
+  - `Token.lemma_`に設定する値をSudachiPyの`Morpheme.dictionary_form()`に変更
+- コマンドラインツール出力(標準conllu形式)のmiscフィールドの変更
+  - NE(OntoNotes)のBIラベル直後のセパレータをハイフン(B-GPE)に変更
+  - Reading(読み), Inf(活用), ENE(拡張固有表現)のサブフィールドを追加
+- トークン拡張フィールド(`Token._.*`)を廃止
+  - `Doc.user_data`に対応するエントリを追加
+- Pipelineの構成を変更
+  - BunsetuRecognizer・CompoundSplitterを追加しJapaneseCorrectorを廃止
+- 文節単位で解析を行うAPIを追加
+  - `from ginza import *`
+- 学習コーパスをUD_JAPANESE-BCCWJ v2.6にアップグレード
+  - 解析精度と一貫性が向上
+- 単語ベクトルをchiVe mc90(うち頻度上位35,000語)に変更
 
 ## 発表資料
-- NLP2020論文 (coming soon)
-- [Universal Dependencies Symposium 2019@国語研での発表スライド](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
-- [NLP2019論文](http://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf)
-([発表スライド](https://www.slideshare.net/MegagonLabs/nlp2019-ginza-139011245))
+- 言語処理学会論文誌 委嘱記事 Volume 27 Number 3 (coming soon)
+- [Universal Dependencies Symposium 2019 発表スライド](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
 
 ## ライセンス
 GiNZA NLPライブラリおよびGiNZA日本語Universal Dependenciesモデルは
@@ -34,23 +36,27 @@ GiNZAはspaCyをNLP Frameworkとして使用しています。
 
 [spaCy LICENSE PAGE](https://github.com/explosion/spaCy/blob/master/LICENSE)
 
-### SudachiおよびSudachiPy
+### Sudachi/SudachiPy - SudachiDict - chiVe
 GiNZAはトークン化（形態素解析）処理にSudachiPyを使用することで、高い解析精度を得ています。
 
 [Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
 [SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
+[SudachiDict LEGAL PAGE](https://github.com/WorksApplications/SudachiDict/blob/develop/LEGAL)
+
+[chiVe LICENSE PAGE](https://github.com/WorksApplications/chiVe/blob/master/LICENSE)
+
 ## 訓練コーパス
 
-### UD Japanese BCCWJ v2.4
-GiNZA v3 の依存構造解析モデルは
-[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) v2.4
+### UD Japanese BCCWJ v2.6
+GiNZA v4 の依存構造解析モデルは
+[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) v2.6
 ([Omura and Asahara:2018](https://www.aclweb.org/anthology/W18-6014/))
 から新聞系文書を除外して学習しています。
 本モデルは国立国語研究所とMegagon Labsの共同研究成果です。
 
 ### GSK2014-A (2019) BCCWJ版
-GiNZA v3 の固有表現抽出モデルは
+GiNZA v4 の固有表現抽出モデルは
 [GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ版
 ([橋本・乾・村上(2008)](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf))
 から新聞系文書を除外して学習しています。
@@ -61,8 +67,6 @@ GiNZA v3 の固有表現抽出モデルは
 
 ## 実行環境
 このプロジェクトは Python 3.6以上（および対応するpip）で動作検証を行っています。
-Anaconda環境等ではpipによるインストールが正常に行えない場合があります。
-(Anaconda環境は将来のバージョンでサポートする予定です)
 
 [(開発環境についての詳細はこちら)](#development-environment)
 ### 実行環境のセットアップ
@@ -71,16 +75,6 @@ Anaconda環境等ではpipによるインストールが正常に行えない場
 ```bash
 $ pip install -U ginza
 ```
-pipインストールアーカイブを[リリースページからダウンロード](https://github.com/megagonlabs/ginza/releases)して、
-次のように直接指定することもできます。
-```bash
-$ pip install -U ginza-3.1.2.tar.gz
-```
-インストールの後、`ginza` コマンド実行時に `ValueError: cannot mmap an empty file` が表示されて `ginza` が異常終了する場合は、
-```bash
-$ ginza -i
-```
-を一度だけ実行して辞書ファイルを初期化してください。
 
 Google Colab 環境ではインストール後にパッケージ情報の再読込が必要な場合があります。詳細はリンクの記事をご確認下さい。
 ```python
@@ -100,15 +94,15 @@ $ CFLAGS='-stdlib=libc++' pip install ginza
 $ ginza
 銀座でランチをご一緒しましょう。
 # text = 銀座でランチをご一緒しましょう。
-1	銀座	銀座	PROPN	名詞-固有名詞-地名-一般	_	6	compound	_	BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|SpaceAfter=No|NP_B|ENE7=B_City|NE=B_GPE
-2	で	で	ADP	助詞-格助詞	_	1	case	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
-3	ランチ	ランチ	NOUN	名詞-普通名詞-一般	_	6	obj	_	BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|SpaceAfter=No|NP_B
-4	を	を	ADP	助詞-格助詞	_	3	case	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
-5	ご	御	NOUN	接頭辞	_	6	compound	_	BunsetuBILabel=B|BunsetuPositionType=CONT|SpaceAfter=No|NP_B
-6	一緒	一緒	VERB	名詞-普通名詞-サ変可能	_	0	root	_	BunsetuBILabel=I|BunsetuPositionType=ROOT|SpaceAfter=No
-7	し	為る	AUX	動詞-非自立可能	_	6	aux	_	BunsetuBILabel=I|BunsetuPositionType=FUNC|SpaceAfter=No
-8	ましょう	ます	AUX	助動詞	_	6	aux	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
-9	。	。	PUNCT	補助記号-句点	_	6	punct	_	BunsetuBILabel=I|BunsetuPositionType=CONT|SpaceAfter=No
+1	銀座	銀座	PROPN	名詞-固有名詞-地名-一般	_	6	obl	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ギンザ|NE=B-GPE|ENE=B-City
+2	で	で	ADP	助詞-格助詞	_	1	case	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=デ
+3	ランチ	ランチ	NOUN	名詞-普通名詞-一般	_	6	obj	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ランチ
+4	を	を	ADP	助詞-格助詞	_	3	case	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=ヲ
+5	ご	ご	NOUN	接頭辞	_	6	compound	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=CONT|Reading=ゴ
+6	一緒	一緒	VERB	名詞-普通名詞-サ変可能	_	0	root	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=ROOT|Reading=イッショ
+7	し	する	AUX	動詞-非自立可能	_	6	advcl	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,連用形-一般|Reading=シ
+8	ましょう	ます	AUX	助動詞	_	6	aux	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=助動詞-マス,意志推量形|Reading=マショウ
+9	。	。	PUNCT	補助記号-句点	_	6	punct	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=CONT|Reading=。
 
 ```
 `ginzame`コマンドでオープンソース形態素解析エンジン [MeCab](https://taku910.github.io/mecab/) の`mecab`コマンドに近い形式で解析結果を出力することができます。
@@ -130,6 +124,35 @@ $ ginzame
 EOS
 
 ```
+spaCyの学習用JSON形式での出力は`ginza -f 3` または `ginza -f json`を実行してください。
+```bash
+$ ginza -f json
+銀座でランチをご一緒しましょう。
+[
+ {
+  "paragraphs": [
+   {
+    "raw": "銀座でランチをご一緒しましょう。",
+    "sentences": [
+     {
+      "tokens": [
+       {"id": 1, "orth": "銀座", "tag": "名詞-固有名詞-地名-一般", "pos": "PROPN", "lemma": "銀座", "head": 5, "dep": "obl", "ner": "B-City"},
+       {"id": 2, "orth": "で", "tag": "助詞-格助詞", "pos": "ADP", "lemma": "で", "head": -1, "dep": "case", "ner": "O"},
+       {"id": 3, "orth": "ランチ", "tag": "名詞-普通名詞-一般", "pos": "NOUN", "lemma": "ランチ", "head": 3, "dep": "obj", "ner": "O"},
+       {"id": 4, "orth": "を", "tag": "助詞-格助詞", "pos": "ADP", "lemma": "を", "head": -1, "dep": "case", "ner": "O"},
+       {"id": 5, "orth": "ご", "tag": "接頭辞", "pos": "NOUN", "lemma": "ご", "head": 1, "dep": "compound", "ner": "O"},
+       {"id": 6, "orth": "一緒", "tag": "名詞-普通名詞-サ変可能", "pos": "VERB", "lemma": "一緒", "head": 0, "dep": "ROOT", "ner": "O"},
+       {"id": 7, "orth": "し", "tag": "動詞-非自立可能", "pos": "AUX", "lemma": "する", "head": -1, "dep": "advcl", "ner": "O"},
+       {"id": 8, "orth": "ましょう", "tag": "助動詞", "pos": "AUX", "lemma": "ます", "head": -2, "dep": "aux", "ner": "O"},
+       {"id": 9, "orth": "。", "tag": "補助記号-句点", "pos": "PUNCT", "lemma": "。", "head": -3, "dep": "punct", "ner": "O"}
+      ]
+     }
+    ]
+   }
+  ]
+ }
+]
+```
 日本語係り受け解析器 [CaboCha](https://taku910.github.io/cabocha/) の`cabocha -f1`のラティス形式に近い解析結果を出力する場合は
 `ginza -f 1` または `ginza -f cabocha` を実行して下さい。
 このオプションと`cabocha -f1`の出力形式の相違点として、 
@@ -137,25 +160,25 @@ EOS
 機能語認定基準が一部異なること、
 に注意して下さい。
 ```bash
-$ ginza -f 1
+$ ginza -f cabocha
 銀座でランチをご一緒しましょう。
 * 0 2D 0/1 0.000000
-銀座	名詞,固有名詞,地名,一般,*,*,銀座,ギンザ,*	B-City
-で	助詞,格助詞,*,*,*,*,で,デ,*	O
+銀座	名詞,固有名詞,地名,一般,,銀座,ギンザ,*	B-City
+で	助詞,格助詞,*,*,,で,デ,*	O
 * 1 2D 0/1 0.000000
-ランチ	名詞,普通名詞,一般,*,*,*,ランチ,ランチ,*	O
-を	助詞,格助詞,*,*,*,*,を,ヲ,*	O
+ランチ	名詞,普通名詞,一般,*,,ランチ,ランチ,*	O
+を	助詞,格助詞,*,*,,を,ヲ,*	O
 * 2 -1D 0/2 0.000000
-ご	接頭辞,*,*,*,*,*,御,ゴ,*	O
-一緒	名詞,普通名詞,サ変可能,*,*,*,一緒,イッショ,*	O
-し	動詞,非自立可能,*,*,サ行変格,連用形-一般,為る,シ,*	O
+ご	接頭辞,*,*,*,,ご,ゴ,*	O
+一緒	名詞,普通名詞,サ変可能,*,,一緒,イッショ,*	O
+し	動詞,非自立可能,*,*,サ行変格,連用形-一般,する,シ,*	O
 ましょう	助動詞,*,*,*,助動詞-マス,意志推量形,ます,マショウ,*	O
-。	補助記号,句点,*,*,*,*,。,。,*	O
+。	補助記号,句点,*,*,,。,。,*	O
 EOS
 
 ```
 ### マルチプロセス実行 (Experimental)
-GiNZA v3.0 で追加された `-p NUM_PROCESS` オプションで解析処理のマルチプロセス実行が可能になります。
+`-p NUM_PROCESS` オプションで解析処理のマルチプロセス実行が可能になります。
 `NUM_PROCESS`には並列実行するプロセス数を整数で指定します。
 0以下の値は`実行環境のCPUコア数＋NUM_PROCESS`を指定したのと等価になります。
 
@@ -176,7 +199,7 @@ for sent in doc.sents:
 ```
 
 ### API
-基本的な解析APIは[spaCy API documents](https://spacy.io/api/)を参照してください。
+基本的な解析APIは [spaCy API documents](https://spacy.io/api/) を参照してください。
 その他、詳細についてはドキュメントが整備されるまでお手数ですがソースコードをご確認ください。
 
 ### ユーザ辞書の使用
@@ -184,15 +207,54 @@ GiNZAはTokenizer(形態素解析レイヤ)にSudachiPyを使用しています�
 GiNZAでユーザ辞書を使用するにはSudachiPyの辞書設定ファイル `sudachi.json` の `userDict` フィールドに、
 コンパイル済みのユーザ辞書ファイルのパスのリストを指定します。
 
-GiNZAで使用するSudachiPyの `sudachi.json` は、
-GiNZAで使用するpython環境の `ja_ginza_dict` パッケージのインストールディレクトリ配下にあります。  
-`${python_library_path}/ja_ginza_dict/sudachidict/sudachi.json`
-
 SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSudachiPyのGitHubリポジトリで公開されているドキュメントを参照してください。  
 [SudachiPy - User defined Dictionary](https://github.com/WorksApplications/SudachiPy#user-defined-dictionary)  
 [Sudachi ユーザー辞書作成方法](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)
 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
+### version 4.x
+
+#### ginza-4.0.0
+- 2020-08-16
+- 重要な変更
+  - 解析モデルを`spaCy v2.3`の`spacy.lang.ja`に変更
+    - `Token.lemma_`に設定される値をSudachiPyの`Morpheme.dictionary_form()`に変更
+  - SudachiPy辞書をPyPI(SudachiDict-core)の公式パッケージに変更
+    - 旧バージョンでインストールされる`ja_ginza_dict`パッケージはアンインストール可能
+  - コマンドラインツール出力(標準conllu形式)のmiscフィールドの変更
+    - NE(OntoNotes)のBIラベル直後のセパレータをハイフン(B-GPE)に変更
+    - Reading(読み), Inf(活用), ENE(拡張固有表現)のサブフィールドを追加
+  - トークン拡張フィールド(`Token._.*`)を廃止し`Doc.user_data[]`のエントリとアクセサを追加
+    - inflections (`ginza.inflection(Token)`)
+    - reading_forms (`ginza.reading_form(Token)`)
+    - bunsetu_bi_labels (`ginza.bunsetu_bi_label(Token)`)
+    - bunsetu_position_types (`ginza.bunsetu_position_type(Token)`)
+    - bunsetu_heads (`ginza.is_bunsetu_head(Token)`)
+  - Pipelineの構成を変更
+    - JapaneseCorrectorを廃止
+      - 可能性品詞の曖昧性解消およびトークン結合処理はspaCy標準機能を利用するよう変更
+    - CompoundSplitterを追加
+      - `spacy.lang.ja`で登録されるSudachi辞書の分割情報(`Doc.user_data["sub_tokens"]`)を参照してTokenを分割
+      - `ginza.set_split_mode(Language, str)`の第2引数にA, B, Cのいずれかを指定(デフォルト=C)
+    - BunsetuRecognizerを追加
+      - ja_ginzaモデルで得られる文節主辞ラベルを用いて`Doc.user_data[]`に`bunsetu_bi_labels`,`bunsetu_position_types`,`bunsetu_heads`を追加
+  - 学習コーパスをUD_JAPANESE-BCCWJ v2.6にアップグレード
+    - 解析精度と一貫性が向上
+  - 単語ベクトルをchiVe mc90(うち頻度上位35,000語)に変更
+    - ベクトル次元数=300
+- API Changes
+  - 文節単位で解析を行うAPIを追加(`from ginza import *`)
+    - bunsetu(Token)
+    - phrase(Token)
+    - sub_phrases(Token)
+    - phrases(Span)
+    - bunsetu_spans(Span)
+    - bunsetu_phrase_spans(Span)
+    - bunsetu_head_list(Span)
+    - bunsetu_head_tokens(Span)
+    - bunsetu_bi_labels(Span)
+    - bunsetu_position_types(Span)
+
 ### version 3.x
 
 #### ginza-3.1.2
@@ -340,20 +402,25 @@ with open('sample2.pickle', 'wb') as f:
 
 ## 開発環境
 ### 開発環境のセットアップ
-#### 1. githubからsubmodulesを含めてclone
+#### 1. githubからclone
 ```bash
 $ git clone 'https://github.com/megagonlabs/ginza.git'
 ```
 
-#### 2. ./setup.sh の実行
-通常の開発環境はこちらを実行。
+#### 2. pip install および setup.sh の実行
 ```bash
-$ python setup.sh develop
+$ pip install -U -r requirements.txt
+$ python setup.py develop
 ```
 
-### 3. system.dic の配置
-PyPIから取得したja_ginza_dictパッケージのディレクトリから`system.dic`を`./ja_ginza_dict/sudachidict/`にコピーします。
+#### 3. GPU用ライブラリのセットアップ (Optional)
+CUDA v10.1の場合は次のように指定します。
+```bash
+$ pip install -U thinc[cuda101]
+```
 
 ### 訓練の実行
-GiNZAの解析モデル `ja_ginza` のトレーニングには次のスクリプトを使用しています。
-[shell/train_pipeline.sh](https://github.com/megagonlabs/ginza/blob/develop/shell/train_pipeline.sh)
+GiNZAの解析モデル `ja_ginza` はspaCy標準コマンドを使用して学習を行っています。
+```bash
+$ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/ja_ginza-ud-dev.json -b ja_vectors_chive_mc90_35k/ -ovl 0.3 -n 100 -m meta.json.ginza -V 4.0.0
+```

@@ -1,75 +1,387 @@
-# encoding: utf8
-from __future__ import unicode_literals, print_function
+from functools import singledispatch
+from typing import Callable, Iterable, Union, Tuple, TypeVar
 
-from collections import namedtuple
-
-from spacy.attrs import LANG
+from spacy.lang.ja import DetailedToken
 from spacy.language import Language
-from spacy.tokens import Token
-from spacy.util import get_model_meta
-from spacy.compat import copy_reg
+from spacy.tokens import Doc, Span, Token
 
-from .stop_words import STOP_WORDS
-from .syntax_iterators import SYNTAX_ITERATORS
-from .tag_map import TAG_MAP
-
-from .japanese_corrector import JapaneseCorrector
-from .sudachipy_tokenizer import SudachipyTokenizer
-
-
-ShortUnitWord = namedtuple("ShortUnitWord", ["surface", "lemma", "pos"])
-
-Language.factories['JapaneseCorrector'] = lambda nlp, **cfg: JapaneseCorrector(nlp)
-
-
-class JapaneseDefaults(Language.Defaults):
-    lex_attr_getters = dict(Language.Defaults.lex_attr_getters)
-    lex_attr_getters[LANG] = lambda _text: "ja"
-    stop_words = STOP_WORDS
-    tag_map = TAG_MAP
-    syntax_iterators = SYNTAX_ITERATORS
-    writing_system = {"direction": "ltr", "has_case": False, "has_letters": False}
-
-    if not Token.get_extension('inf'):
-        Token.set_extension('inf', default='')
-    if not Token.get_extension('reading'):
-        Token.set_extension('reading', default='')
-    if not Token.get_extension('sudachi'):
-        Token.set_extension('sudachi', default='')
-    if not Token.get_extension('bunsetu_index'):
-        Token.set_extension('bunsetu_index', default='')
-    if not Token.get_extension('bunsetu_bi_label'):
-        Token.set_extension('bunsetu_bi_label', default='')
-    if not Token.get_extension('bunsetu_position_type'):
-        Token.set_extension('bunsetu_position_type', default='')
-    if not Token.get_extension('ne'):
-        Token.set_extension('ne', default='')
-
-    @classmethod
-    def create_tokenizer(cls, nlp=None):
-        return SudachipyTokenizer(nlp)
-
-    @classmethod
-    def create_lemmatizer(cls, nlp=None, lookups=None):
-        return None
-
-
-class Japanese(Language):
-    lang = "ja"
-    Defaults = JapaneseDefaults
-    Tokenizer = SudachipyTokenizer
-
-    def make_doc(self, text):
-        return self.tokenizer(text)
-
-
-def pickle_japanese(instance):
-    return Japanese, tuple()
-
-
-copy_reg.pickle(Japanese, pickle_japanese)
+from .bunsetu_recognizer import *
+from .compound_splitter import *
+from .ene_ontonotes_mapper import ENE_ONTONOTES_MAPPING
 
 
 __all__ = [
-    'Japanese',
+    "set_split_mode",
+    "token_i", "text", "text_with_ws", "orth", "orth_",
+    "ent_type", "ent_type_", "ent_iob", "ent_iob_",
+    "lemma", "lemma_", "norm", "norm_",
+    "pos", "pos_", "tag", "tag_", "dep", "dep_",
+    "is_sent_start", "is_stop", "is_not_stop",
+    "ent_label_ene", "ent_label_ontonotes",
+    "reading_form", "inflection",
+    "bunsetu_bi_label", "bunsetu_position_type", "is_bunsetu_head",
+    "SEP", "default_join_func",
+    "traverse",
+    "head", "ancestors", "conjuncts", "children", "lefts", "rights", "subtree",
+    "bunsetu", "phrase", "sub_phrases", "phrases",
+    "sub_tokens",
+    # from bunsetu_recognizer
+    "bunsetu_span",
+    "bunsetu_spans",
+    "bunsetu_phrase_span",
+    "bunsetu_phrase_spans",
+    "bunsetu_head_list",
+    "bunsetu_head_tokens",
+    "bunsetu_bi_labels",
+    "bunsetu_position_types",
+    "BunsetuRecognizer",
+    # from compound_splitter
+    "CompoundSplitter",
+    "tag_to_pos",
 ]
+
+
+def set_split_mode(nlp: Language, mode: str):
+    splitter = nlp.get_pipe("CompoundSplitter")
+    splitter.split_mode = mode
+
+
+# token field getters
+
+def token_i(token: Token) -> int:
+    return token.i
+
+
+def text(token: Token) -> str:
+    return token.text
+
+
+def text_with_ws(token: Token) -> str:
+    return token.text_with_ws
+
+
+def orth(token: Token) -> int:
+    return token.orth
+
+
+def orth_(token: Token) -> str:
+    return token.orth_
+
+
+def ent_type(token: Token) -> int:
+    return token.ent_type
+
+
+def ent_type_(token: Token) -> str:
+    return ENE_ONTONOTES_MAPPING.get(token.ent_type_, "OTHERS")
+
+
+def ent_iob(token: Token) -> int:
+    return token.ent_iob
+
+
+def ent_iob_(token: Token) -> str:
+    return token.ent_iob_
+
+
+def lemma(token: Token) -> int:
+    return token.lemma
+
+
+def lemma_(token: Token) -> str:
+    return token.lemma_
+
+
+def norm(token: Token) -> int:
+    return token.norm
+
+
+def norm_(token: Token) -> str:
+    return token.norm_
+
+
+def pos(token: Token) -> int:
+    return token.pos
+
+
+def pos_(token: Token) -> str:
+    return token.pos_
+
+
+def tag(token: Token) -> int:
+    return token.tag
+
+
+def tag_(token: Token) -> str:
+    return token.tag_
+
+
+def dep(token: Token) -> int:
+    return token.dep
+
+
+def dep_(token: Token) -> str:
+    return token.dep_
+
+
+def is_sent_start(token: Token) -> bool:
+    return token.is_sent_start
+
+
+def is_stop(token: Token) -> bool:
+    return token.is_stop
+
+
+def is_not_stop(token: Token) -> bool:
+    return not token.is_stop
+
+
+def ent_label_ene(token: Token) -> str:
+    if token.ent_iob_ in "BI":
+        return token.ent_iob_ + "-" + token.ent_type_
+    else:
+        return token.ent_iob_
+
+
+def ent_label_ontonotes(token: Token) -> str:
+    if token.ent_iob_ in "BI":
+        return token.ent_iob_ + "-" + ENE_ONTONOTES_MAPPING.get(token.ent_type_, "OTHERS")
+    else:
+        return token.ent_iob_
+
+
+# token field getters for Doc.user_data
+
+def reading_form(token: Token, use_orth_if_none=True) -> str:
+    reading = token.doc.user_data["reading_forms"][token.i]
+    if not reading and use_orth_if_none:
+        reading = token.orth_
+    return reading
+
+
+def inflection(token: Token) -> str:
+    return token.doc.user_data["inflections"][token.i]
+
+
+# bunsetu related field getters for Doc.user_data
+
+def bunsetu_bi_label(token: Token):
+    return bunsetu_bi_labels(token.doc)[token.i]
+
+
+def bunsetu_position_type(token: Token):
+    return bunsetu_position_types(token.doc)[token.i]
+
+
+def is_bunsetu_head(token: Token):
+    return token.i in token.doc.user_data["bunsetu_heads"]
+
+
+SEP = "+"
+
+
+def default_join_func(elements):
+    return SEP.join([element if isinstance(element, str) else str(element) for element in elements])
+
+
+T = TypeVar('T')
+U = TypeVar('U')
+V = TypeVar('V')
+
+
+# curried function: ex. traverse(children, lemma_)(token)
+@singledispatch
+def traverse(
+        traverse_func: Callable[[Token], Iterable[Token]],
+        element_func: Callable[[Token], T] = lambda token: token,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+        join_func: Callable[[Iterable[T]], U] = lambda lst: lst,
+) -> Callable[[Union[Token, Span]], U]:
+    return lambda token: join_func([element_func(t) for t in traverse_func(token) if condition_func(t)])
+
+
+# overload: ex. traverse(token, children, lemma_)
+@traverse.register
+def _traverse(
+        token: Token,
+        traverse_func: Callable[[Token], Iterable[Token]],
+        element_func: Callable[[Token], T] = lambda token: token,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+        join_func: Callable[[Iterable[T]], U] = lambda lst: lst,
+) -> U:
+    return traverse(traverse_func, element_func, condition_func, join_func)(token)
+
+
+def head(token: Token) -> Token:
+    return token.head
+
+
+def ancestors(token: Token) -> Iterable[Token]:
+    return token.ancestors
+
+
+def conjuncts(token: Token) -> Tuple[Token]:
+    return token.conjuncts
+
+
+def children(token: Token) -> Iterable[Token]:
+    return token.children
+
+
+def lefts(token: Token) -> Iterable[Token]:
+    return token.lefts
+
+
+def rights(token: Token) -> Iterable[Token]:
+    return token.rights
+
+
+def subtree(token: Token) -> Iterable[Token]:
+    return token.subtree
+
+
+# curried function: ex. bunsetu(lemma_)(token)
+@singledispatch
+def bunsetu(
+        element_func: Callable[[Token], T] = lambda token: token,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
+) -> Callable[[Token], U]:
+    return traverse(bunsetu_span, element_func, condition_func, join_func)
+
+
+# overload: ex. bunsetu(token, lemma_)
+@bunsetu.register
+def _bunsetu(
+        token: Token,
+        element_func: Callable[[Token], T] = lambda token: token,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
+) -> U:
+    return traverse(bunsetu_span, element_func, condition_func, join_func)(token)
+
+
+# curried function: ex. phrase(lemma_)(token)
+@singledispatch
+def phrase(
+        element_func: Callable[[Token], T] = lambda token: token,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
+) -> Callable[[Token], U]:
+    return traverse(bunsetu_phrase_span, element_func, condition_func, join_func)
+
+
+# overload: ex. phrase(token)
+@phrase.register
+def _phrase(
+        token: Token,
+        element_func: Callable[[Token], T] = lambda token: token,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
+) -> U:
+    return traverse(bunsetu_phrase_span, element_func, condition_func, join_func)(token)
+
+
+# curried function: ex. sub_phrases(lemma_)(token)
+@singledispatch
+def sub_phrases(
+        phrase_func: Callable[[Token], U] = _phrase,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+) -> Callable[[Token], Iterable[Tuple[str, U]]]:
+    return lambda token: _sub_phrases(
+        token,
+        phrase_func,
+        condition_func,
+    )
+
+
+# overload: ex. sub_phrases(token, lemma_)
+@sub_phrases.register
+def _sub_phrases(
+        token: Token,
+        phrase_func: Callable[[Token], U] = _phrase,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+) -> Iterable[Tuple[str, U]]:
+    return [
+        (
+            t.dep_,
+            phrase_func(t),
+        ) for t in bunsetu_span(token).root.children if t.i in bunsetu_head_list(token.doc) and condition_func(t)
+    ]
+
+
+# curried function: ex. phrases(lemma_)(sent)
+@singledispatch
+def phrases(
+        phrase_func: Callable[[Token], U] = _phrase,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+) -> Callable[[Span], Iterable[U]]:
+    return lambda sent: _phrases_span(
+        sent,
+        phrase_func,
+        condition_func,
+    ) if isinstance(sent, Span) else _phrases_doc(
+        sent,
+        phrase_func,
+        condition_func,
+    )
+
+
+# overload: ex. phrases(sent, lemma_)
+@phrases.register
+def _phrases_span(
+        sent: Span,
+        phrase_func: Callable[[Token], U] = _phrase,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+) -> Iterable[U]:
+    return [
+        phrase_func(t) for t in bunsetu_head_tokens(sent) if condition_func(t)
+    ]
+
+
+# overload: ex. phrases(doc, lemma_)
+@phrases.register
+def _phrases_doc(
+        doc: Doc,
+        phrase_func: Callable[[Token], U] = _phrase,
+        condition_func: Callable[[Token], bool] = lambda token: True,
+) -> Iterable[U]:
+    return [
+        phrase_func(t) for t in bunsetu_head_tokens(doc[:]) if condition_func(t)
+    ]
+
+
+# curried function: ex. sub_tokens("B", lambda sub_token: sub_token.lemma)(token)
+@singledispatch
+def sub_tokens(
+        mode: str = "A",  # "A" or "B"
+        sub_token_func: Callable[[DetailedToken], T] = lambda sub_token: sub_token,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
+) -> Callable[[Token], U]:
+    return lambda token: _sub_tokens(token, mode, sub_token_func, join_func)
+
+
+# overload: ex. sub_tokens(token, "B", lambda sub_token: sub_token.lemma)
+@sub_tokens.register
+def _sub_tokens(
+        token: Token,
+        mode: str = "A",  # "A" or "B"
+        sub_token_func: Callable[[DetailedToken], T] = lambda sub_token: sub_token.surface,
+        join_func: Callable[[Iterable[T]], U] = default_join_func,
+) -> U:
+    if token.doc.user_data["sub_tokens"][token.i]:
+        elements = token.doc.user_data["sub_tokens"][token.i][{"A": 0, "B": 1}[mode]]
+    else:
+        elements = [
+            DetailedToken(
+                token.orth_,
+                token.tag_,
+                inflection(token),
+                token.lemma_,
+                reading_form(token),
+                None,
+            )
+        ]
+    return join_func([
+        sub_token_func(element) for element in elements
+    ])

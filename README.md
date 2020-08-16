@@ -7,7 +7,7 @@
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
-***Please read the [Important changes](#ginza-300) before you upgrade GiNZA.***
+***Please read the [Important changes](#ginza-400) before you upgrade GiNZA.***
 
 ## License
 GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under
@@ -18,21 +18,25 @@ You must agree and follow The MIT License to use GiNZA NLP Library and GiNZA Jap
 spaCy is the key framework of GiNZA.
 [spaCy LICENSE PAGE](https://github.com/explosion/spaCy/blob/master/LICENSE)
 
-### Sudachi and SudachiPy
+### Sudachi/SudachiPy - SudachiDict - chiVe
 SudachiPy provides high accuracies for tokenization and pos tagging.
 [Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
 [SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
 
+[SudachiDict LEGAL PAGE](https://github.com/WorksApplications/SudachiDict/blob/develop/LEGAL)
+
+[chiVe LICENSE PAGE](https://github.com/WorksApplications/chiVe/blob/master/LICENSE)
+
 ## Training Data-sets
 
-### UD Japanese BCCWJ v2.4
-The parsing model of GiNZA v3 is trained on a part of
-[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) v2.4
+### UD Japanese BCCWJ v2.6
+The parsing model of GiNZA v4 is trained on a part of
+[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) v2.6
 ([Omura and Asahara:2018](https://www.aclweb.org/anthology/W18-6014/)).
 This model is developed by National Institute for Japanese Language and Linguistics, and Megagon Labs.
 
 ### GSK2014-A (2019) BCCWJ edition
-The named entity recognition model of GiNZA v3 is trained on a part of
+The named entity recognition model of GiNZA v4 is trained on a part of
 [GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ edition
 ([Hashimoto, Inui, and Murakami:2008](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf)).
 We use two of the named entity label systems, both
@@ -53,23 +57,6 @@ Run following line
 ```bash
 $ pip install -U ginza
 ```
-or download pip install archive from
-[release page](https://github.com/megagonlabs/ginza/releases)
-and run `pip install` with it.
-```bash
-$ pip install ginza-3.1.2.tar.gz
-```
-If you found a error message, `ValueError: cannot mmap an empty file` from `ginza` command,
-please execute following step once to initialize `ja_ginza_dict` package.
-```bash
-$ ginza -i
-```
-
-For Google Colab, you need to reload the package info. 
-```python
-import pkg_resources, imp
-imp.reload(pkg_resources)
-```
 
 If you encountered some install problems related to Cython, please try to set the CFLAGS like below.
 ```bash
@@ -83,15 +70,15 @@ After pressing enter key, you will get the parsed results with [CoNLL-U Syntacti
 $ ginza
 銀座でランチをご一緒しましょう。
 # text = 銀座でランチをご一緒しましょう。
-1	銀座	銀座	PROPN	名詞-固有名詞-地名-一般	_	6	compound	_	BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|SpaceAfter=No|NP_B|ENE7=B_City|NE=B_GPE
-2	で	で	ADP	助詞-格助詞	_	1	case	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
-3	ランチ	ランチ	NOUN	名詞-普通名詞-一般	_	6	obj	_	BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|SpaceAfter=No|NP_B
-4	を	を	ADP	助詞-格助詞	_	3	case	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
-5	ご	御	NOUN	接頭辞	_	6	compound	_	BunsetuBILabel=B|BunsetuPositionType=CONT|SpaceAfter=No|NP_B
-6	一緒	一緒	VERB	名詞-普通名詞-サ変可能	_	0	root	_	BunsetuBILabel=I|BunsetuPositionType=ROOT|SpaceAfter=No
-7	し	為る	AUX	動詞-非自立可能	_	6	aux	_	BunsetuBILabel=I|BunsetuPositionType=FUNC|SpaceAfter=No
-8	ましょう	ます	AUX	助動詞	_	6	aux	_	BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|SpaceAfter=No
-9	。	。	PUNCT	補助記号-句点	_	6	punct	_	BunsetuBILabel=I|BunsetuPositionType=CONT|SpaceAfter=No
+1	銀座	銀座	PROPN	名詞-固有名詞-地名-一般	_	6	obl	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ギンザ|NE=B-GPE|ENE=B-City
+2	で	で	ADP	助詞-格助詞	_	1	case	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=デ
+3	ランチ	ランチ	NOUN	名詞-普通名詞-一般	_	6	obj	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ランチ
+4	を	を	ADP	助詞-格助詞	_	3	case	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=ヲ
+5	ご	ご	NOUN	接頭辞	_	6	compound	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=CONT|Reading=ゴ
+6	一緒	一緒	VERB	名詞-普通名詞-サ変可能	_	0	root	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=ROOT|Reading=イッショ
+7	し	する	AUX	動詞-非自立可能	_	6	advcl	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,連用形-一般|Reading=シ
+8	ましょう	ます	AUX	助動詞	_	6	aux	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=助動詞-マス,意志推量形|Reading=マショウ
+9	。	。	PUNCT	補助記号-句点	_	6	punct	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=CONT|Reading=。
 
 ```
 `ginzame` command provides tokenization function like [MeCab](https://taku910.github.io/mecab/).
@@ -111,25 +98,54 @@ $ ginzame
 EOS
 
 ```
+The format of spaCy's JSON is available by specifying `-f 3` or `-f json` for `ginza` command.
+```bash
+$ ginza -f json
+銀座でランチをご一緒しましょう。
+[
+ {
+  "paragraphs": [
+   {
+    "raw": "銀座でランチをご一緒しましょう。",
+    "sentences": [
+     {
+      "tokens": [
+       {"id": 1, "orth": "銀座", "tag": "名詞-固有名詞-地名-一般", "pos": "PROPN", "lemma": "銀座", "head": 5, "dep": "obl", "ner": "B-City"},
+       {"id": 2, "orth": "で", "tag": "助詞-格助詞", "pos": "ADP", "lemma": "で", "head": -1, "dep": "case", "ner": "O"},
+       {"id": 3, "orth": "ランチ", "tag": "名詞-普通名詞-一般", "pos": "NOUN", "lemma": "ランチ", "head": 3, "dep": "obj", "ner": "O"},
+       {"id": 4, "orth": "を", "tag": "助詞-格助詞", "pos": "ADP", "lemma": "を", "head": -1, "dep": "case", "ner": "O"},
+       {"id": 5, "orth": "ご", "tag": "接頭辞", "pos": "NOUN", "lemma": "ご", "head": 1, "dep": "compound", "ner": "O"},
+       {"id": 6, "orth": "一緒", "tag": "名詞-普通名詞-サ変可能", "pos": "VERB", "lemma": "一緒", "head": 0, "dep": "ROOT", "ner": "O"},
+       {"id": 7, "orth": "し", "tag": "動詞-非自立可能", "pos": "AUX", "lemma": "する", "head": -1, "dep": "advcl", "ner": "O"},
+       {"id": 8, "orth": "ましょう", "tag": "助動詞", "pos": "AUX", "lemma": "ます", "head": -2, "dep": "aux", "ner": "O"},
+       {"id": 9, "orth": "。", "tag": "補助記号-句点", "pos": "PUNCT", "lemma": "。", "head": -3, "dep": "punct", "ner": "O"}
+      ]
+     }
+    ]
+   }
+  ]
+ }
+]
+```
 If you want to use [`cabocha -f1`](https://taku910.github.io/cabocha/) (lattice style) like output, add `-f 1` or `-f cabocha` option to `ginza` command.
 This option's format is almost same as `cabocha -f1` but the `func_index` field (after the slash) is slightly different.
 Our `func_index` field indicates the boundary where the `自立語` ends in each `文節` (and the `機能語` might start from there).
 And the functional token filter is also slightly different between `cabocha -f1` and ' `ginza -f cabocha`.
 ```bash
-$ ginza -f 1
+$ ginza -f cabocha
 銀座でランチをご一緒しましょう。
 * 0 2D 0/1 0.000000
-銀座	名詞,固有名詞,地名,一般,*,*,銀座,ギンザ,*	B-City
-で	助詞,格助詞,*,*,*,*,で,デ,*	O
+銀座	名詞,固有名詞,地名,一般,,銀座,ギンザ,*	B-City
+で	助詞,格助詞,*,*,,で,デ,*	O
 * 1 2D 0/1 0.000000
-ランチ	名詞,普通名詞,一般,*,*,*,ランチ,ランチ,*	O
-を	助詞,格助詞,*,*,*,*,を,ヲ,*	O
+ランチ	名詞,普通名詞,一般,*,,ランチ,ランチ,*	O
+を	助詞,格助詞,*,*,,を,ヲ,*	O
 * 2 -1D 0/2 0.000000
-ご	接頭辞,*,*,*,*,*,御,ゴ,*	O
-一緒	名詞,普通名詞,サ変可能,*,*,*,一緒,イッショ,*	O
-し	動詞,非自立可能,*,*,サ行変格,連用形-一般,為る,シ,*	O
+ご	接頭辞,*,*,*,,ご,ゴ,*	O
+一緒	名詞,普通名詞,サ変可能,*,,一緒,イッショ,*	O
+し	動詞,非自立可能,*,*,サ行変格,連用形-一般,する,シ,*	O
 ましょう	助動詞,*,*,*,助動詞-マス,意志推量形,ます,マショウ,*	O
-。	補助記号,句点,*,*,*,*,。,。,*	O
+。	補助記号,句点,*,*,,。,。,*	O
 EOS
 
 ```
@@ -157,14 +173,49 @@ Or please refer the source codes of GiNZA on github until we'd write the documen
 
 ### User Dictionary
 The user dictionary files should be set to `userDict` field of `sudachi.json` in the installed package directory of`ja_ginza_dict` package.
-The `sudachi.json` is located at below path.  
-`${python_library_path}/ja_ginza_dict/sudachidict/sudachi.json`
 
 Please read the official documents to compile user dictionaries with `sudachipy` command.  
 [SudachiPy - User defined Dictionary](https://github.com/WorksApplications/SudachiPy#user-defined-dictionary)  
-[Sudachi ユーザー辞書作成方法 (Japanese Only)](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)
+[Sudachi User Dictionary Construction (Japanese Only)](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)
 
 ## Releases
+### version 4.x
+
+#### ginza-4.0.0
+- 2020-08-16
+- Important changes
+  - Replace Japanese model with `spacy.lang.ja` of spaCy v2.3
+    - Replace values of `Token.lemma_` with the output of SudachiPy's `Morpheme.dictionary_form()`
+  - Replace ja_ginza_dict with official SudachiDict-core package
+    - You can delete`ja_ginza_dict` package safety
+  - Change misc field contents of command line output
+    - NE(OntoNotes) BI labels as `B-GPE`
+    - Add subfields: Reading, Inf(inflection) and ENE(Extended NE)
+  - Obsolete `Token._.*` and add some entries for `Doc.user_data[]` and accessors
+    - inflections (`ginza.inflection(Token)`)
+    - reading_forms (`ginza.reading_form(Token)`)
+    - bunsetu_bi_labels (`ginza.bunsetu_bi_label(Token)`)
+    - bunsetu_position_types (`ginza.bunsetu_position_type(Token)`)
+    - bunsetu_heads (`ginza.is_bunsetu_head(Token)`)
+  - Change pipeline architecture
+    - JapaneseCorrector was obsoleted
+    - Add CompoundSplitter and BunsetuRecognizer
+  - Upgrade UD_JAPANESE-BCCWJ to v2.6
+  - Change word2vec to chiVe mc90
+- API Changes
+  - Add bunsetu-unit APIs (`from ginza import *`)
+    - bunsetu(Token)
+    - phrase(Token)
+    - sub_phrases(Token)
+    - phrases(Span)
+    - bunsetu_spans(Span)
+    - bunsetu_phrase_spans(Span)
+    - bunsetu_head_list(Span)
+    - bunsetu_head_tokens(Span)
+    - bunsetu_bi_labels(Span)
+    - bunsetu_position_types(Span)
+
+
 ### version 3.x
 
 #### ginza-3.1.2
@@ -320,12 +371,14 @@ $ git clone 'https://github.com/megagonlabs/ginza.git'
 #### 2. Run python setup.py
 For normal environment:
 ```bash
-$ python setup.sh develop
+$ python setup.py develop
 ```
 
 ### 3. Set up system.dic
 Copy `system.dic` from installed package directory of `ja_ginza_dict` to `./ja_ginza_dict/sudachidict/`.
 
 ### Training models
-The script below is used to train `ja_ginza` models.
-[shell/train_pipeline.sh](https://github.com/megagonlabs/ginza/blob/develop/shell/train_pipeline.sh)
+The analysis model of GiNZA is trained by `spacy train` command.
+```bash
+$ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/ja_ginza-ud-dev.json -b ja_vectors_chive_mc90_35k/ -ovl 0.3 -n 100 -m meta.json.ginza -V 4.0.0
+```
