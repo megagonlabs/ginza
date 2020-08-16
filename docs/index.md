@@ -9,7 +9,8 @@
 - 解析モデルを`spaCy v2.3`の`spacy.lang.ja`に変更
   - SudachiPy辞書をPyPI(SudachiDict-core)の公式パッケージに変更
   - `Token.lemma_`に設定する値をSudachiPyの`Morpheme.dictionary_form()`に変更
-- コマンドラインツール出力(標準conllu形式)のmiscフィールドの変更
+- コマンドラインツール起動オプションおよび出力(標準conllu形式)のmiscフィールドの変更
+  - use_sentence_separator(-s)オプションの廃止
   - NE(OntoNotes)のBIラベル直後のセパレータをハイフン(B-GPE)に変更
   - Reading(読み), Inf(活用), ENE(拡張固有表現)のサブフィールドを追加
 - トークン拡張フィールド(`Token._.*`)を廃止
@@ -22,6 +23,45 @@
   - 解析精度と一貫性が向上
 - 単語ベクトルをchiVe mc90(うち頻度上位35,000語)に変更
 
+## GiNZA v4の解析モデルと文節単位の解析API
+新しいGiNZAの解析モデルにより、Universal Dependenciesの枠組みの中で日本語に特徴的な文節構造を考慮することができます。
+
+![bunsetu_heads](https://github.com/megagonlabs/ginza/raw/static/docs/images/bunsetu_heads.png)
+
+またGiNZA v4で追加された解析APIを用いることで、文節やその主辞を単位とした分析がこれまでよりずっと容易になります。
+```python
+from ginza import *
+import spacy
+nlp = spacy.load("ja_ginza")  # GiNZAモデルの読み込み
+
+from collections import defaultdict
+frames = defaultdict(lambda: 0)  # 依存関係の出現頻度を格納
+sentences = set()  # 重複文検出用のset
+
+with open("sentences.txt", "r") as fin:  # 解析対象のテキストファイルから
+  for line in fin:  # 一行ごとに
+    try:
+      doc = nlp(line.rstrip())  # 解析を実行し
+    except:
+      continue
+    for sent in doc.sents:  # 文単位でループ
+      if sent.text in sentences:
+        continue  # 重複文はスキップ
+      sentences.add(sent.text)
+      for t in bunsetu_head_tokens(sent):  # 文節主辞トークンのうち
+        if t.pos_ not in {"ADJ", "VERB"}:
+          continue  # 述語以外はスキップ
+        v = phrase(lemma_)(t)  # 述語とその格要素(主語・目的語相当)の句を集める
+        dep_phrases = sub_phrases(t, phrase(lemma_), is_not_stop)
+        subj = [phrase for dep, phrase in dep_phrases if dep in {"nsubj"}]
+        obj  = [phrase for dep, phrase in dep_phrases if dep in {"obj", "iobj"}]
+        for s in subj:
+          for o in obj:
+            frames[(s, o, v)] += 1  # 格要素と述語の組み合わせをカウント
+
+for frame, count in sorted(frames.items(), key=lambda t: -t[1]):
+  print(count, *frame, sep="\t")  # 出現頻度の高い順に表示
+```
 ## 発表資料
 - 言語処理学会論文誌 委嘱記事 Volume 27 Number 3 (coming soon)
 - [Universal Dependencies Symposium 2019 発表スライド](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
@@ -215,13 +255,14 @@ SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSu
 ### version 4.x
 
 #### ginza-4.0.0
-- 2020-08-16
+- 2020-08-16, Chrysoberyl
 - 重要な変更
   - 解析モデルを`spaCy v2.3`の`spacy.lang.ja`に変更
     - `Token.lemma_`に設定される値をSudachiPyの`Morpheme.dictionary_form()`に変更
   - SudachiPy辞書をPyPI(SudachiDict-core)の公式パッケージに変更
     - 旧バージョンでインストールされる`ja_ginza_dict`パッケージはアンインストール可能
-  - コマンドラインツール出力(標準conllu形式)のmiscフィールドの変更
+  - コマンドラインツール起動オプションおよび出力(標準conllu形式)のmiscフィールドの変更
+    - use_sentence_separator(-s)オプションの廃止
     - NE(OntoNotes)のBIラベル直後のセパレータをハイフン(B-GPE)に変更
     - Reading(読み), Inf(活用), ENE(拡張固有表現)のサブフィールドを追加
   - トークン拡張フィールド(`Token._.*`)を廃止し`Doc.user_data[]`のエントリとアクセサを追加
@@ -294,7 +335,7 @@ with open('sample2.pickle', 'wb') as f:
       - add `-i` option to initialize the files of `ja_ginza_dict`
 
 #### ginza-3.0.0
-- 2020-01-15
+- 2020-01-15, Benitoite
 - 重要な変更
   - パッケージの配布元をPyPIに変更
     - `pip install ginza` を実行するだけで解析モデルを含めてインストールが完結
