@@ -54,19 +54,19 @@ Please also see the Development Environment section below.
 ### Runtime set up
 #### 1. Install GiNZA NLP Library with Japanese Universal Dependencies Model
 Run following line
-```bash
+```console
 $ pip install -U ginza
 ```
 
 If you encountered some install problems related to Cython, please try to set the CFLAGS like below.
-```bash
+```console
 $ CFLAGS='-stdlib=libc++' pip install ginza
 ```
 
 #### 2. Execute ginza from command line
 Run `ginza` command from the console, then input some Japanese text.
 After pressing enter key, you will get the parsed results with [CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) format.
-```bash
+```console
 $ ginza
 銀座でランチをご一緒しましょう。
 # text = 銀座でランチをご一緒しましょう。
@@ -83,7 +83,7 @@ $ ginza
 ```
 `ginzame` command provides tokenization function like [MeCab](https://taku910.github.io/mecab/).
 The output format of `ginzame` is almost same as `mecab`, but the last `pronounciation` field is always '*'.
-```bash
+```console
 $ ginzame
 銀座でランチをご一緒しましょう。
 銀座	名詞,固有名詞,地名,一般,*,*,銀座,ギンザ,*
@@ -99,7 +99,7 @@ EOS
 
 ```
 The format of spaCy's JSON is available by specifying `-f 3` or `-f json` for `ginza` command.
-```bash
+```console
 $ ginza -f json
 銀座でランチをご一緒しましょう。
 [
@@ -131,7 +131,7 @@ If you want to use [`cabocha -f1`](https://taku910.github.io/cabocha/) (lattice 
 This option's format is almost same as `cabocha -f1` but the `func_index` field (after the slash) is slightly different.
 Our `func_index` field indicates the boundary where the `自立語` ends in each `文節` (and the `機能語` might start from there).
 And the functional token filter is also slightly different between `cabocha -f1` and ' `ginza -f cabocha`.
-```bash
+```console
 $ ginza -f cabocha
 銀座でランチをご一緒しましょう。
 * 0 2D 0/1 0.000000
@@ -227,8 +227,8 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 - 2020-01-19
 - API Changes
   - Extension fields
-    - The values of Token._.sudachi field would be set after calling SudachipyTokenizer.set_enable_ex_sudachi(True), to avoid serializtion errors
-```
+    - The values of ``Token._.sudachi`` field would be set after calling ``SudachipyTokenizer.set_enable_ex_sudachi(True)``, to avoid serializtion errors
+```python
 import spacy
 import pickle
 nlp = spacy.load('ja_ginza')
@@ -364,13 +364,13 @@ with open('sample2.pickle', 'wb') as f:
 ## Development Environment
 ### Development set up
 #### 1. Clone from github
-```bash
+```console
 $ git clone 'https://github.com/megagonlabs/ginza.git'
 ```
 
 #### 2. Run python setup.py
 For normal environment:
-```bash
+```console
 $ python setup.py develop
 ```
 
@@ -379,6 +379,6 @@ Copy `system.dic` from installed package directory of `ja_ginza_dict` to `./ja_g
 
 ### Training models
 The analysis model of GiNZA is trained by `spacy train` command.
-```bash
+```console
 $ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/ja_ginza-ud-dev.json -b ja_vectors_chive_mc90_35k/ -ovl 0.3 -n 100 -m meta.json.ginza -V 4.0.0
 ```

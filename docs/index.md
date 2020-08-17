@@ -112,7 +112,7 @@ GiNZA v4 の固有表現抽出モデルは
 ### 実行環境のセットアップ
 #### 1. GiNZA NLPライブラリと日本語Universal Dependenciesモデルのインストール
 最新版をインストールするにはコンソールで次のコマンドを実行します。
-```bash
+```console
 $ pip install -U ginza
 ```
 
@@ -124,13 +124,13 @@ imp.reload(pkg_resources)
 [【GiNZA】GoogleColabで日本語NLPライブラリGiNZAがloadできない](https://www.sololance.tokyo/2019/10/colab-load-ginza.html)
 
 インストール時にCythonに関するエラーが発生した場合は、次のように環境変数CFLAGSを設定してください。
-```bash
+```console
 $ CFLAGS='-stdlib=libc++' pip install ginza
 ```
 
 #### 2. ginzaコマンドの実行
 コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、[CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) 形式で解析結果が出力されます。
-```bash
+```console
 $ ginza
 銀座でランチをご一緒しましょう。
 # text = 銀座でランチをご一緒しましょう。
@@ -149,7 +149,7 @@ $ ginza
 `ginzame`コマンドは形態素解析処理のみをマルチプロセスで高速に実行します。
 このコマンドと`mecab`の出力形式の相違点として、 
 最終フィールド（発音）が常に`*`となることに注意して下さい。
-```bash
+```console
 $ ginzame
 銀座でランチをご一緒しましょう。
 銀座	名詞,固有名詞,地名,一般,*,*,銀座,ギンザ,*
@@ -165,7 +165,7 @@ EOS
 
 ```
 spaCyの学習用JSON形式での出力は`ginza -f 3` または `ginza -f json`を実行してください。
-```bash
+```console
 $ ginza -f json
 銀座でランチをご一緒しましょう。
 [
@@ -199,7 +199,7 @@ $ ginza -f json
 スラッシュ記号`/`に続く`func_index`フィールドが常に自立語の終了位置（機能語があればその開始位置に一致）を示すこと、
 機能語認定基準が一部異なること、
 に注意して下さい。
-```bash
+```console
 $ ginza -f cabocha
 銀座でランチをご一緒しましょう。
 * 0 2D 0/1 0.000000
@@ -307,9 +307,9 @@ SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSu
 - 2020-01-19
 - API Changes
   - Extension fields
-    - The values of Token._.sudachi field would	be set after calling SudachipyTokenizer.set_enable_ex_sudachi(True), to avoid pickling errors
+    - The values of ``Token._.sudachi`` field would	be set after calling ``SudachipyTokenizer.set_enable_ex_sudachi(True)``, to avoid pickling errors
 
-```
+```python
 import spacy
 import pickle
 nlp = spacy.load('ja_ginza')
@@ -444,24 +444,24 @@ with open('sample2.pickle', 'wb') as f:
 ## 開発環境
 ### 開発環境のセットアップ
 #### 1. githubからclone
-```bash
+```console
 $ git clone 'https://github.com/megagonlabs/ginza.git'
 ```
 
 #### 2. pip install および setup.sh の実行
-```bash
+```console
 $ pip install -U -r requirements.txt
 $ python setup.py develop
 ```
 
 #### 3. GPU用ライブラリのセットアップ (Optional)
 CUDA v10.1の場合は次のように指定します。
-```bash
+```console
 $ pip install -U thinc[cuda101]
 ```
 
 ### 訓練の実行
 GiNZAの解析モデル `ja_ginza` はspaCy標準コマンドを使用して学習を行っています。
-```bash
+```console
 $ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/ja_ginza-ud-dev.json -b ja_vectors_chive_mc90_35k/ -ovl 0.3 -n 100 -m meta.json.ginza -V 4.0.0
 ```
