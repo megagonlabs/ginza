@@ -188,7 +188,8 @@ Please read the official documents to compile user dictionaries with `sudachipy`
     - Replace values of `Token.lemma_` with the output of SudachiPy's `Morpheme.dictionary_form()`
   - Replace ja_ginza_dict with official SudachiDict-core package
     - You can delete`ja_ginza_dict` package safety
-  - Change misc field contents of command line output
+  - Change options and misc field contents of output of command line tool
+    - delete use_sentence_separator(-s)
     - NE(OntoNotes) BI labels as `B-GPE`
     - Add subfields: Reading, Inf(inflection) and ENE(Extended NE)
   - Obsolete `Token._.*` and add some entries for `Doc.user_data[]` and accessors
