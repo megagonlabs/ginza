@@ -9,7 +9,7 @@ import os
 
 import plac
 
-from spacy.util import get_lang_class
+from spacy.lang.ja import JapaneseDefaults
 from spacy.syntax.nonproj import is_nonproj_tree, contains_cycle
 
 
@@ -31,24 +31,19 @@ TOKEN_PATTERN = re.compile(
 )
 BUNSETU_PATTERN = re.compile(r"BunsetuBILabel=(.)")
 NE_PATTERN = re.compile(r'NE=([^|]+)([|]|$)')
+LUW_PATTERN = re.compile(r'LUWBILabel=([BI])\|LUWPOS=([^|]+)')
 
-SPACY_NE_EXCEPTIONAL_CHARS = [".", ",", "!", "?", "'"]
 
-
-def unify_range(gold_tokens, start, end, replacing_token, extend_dep_labels):
-    head = None
+def unify_range(gold_tokens, start, end, replacing_token):
     dep_outer_id = None
     dep_outer_label = None
     for g in gold_tokens[start:end]:
         head_id = g['id'] + g['head']
         if head_id < start or end <= head_id or g['head'] == 0:
             if dep_outer_id is None:
-                head = g['id']
                 dep_outer_id = head_id
                 dep_outer_label = g['dep']
-            elif dep_outer_id == head_id:
-                head = head_id
-            else:
+            elif dep_outer_id != head_id:
                 return False
     if dep_outer_id is None:
         print(gold_tokens[start:end], file=sys.stderr)
@@ -109,7 +104,7 @@ def _print(_prefix, _golds, _doc):
     )
 
 
-def retokenize(gold_tokens, doc, extend_dep_labels, debug=False):
+def retokenize_gold(gold_tokens, doc, debug=False):
     if debug:
         print(doc.text)
         print([g['orth'] + (' ' if g['whitespace'] else '') for g in gold_tokens])
@@ -142,7 +137,7 @@ def retokenize(gold_tokens, doc, extend_dep_labels, debug=False):
             elif align_from_g is not None:
                 if debug:
                     _print('<', gold_tokens[align_from_g:index_g + 1], doc[index_t:index_t + 1])
-                if unify_range(gold_tokens, align_from_g, index_g + 1, doc[index_t], extend_dep_labels):
+                if unify_range(gold_tokens, align_from_g, index_g + 1, doc[index_t]):
                     index_g = align_from_g
                 align_from_g = None
             elif g_offset == t_offset:
@@ -199,7 +194,17 @@ def retokenize(gold_tokens, doc, extend_dep_labels, debug=False):
         raise Exception('cyclic')
 
 
-def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels, ensure_end_period, _print_bunsetu_dep=False):
+def convert_lines(
+        path,
+        lines,
+        tokenizer,
+        paragraph_id_regex,
+        n_sents,
+        extend_dep_labels,
+        ensure_end_period,
+        luw_ent,
+        _print_bunsetu_dep=False,
+):
     paragraphs = []
     raw = ''
     sentences = []
@@ -217,7 +222,9 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
     ent_target = False
     ents = []
     ent_start_char = None
+    ent_end_char = None
     ent_label = None
+    skip = False
     offset = 0
     state = 'sid'
 
@@ -248,6 +255,13 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
                 new_paragraph_id = ''
             if paragraph_id is None or paragraph_id != new_paragraph_id:
                 paragraph_id = new_paragraph_id
+                if sentences:
+                    paragraphs.append({
+                        'raw': raw,
+                        'sentences': sentences,
+                    })
+                    raw = ''
+                    sentences = []
 
             state = 'text'
 
@@ -318,92 +332,65 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
                 bunsetu_all_deps[bunsetu_dep] = 0
             bunsetu_all_deps[bunsetu_dep] += 1
 
-            m = NE_PATTERN.search(options)
+            if luw_ent:
+                m = LUW_PATTERN.search(options)
+            else:
+                m = NE_PATTERN.search(options)
             if m:
                 ent_target = True
-                label = m.group(1)
-                if label.startswith('B-'):
+                if luw_ent:
+                    label = m.group(1) + "-" + m.group(2)
+                else:
+                    label = m.group(1)
+                if label[0] == "U":
+                    label = "B" + label[1:]
+                elif label[0] == "L":
+                    label = "I" + label[1:]
+
+                if label.startswith('B'):
                     if ent_label:
-                        print(line_index, ent_label, label, file=sys.stderr)
-                        raise Exception('Bad NE label: ' + line)
-                    ent_start_char = offset
-                    if orth in SPACY_NE_EXCEPTIONAL_CHARS:
-                        print(line_index, 'NE punctuation {} of {} dropped'.format(orth, label), file=sys.stderr)
-                        if whitespace:
-                            ent_start_char += 2
-                        else:
-                            ent_start_char += 1
-                    ent_label = label[2:]
-                elif label.startswith('I-'):
-                    if not ent_label or ent_label != label[2:]:
-                        print(line_index, ent_label, label, file=sys.stderr)
-                        raise Exception('Bad NE label: ' + line)
-                    if orth in ["."] and re.match(r'^([A-Z]+)$', tokens[-2]['orth']):
-                        print(line_index, 'NE context including punctuation {}{} {} dropped'.format(
-                            tokens[-2]['orth'], orth, label
-                        ), file=sys.stderr)
-                        ent_end_char = offset - 1
-                        if tokens[-2]['whitespace']:
-                            ent_end_char -= 1
-                        if len(tokens) >= 3 and tokens[-3]['whitespace']:
-                            ent_end_char -= 1
-                        if ent_start_char < ent_end_char:
-                            ents.append({
-                                'start': ent_start_char,
-                                'end': ent_end_char,
-                                'label': ent_label,
-                            })
-                        if whitespace:
-                            ent_start_char = offset + 2
-                        else:
-                            ent_start_char = offset + 1
-                elif label.startswith('L-'):
-                    if not ent_label or ent_label != label[2:]:
-                        print(line_index, ent_label, label, file=sys.stderr)
-                        raise Exception('Bad NE label: ' + line)
-                    ent_end_char = offset + len(orth)
-                    if orth in SPACY_NE_EXCEPTIONAL_CHARS:
-                        print(line_index, 'NE punctuation {} of {} dropped'.format(orth, label), file=sys.stderr)
-                        ent_start_char -= 1
-                    elif tokens[-2]['orth'] in ["."] and re.match(r'^(x|info)$', orth):
-                        print(line_index, 'NE context including punctuation {}{} {} dropped'.format(
-                            tokens[-2]['orth'], orth, label
-                        ), file=sys.stderr)
-                        if tokens[-2]['whitespace']:
-                            ent_end_char = offset - 2
-                        else:
-                            ent_end_char = offset - 1
-                    ents.append({
-                        'start': ent_start_char,
-                        'end': ent_end_char,
-                        'label': ent_label,
-                    })
-                    ent_start_char = None
-                    ent_label = None
-                elif label.startswith('U-'):
-                    if ent_label:
-                        print(line_index, ent_label, label, file=sys.stderr)
-                        raise Exception('Bad NE label: ' + line)
-                    if orth in SPACY_NE_EXCEPTIONAL_CHARS:
-                        print(line_index, 'NE punctuation {} of {} dropped'.format(orth, label), file=sys.stderr)
-                    else:
                         ents.append({
-                            'start': offset,
-                            'end': offset + len(orth),
-                            'label': label[2:],
+                            'start': ent_start_char,
+                            'end': ent_end_char,
+                            'label': ent_label,
+                        })
+                    ent_start_char = offset
+                    ent_end_char = offset + len(orth)
+                    ent_label = label[2:]
+                elif label.startswith('I'):
+                    if not ent_label or ent_label != label[2:]:
+                        print('inconsistent ENT label: ' + str(ent_label) + ', ' + line, file=sys.stderr)
+                        skip = True
+                    else:
+                        ent_end_char = offset + len(orth)
+                elif not luw_ent and label == "O":
+                    if ent_label:
+                        ents.append({
+                            'start': ent_start_char,
+                            'end': ent_end_char,
+                            'label': ent_label,
                         })
                         ent_start_char = None
-                elif label == 'O':
-                    tokens[-1]['ner'] = 'O'
-                    if ent_label:
-                        print(line_index, ent_label, label, file=sys.stderr)
-                        raise Exception('Bad NE label: ' + line)
+                        ent_end_char = None
+                        ent_label = None
                 else:
-                    print(line_index, ent_label, label, file=sys.stderr)
-                    raise Exception('Bad NE label: ' + line)
+                    print('bad ENT label: ' + line, file=sys.stderr)
+                    skip = True
+                    ent_start_char = None
+                    ent_end_char = None
+                    ent_label = None
+            elif luw_ent:
+                print('missing LUW label: ' + line, file=sys.stderr)
+                skip = True
             elif ent_label:
-                print(line_index, ent_label, label, file=sys.stderr)
-                raise Exception('NE label not terminated: ' + line)
+                ents.append({
+                    'start': ent_start_char,
+                    'end': ent_end_char,
+                    'label': ent_label,
+                })
+                ent_start_char = None
+                ent_end_char = None
+                ent_label = None
             offset += len(orth)
             if whitespace:
                 offset += 1
@@ -413,8 +400,11 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
                 error_line(state, path, line_index, sentence_id, sentence, line)
                 return []
             if ent_label:
-                raise Exception('NE label not terminated')
-
+                ents.append({
+                    'start': ent_start_char,
+                    'end': ent_end_char,
+                    'label': ent_label,
+                })
             if bunsetu_dep:
                 if extend_dep_labels and bunsetu_dep.lower() != 'root':
                     tokens[bunsetu_root]['dep'] += '_bunsetu'
@@ -429,14 +419,16 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
             elif contains_cycle(heads):
                 print(file=sys.stderr)
                 print('skip(cyclic)', path, sentence_id, file=sys.stderr)
+            elif skip:
+                print(file=sys.stderr)
+                print('skip(bad-luw-label)', path, sentence_id, file=sys.stderr)
             else:
                 if tokenizer:
-                    retokenize(
+                    retokenize_gold(
                         tokens,
                         tokenizer(
                             ''.join([t['orth'] + (' ' if t['whitespace'] else '') for t in tokens])
                         ),
-                        extend_dep_labels,
                     )
                 if ent_target:
                     offset = 0
@@ -498,7 +490,9 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
             ent_target = False
             ents = []
             ent_start_char = None
+            ent_end_char = None
             ent_label = None
+            skip = False
             offset = 0
             state = 'sid'
 
@@ -530,13 +524,21 @@ def convert_lines(path, lines, tokenizer, paragraph_id_regex, n_sents, extend_de
     return paragraphs
 
 
-def convert_files(path, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels, ensure_end_period):
+def convert_files(path, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels, ensure_end_period, luw_ent):
     docs = []
 
     if type(path) == list:
         print('targets: {}'.format(str(path)), file=sys.stderr)
         for p in path:
-            docs += convert_files(p, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels, ensure_end_period)
+            docs += convert_files(
+                p,
+                tokenizer,
+                paragraph_id_regex,
+                n_sents,
+                extend_dep_labels,
+                ensure_end_period,
+                luw_ent,
+            )
         print(file=sys.stderr, flush=True)
         return docs
 
@@ -550,6 +552,7 @@ def convert_files(path, tokenizer, paragraph_id_regex, n_sents, extend_dep_label
                 n_sents,
                 extend_dep_labels,
                 ensure_end_period,
+                luw_ent,
             )
         print(file=sys.stderr)
     else:
@@ -559,7 +562,14 @@ def convert_files(path, tokenizer, paragraph_id_regex, n_sents, extend_dep_label
             with open(str(path), 'r') as file:
                 lines = file.readlines()
         paragraphs = convert_lines(
-            path, lines, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels, ensure_end_period
+            path,
+            lines,
+            tokenizer,
+            paragraph_id_regex,
+            n_sents,
+            extend_dep_labels,
+            ensure_end_period,
+            luw_ent,
         )
         docs.append({
             'id': str(path),
@@ -638,12 +648,13 @@ def print_json(docs, file=sys.stdout):
 
 @plac.annotations(
     input_path=("Input path", "positional", None, str),
-    retokenize=("Retokenize", "flag", "r"),
+    retokenize=("Retokenize", "option", "r", str, ["A", "B", "C", None]),
     extend_dep_labels=("Extend dep labels", "flag", "e"),
     paragraph_id_regex=("Regex pattern for paragraph_id (default=r'')", 'option', 'p', str),
     n_sents=("Number of sentences per paragraph (default=10)", "option", "n", int),
     augmentation=("Enable Zenkaku/Hankaku augmentation", "flag", "a"),
     ensure_end_period=("Docs always end with period", "flag", "d"),
+    luw_ent=("Use LUW label as ent", "flag", "l"),
 )
 def main(
         input_path='-',
@@ -653,13 +664,27 @@ def main(
         n_sents=10,
         augmentation=False,
         ensure_end_period=False,
+        luw_ent=False,
 ):
+    if luw_ent:
+        assert not retokenize, "retokenize option must be disabled if use luw_ent option"
+
     if retokenize:
-        tokenizer = get_lang_class('ja')()
+        tokenizer = JapaneseDefaults.create_tokenizer(config={
+            "split_mode": retokenize
+        })
     else:
         tokenizer = None
     out = sys.stdout
-    docs = convert_files(input_path, tokenizer, paragraph_id_regex, n_sents, extend_dep_labels, ensure_end_period)
+    docs = convert_files(
+        input_path,
+        tokenizer,
+        paragraph_id_regex,
+        n_sents,
+        extend_dep_labels,
+        ensure_end_period,
+        luw_ent,
+    )
     if augmentation:
         random.seed(1)
         docs = [{
