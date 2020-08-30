@@ -181,6 +181,11 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 ## Releases
 ### version 4.x
 
+#### ginza-4.0.1
+- 2020-08-30
+- Debug
+  - Add type arguments for singledispatch register annotations (for Python 3.6)
+
 #### ginza-4.0.0
 - 2020-08-16, Chrysoberyl
 - Important changes

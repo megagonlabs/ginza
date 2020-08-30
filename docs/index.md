@@ -254,6 +254,11 @@ SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSu
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 4.x
 
+#### ginza-4.0.1
+- 2020-08-30
+- Debug
+  - Add type arguments for singledispatch register annotations (for Python 3.6)
+
 #### ginza-4.0.0
 - 2020-08-16, Chrysoberyl
 - 重要な変更
