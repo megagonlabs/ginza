@@ -62,6 +62,36 @@ with open("sentences.txt", "r") as fin:  # 解析対象のテキストファイ�
 for frame, count in sorted(frames.items(), key=lambda t: -t[1]):
   print(count, *frame, sep="\t")  # 出現頻度の高い順に表示
 ```
+|表1 GiNZA v4で追加された文節APIの一覧|||
+||||
+|Bunsetu Span APIs|||
+||bunsetu_spans()|文節SpanのIterable。|
+||bunsetu_phrase_spans()|文節主辞SpanのIterable。|
+||bunsetu_span()|トークンが属する文節のSpan。|
+||bunsetu_phrase_span()|トークンが属する文節の主辞Span。|
+|Bunsetu Construction APIs|||
+||bunsetu()|文節中のトークン列を指定された形に整形して返す。|
+||phrase()|文節主辞中のトークン列を指定された形に整形して返す。|
+||sub_phrases()|従属文節を指定された形に整形して返す。|
+||phrases()|スパンに含まれる文節を指定された形に整形して返す。|
+|Utility APIs|||
+||traverse()|構文木を指定された方法で巡回し指定された形に整形して返す。|
+||default_join_func()|デフォルトのトークン列の結合方法。|
+||SEP|デフォルトのトークン区切り文字。|
+|Token Level APIs|||
+||bunsetu_head_list()|DocやSpanに含まれる文節のヘッドトークンのインデックスのリスト。|
+||bunsetu_head_tokens()|DocやSpanに含まれる文節のヘッドトークンのリスト。|
+||bunsetu_bi_labels()|DocやSpanに含まれるトークンが文節開始位置にある場合は"B"、それ以外は"I"とするリスト。|
+||bunsetu_position_types()|DocやSpanに含まれるトークンを{"ROOT", "SEM_HEAD", "SYN_HEAD", "NO_HEAD", "FUNC", "CONT"}に分類したリスト。|
+||is_bunsetu_head()|トークンが文節のヘッドの場合はTrue、それ以外はFalse。|
+||bunsetu_bi_label()|トークンが文節開始位置にある場合は"B"、それ以外は"I"。|
+||bunsetu_position_type()|トークンを{"ROOT", "SEM_HEAD", "SYN_HEAD", "NO_HEAD", "FUNC", "CONT"}に分類。|
+|Token Proxy APIs|||
+||*|spacy.tokens.Tokenクラスのプロパティと同名・同機能の関数群。|
+|Subtoken APIs|||
+||sub_tokens()|トークンの分割情報。|
+||set_split_mode()|デフォルトの分割モードの変更。|
+
 ## 発表資料
 - 言語処理学会論文誌 委嘱記事 Volume 27 Number 3 (coming soon)
 - [Universal Dependencies Symposium 2019 発表スライド](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
