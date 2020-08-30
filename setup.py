@@ -25,5 +25,5 @@ setup(
     name="ginza",
     packages=find_packages(include=["ginza"]),
     url="https://github.com/megagonlabs/ginza",
-    version='4.0.0',
+    version='4.0.1',
 )

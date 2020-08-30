@@ -197,11 +197,13 @@ def traverse(
         condition_func: Callable[[Token], bool] = lambda token: True,
         join_func: Callable[[Iterable[T]], U] = lambda lst: lst,
 ) -> Callable[[Union[Token, Span]], U]:
-    return lambda token: join_func([element_func(t) for t in traverse_func(token) if condition_func(t)])
+    return lambda token: join_func([
+        element_func(t) for t in traverse_func(token) if condition_func(t)
+    ])
 
 
 # overload: ex. traverse(token, children, lemma_)
-@traverse.register
+@traverse.register(Token)
 def _traverse(
         token: Token,
         traverse_func: Callable[[Token], Iterable[Token]],
@@ -251,7 +253,7 @@ def bunsetu(
 
 
 # overload: ex. bunsetu(token, lemma_)
-@bunsetu.register
+@bunsetu.register(Token)
 def _bunsetu(
         token: Token,
         element_func: Callable[[Token], T] = lambda token: token,
@@ -272,7 +274,7 @@ def phrase(
 
 
 # overload: ex. phrase(token)
-@phrase.register
+@phrase.register(Token)
 def _phrase(
         token: Token,
         element_func: Callable[[Token], T] = lambda token: token,
@@ -296,7 +298,7 @@ def sub_phrases(
 
 
 # overload: ex. sub_phrases(token, lemma_)
-@sub_phrases.register
+@sub_phrases.register(Token)
 def _sub_phrases(
         token: Token,
         phrase_func: Callable[[Token], U] = _phrase,
@@ -328,7 +330,7 @@ def phrases(
 
 
 # overload: ex. phrases(sent, lemma_)
-@phrases.register
+@phrases.register(Span)
 def _phrases_span(
         sent: Span,
         phrase_func: Callable[[Token], U] = _phrase,
@@ -340,7 +342,7 @@ def _phrases_span(
 
 
 # overload: ex. phrases(doc, lemma_)
-@phrases.register
+@phrases.register(Doc)
 def _phrases_doc(
         doc: Doc,
         phrase_func: Callable[[Token], U] = _phrase,
@@ -362,7 +364,7 @@ def sub_tokens(
 
 
 # overload: ex. sub_tokens(token, "B", lambda sub_token: sub_token.lemma)
-@sub_tokens.register
+@sub_tokens.register(Token)
 def _sub_tokens(
         token: Token,
         mode: str = "A",  # "A" or "B"

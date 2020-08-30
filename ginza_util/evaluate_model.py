@@ -18,7 +18,7 @@ def evaluate_from_file(
 ):
     gold = []
     for file in json_files:
-        with open(file, 'r') as f:
+        with open(file, 'r', encoding="utf-8") as f:
             for doc in json.load(f):
                 for paragraph in doc['paragraphs']:
                     for sentence in paragraph['sentences']:
@@ -56,7 +56,7 @@ def evaluate(
             offset += len(t['orth'])
             t['end'] = offset
             sentence += t['orth']
-            if t['whitespace']:
+            if 'whitespace' in t and t['whitespace']:
                 offset += 1
                 sentence += ' '
         try:
@@ -126,7 +126,10 @@ class Stats:
 
     def print(self, file=sys.stdout):
         def f1(p, r):
-            return 2 * p * r / (p + r)
+            if p + r == 0.0:
+                return 0.0
+            else:
+                return 2 * p * r / (p + r)
 
         for title, matrix in (
                 ('pos_confusion', self.pos_confusion),
@@ -246,23 +249,23 @@ class Stats:
                         correct_pos_tokens += 1
                     if is_correct_dep(g, r):
                         correct_uas_tokens += 1
-                        count(self.dep_confusion, g['dep'], r.dep_)
+                        count(self.dep_confusion, g['dep'].lower(), r.dep_)
                         if g['pos'] == r.pos_:
                             correct_pos_uas_tokens += 1
-                        if g['dep'] == r.dep_.lower():
+                        if g['dep'].lower() == r.dep_.lower():
                             correct_las_tokens += 1
                             if g['pos'] == r.pos_:
                                 correct_pos_las_tokens += 1
                     else:
-                        count(self.dep_confusion, g['dep'], '_')
-                    if g['dep'] == 'root' and r.dep_.lower() == 'root':
+                        count(self.dep_confusion, g['dep'].lower(), '_')
+                    if g['dep'].lower() == 'root' and r.dep_.lower() == 'root':
                         self.correct_roots += 1
                 elif g_end < r_end:
                     count(self.pos_confusion, g['pos'], '_')
-                    count(self.dep_confusion, g['dep'], '_')
+                    count(self.dep_confusion, g['dep'].lower(), '_')
             elif g_end < r_end:
                 count(self.pos_confusion, g['pos'], '_')
-                count(self.dep_confusion, g['dep'], '_')
+                count(self.dep_confusion, g['dep'].lower(), '_')
 
             if debug:
                 if g_end == r_end:
