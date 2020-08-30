@@ -64,6 +64,7 @@ for frame, count in sorted(frames.items(), key=lambda t: -t[1]):
 ```
 
 #### 表1 GiNZA v4で追加された文節APIの一覧
+
 | category | func or variable | description |
 | --- | --- | --- |
 | Span-based | | |
