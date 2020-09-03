@@ -181,6 +181,12 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 ## Releases
 ### version 4.x
 
+#### ginza-4.0.2
+- 2020-09-04
+- Improvements
+  - Serialization of `CompoundSplitter` for `nlp.to_disk()`
+  - Bunsetu span detection accuracy
+
 #### ginza-4.0.1
 - 2020-08-30
 - Debug
