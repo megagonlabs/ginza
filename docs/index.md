@@ -287,6 +287,12 @@ SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSu
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 4.x
 
+#### ginza-4.0.2
+- 2020-09-04
+- Improvements
+  - Serialization of `CompoundSplitter` for `nlp.to_disk()`
+  - Bunsetu span detection accuracy
+
 #### ginza-4.0.1
 - 2020-08-30
 - Debug

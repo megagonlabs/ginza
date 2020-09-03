@@ -1,6 +1,6 @@
 from typing import Iterable, List
 
-from spacy.language import Language
+from spacy.language import Language, component
 from spacy.tokens import Doc, Span, Token
 
 __all__ = [
@@ -134,6 +134,7 @@ def bunsetu_position_types(span: Span) -> List[str]:
         return position_types[start:end]
 
 
+@component("BunsetuRecognizer", requires=("token.dep",), assigns=("token.dep",))
 class BunsetuRecognizer:
     def __init__(self, nlp: Language, **_cfg) -> None:
         self.nlp = nlp
@@ -188,18 +189,30 @@ class BunsetuRecognizer:
         bunsetu_heads = tuple(idx for idx, is_head in enumerate(heads) if is_head)
 
         bunsetu_bi = ["I"] * len(doc)
-        next_start = 0
-        for head_i in bunsetu_heads:
-            t = doc[head_i]
-            if next_start < len(bunsetu_bi):
-                bunsetu_bi[next_start] = "B"
-            right = t
-            for sub in t.rights:
-                if heads[sub.i]:
-                    right = right.right_edge
-                    break
-                right = sub
-            next_start = right.i + 1
+        bunsetu_bi[0] = "B"
+        for head_i, next_head_i in zip(bunsetu_heads[:-1], bunsetu_heads[1:]):
+            l_head = doc[head_i]
+            r_head = doc[next_head_i]
+            if l_head.right_edge.i + 1 == r_head.left_edge.i or l_head.right_edge.i >= r_head.i:  # (l)(r) or (l (r))
+                bunsetu_bi[r_head.left_edge.i] = "B"
+            elif l_head.i <= r_head.left_edge.i:  # ((l) r)
+                bunsetu_bi[l_head.right_edge.i + 1] = "B"
+            else:  # ((l) (missed_tokens) (r))
+                l_ancestors = set(t.i for t in l_head.ancestors)
+                r_ancestors = set(t.i for t in r_head.ancestors)
+                for m in doc[l_head.right_edge.i + 1: r_head.left_edge.i]:  # find closer branch
+                    found = False
+                    for m_ancestor in [m] + list(m.ancestors):
+                        if m_ancestor.i in r_ancestors:
+                            bunsetu_bi[m_ancestor.i] = "B"
+                            found = True
+                            break
+                        elif m_ancestor.i in l_ancestors:
+                            break
+                    if found:
+                        break
+                else:
+                    bunsetu_bi[l_head.right_edge.i + 1] = "B"
 
         doc.user_data["bunsetu_heads"] = bunsetu_heads
         doc.user_data["bunsetu_bi_labels"] = bunsetu_bi
