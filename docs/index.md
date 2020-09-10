@@ -4,6 +4,11 @@
 &emsp;
 [![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza/week)
 
+### What's new!
+Megagon Labs Blogで
+[GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合](https://www.megagon.ai/jp/blog/ginza-version-4.0-integrating-bunsetu-api-into-multilingual-structural-analysis-technology/)
+が公開されました。
+
 ***GiNZAをアップグレードする際は [重要な変更](#ginza-400) の記述をご確認ください。***
 ## Breaking Changes in v4.0
 - 解析モデルを`spaCy v2.3`の`spacy.lang.ja`に変更
@@ -95,7 +100,8 @@ for frame, count in sorted(frames.items(), key=lambda t: -t[1]):
 | | sub_tokens()              | トークンの分割情報。 |
 | | set_split_mode()          | デフォルトの分割モードの変更。 |
 
-## 発表資料
+## 解説資料
+- [GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合 - Megagon Labs Blog](https://www.megagon.ai/jp/blog/ginza-version-4.0-integrating-bunsetu-api-into-multilingual-structural-analysis-technology/)
 - 言語処理学会論文誌 委嘱記事 Volume 27 Number 3 (coming soon)
 - [Universal Dependencies Symposium 2019 発表スライド](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
 
