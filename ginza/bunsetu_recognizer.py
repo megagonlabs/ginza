@@ -159,33 +159,21 @@ class BunsetuRecognizer:
                 heads[t.head.i] = True
 
         for ent in doc.ents:  # removing head inside ents
-            head = ent.root
-            if head is not None:
-                for t in ent:
-                    if t.i != head.i:
-                        heads[t.i] = False
-
-        """
-        for t in doc:
-            if heads[t.i]:
-                continue
-            if t.i < t.head.i:
-                for idx in range(t.i + 1, t.head.i):
-                    if heads[idx]:
-                        heads[t.i] = t.pos_ not in {"PUNCT"}
-                        if debug and heads[t.i]:
-                            print("========= B", t.i + 1, t.orth_, "=========")
-                            print(list((t.i + 1, t.orth_, t.head.i + 1) for t, is_head in zip(doc, heads) if is_head))
+            head = None
+            outer = None
+            for t in ent:
+                if t.head.i == t.i or t.head.i < ent.start or ent.end <= t.head.i:
+                    if not outer:
+                        head = t
+                        outer = t.head
+                    elif outer.i != t.head.i:
                         break
             else:
-                for idx in range(t.head.i + 1, t.i):
-                    if heads[idx]:
-                        heads[t.i] = t.pos_ not in {"PUNCT"}
-                        if debug and heads[t.i]:
-                            print("========= C", t.i + 1, t.orth_, "=========")
-                            print(list((t.i + 1, t.orth_, t.head.i + 1) for t, is_head in zip(doc, heads) if is_head))
-                        break
-        """
+                if head:
+                    for t in ent:
+                        if t.i != head.i:
+                            heads[t.i] = False
+
         bunsetu_heads = tuple(idx for idx, is_head in enumerate(heads) if is_head)
 
         bunsetu_bi = ["I"] * len(doc)
