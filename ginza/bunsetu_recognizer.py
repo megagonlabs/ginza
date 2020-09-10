@@ -4,6 +4,7 @@ from spacy.language import Language, component
 from spacy.tokens import Doc, Span, Token
 
 __all__ = [
+    "bunsetu_available",
     "bunsetu_span",
     "bunsetu_spans",
     "bunsetu_phrase_span",
@@ -38,6 +39,10 @@ POS_PHRASE_MAP = {
 
     "CCONJ": "CCONJP",
 }
+
+
+def bunsetu_available(span: Span):
+    return "bunsetu_heads" in span.doc.user_data
 
 
 def bunsetu_head_list(span: Span) -> Iterable[int]:
