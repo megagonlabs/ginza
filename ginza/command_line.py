@@ -12,7 +12,7 @@ from spacy.lang.ja import JapaneseDefaults
 
 from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes,\
     bunsetu_bi_label, bunsetu_position_type
-from .bunsetu_recognizer import bunsetu_head_list, bunsetu_phrase_span
+from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
 
 MINI_BATCH_SIZE = 100
 
@@ -254,7 +254,8 @@ def analyze_conllu(sent: Span, print_origin=True):
     if print_origin:
         yield "# text = {}".format(sent.text)
     np_labels = [""] * len(sent)
-    if bunsetu_head_list:
+    use_bunsetu = bunsetu_available(sent)
+    if use_bunsetu:
         for head_i in bunsetu_head_list(sent):
             bunsetu_head_token = sent[head_i]
             phrase = bunsetu_phrase_span(bunsetu_head_token)
@@ -262,13 +263,13 @@ def analyze_conllu(sent: Span, print_origin=True):
                 for idx in range(phrase.start - sent.start, phrase.end - sent.start):
                     np_labels[idx] = "NP_B" if idx == phrase.start else "NP_I"
     for token, np_label in zip(sent, np_labels):
-        yield conllu_token_line(sent, token, np_label)
+        yield conllu_token_line(sent, token, np_label, use_bunsetu)
     yield ""
 
 
-def conllu_token_line(sent, token, np_label):
-    bunsetu_bi = bunsetu_bi_label(token)
-    position_type = bunsetu_position_type(token)
+def conllu_token_line(sent, token, np_label, use_bunsetu):
+    bunsetu_bi = bunsetu_bi_label(token) if use_bunsetu else None
+    position_type = bunsetu_position_type(token) if use_bunsetu else None
     inf = inflection(token)
     reading = reading_form(token)
     ne = ent_label_ontonotes(token)
