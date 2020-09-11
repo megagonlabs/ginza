@@ -181,8 +181,13 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 ## Releases
 ### version 4.x
 
+#### ginza-4.0.4
+- 2020-09-11
+- Improvements
+  - `ginza` command line tool works correctly without BunsetuRecognizer in the pipeline
+
 #### ginza-4.0.3
-- 2020-09-04
+- 2020-09-10
 - Improve bunsetu head identification accuracy over inconsistent deps in ent spans
 
 #### ginza-4.0.2

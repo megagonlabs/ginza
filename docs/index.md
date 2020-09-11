@@ -293,8 +293,13 @@ SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSu
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 4.x
 
+#### ginza-4.0.4
+- 2020-09-11
+- Improvements
+  - `ginza` command line tool works correctly without BunsetuRecognizer in the pipeline
+
 #### ginza-4.0.3
-- 2020-09-04
+- 2020-09-10
 - Improve bunsetu head identification accuracy over inconsistent deps in ent spans
 
 #### ginza-4.0.2
