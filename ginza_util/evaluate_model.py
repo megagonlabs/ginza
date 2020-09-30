@@ -137,11 +137,22 @@ class Stats:
                 ('ent_confusion', self.ent_confusion),
         ):
             print(' {}'.format(title), file=file)
+            max_label_len = str(max(len(g) for g in matrix.keys()))
             for gold, results in sorted(matrix.items(), key=lambda t: t[0]):
                 results = matrix[gold]
-                print('  {}({}): {}'.format(gold, sum(results.values()), ', '.join([
+                print(('  {:<' + max_label_len + '}({:>6}): {}').format(gold, sum(results.values()), ', '.join([
                     '{}={}'.format(pos, num) for pos, num in sorted(results.items(), key=lambda t:-t[1])
                 ])), file=file)
+            print(' precision, recall, f1', file=file)
+            for gold, results in sorted(matrix.items(), key=lambda t: t[0]):
+                results = matrix[gold]
+                total = sum(results.values())
+                correct = results.get(gold, results.get(gold.upper(), 0))
+                output = sum(sum(v for k, v in r.items() if k.lower() == gold.lower()) for r in matrix.values())
+                p = correct / output if output else 0
+                r = correct / total if total else 0
+                f = p * r * 2 / (p + r) if p and r else 0
+                print(('  {:<' + max_label_len + '}: {:.3f}, {:.3f}, {:.3f}').format(gold, p, r, f), file=file)
 
         print("sentence={}, gold_token={}, result_token={}, custom_cond={:.4f}({}/{})".format(
             self.sentences,
