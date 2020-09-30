@@ -24,6 +24,7 @@ def run(
         output_path=None,
         output_format="0",
         require_gpu=False,
+        disable_sentencizer=False,
         parallel=1,
         files=None,
 ):
@@ -36,6 +37,7 @@ def run(
         hash_comment,
         output_format,
         require_gpu,
+        disable_sentencizer,
     )
 
     if parallel <= 0:
@@ -149,12 +151,14 @@ class Analyzer:
             hash_comment,
             output_format,
             require_gpu,
+            disable_sentencizer,
     ):
         self.model_path = model_path
         self.split_mode = split_mode
         self.hash_comment = hash_comment
         self.output_format = output_format
         self.require_gpu = require_gpu
+        self.disable_sentencizer = disable_sentencizer
         self.nlp = None
 
     def set_nlp(self):
@@ -174,6 +178,13 @@ class Analyzer:
                 nlp = spacy.load(self.model_path)
             else:
                 nlp = spacy.load("ja_ginza")
+
+            if self.disable_sentencizer:
+                def disable_sentencizer(doc):
+                    for t in doc:
+                        t.is_sent_start = False
+                    return doc
+                nlp.add_pipe(disable_sentencizer, before="parser")
 
             if self.split_mode:
                 set_split_mode(nlp, self.split_mode)
@@ -402,6 +413,7 @@ def run_ginzame(
         output_format="mecab",
         require_gpu=False,
         parallel=parallel,
+        disable_sentencizer=False,
         files=files,
     )
 
@@ -417,6 +429,7 @@ def main_ginzame():
     output_path=("output path", "option", "o", Path),
     output_format=("output format", "option", "f", str, ["0", "conllu", "1", "cabocha", "2", "mecab", "3", "json"]),
     require_gpu=("enable require_gpu", "flag", "g"),
+    disable_sentencizer=("disable spaCy's sentence separator", "flag", "d"),
     parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
 )
@@ -427,6 +440,7 @@ def run_ginza(
         output_path=None,
         output_format="conllu",
         require_gpu=False,
+        disable_sentencizer=False,
         parallel=1,
         *files,
 ):
@@ -437,6 +451,7 @@ def run_ginza(
         output_path=output_path,
         output_format=output_format,
         require_gpu=require_gpu,
+        disable_sentencizer=disable_sentencizer,
         parallel=parallel,
         files=files,
     )

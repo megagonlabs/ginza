@@ -293,6 +293,11 @@ SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSu
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 ### version 4.x
 
+#### ginza-4.0.5
+- 2020-10-01
+- Improvements
+  - Add `-d` option, which disables spaCy's sentence separator, to `ginza` command line tool
+
 #### ginza-4.0.4
 - 2020-09-11
 - Improvements
