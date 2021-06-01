@@ -181,6 +181,11 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 ## Releases
 ### version 4.x
 
+#### ginza-4.0.6
+- 2021-06-01
+- Bug fix
+  - Issue #160: IndexError: list assignment index out of range for empty string
+
 #### ginza-4.0.5
 - 2020-10-01
 - Improvements
