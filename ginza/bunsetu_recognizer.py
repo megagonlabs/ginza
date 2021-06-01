@@ -182,7 +182,8 @@ class BunsetuRecognizer:
         bunsetu_heads = tuple(idx for idx, is_head in enumerate(heads) if is_head)
 
         bunsetu_bi = ["I"] * len(doc)
-        bunsetu_bi[0] = "B"
+        if bunsetu_bi:
+            bunsetu_bi[0] = "B"
         for head_i, next_head_i in zip(bunsetu_heads[:-1], bunsetu_heads[1:]):
             l_head = doc[head_i]
             r_head = doc[next_head_i]
