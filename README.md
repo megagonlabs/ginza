@@ -3,7 +3,7 @@
 # GiNZA NLP Library
 [![Tweet](https://abs.twimg.com/favicons/favicon.ico)](https://twitter.com/intent/tweet?text=GiNZA%20-%20Japanese%20NLP%20Library%20https%3A%2F%2Fgithub.com%2Fmegagonlabs%2Fginza)
 &emsp;
-[![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza/week)
+[![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza)
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
