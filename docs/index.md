@@ -2,7 +2,7 @@
 # GiNZAの公開ページ
 [![Tweet](https://abs.twimg.com/favicons/favicon.ico)](https://twitter.com/intent/tweet?text=GiNZA%20-%20Japanese%20NLP%20Library%20https%3A%2F%2Fmegagonlabs.github.io%2Fginza%2F)
 &emsp;
-[![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza/week)
+[![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza)
 
 ### What's new!
 Megagon Labs Blogで
