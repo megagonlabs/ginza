@@ -11,6 +11,7 @@ from .ene_ontonotes_mapper import ENE_ONTONOTES_MAPPING
 
 
 __all__ = [
+    "make_compound_splitter", "make_bunsetu_recognizer",
     "set_split_mode",
     "token_i", "text", "text_with_ws", "orth", "orth_",
     "ent_type", "ent_type_", "ent_iob", "ent_iob_",
@@ -39,6 +40,40 @@ __all__ = [
     "CompoundSplitter",
     "tag_to_pos",
 ]
+
+
+@Language.factory(
+    "compound_splitter",
+    requires=[],
+    assigns=[],
+    retokenizes=True,
+    default_config={"split_mode": None},
+)
+def make_compound_splitter(
+    nlp: Language,
+    name: str,
+    split_mode=None,
+):
+    return CompoundSplitter(
+        nlp.vocab,
+        split_mode,
+    )
+
+
+@Language.factory(
+    "bunsetu_recognizer",
+    requires=["token.dep"],
+    assigns=["token.dep"],
+    retokenizes=False,
+    default_config={},
+)
+def make_bunsetu_recognizer(
+    nlp: Language,
+    name: str,
+):
+    return BunsetuRecognizer(
+        nlp.vocab,
+    )
 
 
 def set_split_mode(nlp: Language, mode: str):

@@ -1,4 +1,4 @@
-spacy>=2.3.2,<3.0.0
-SudachiPy>=0.4.9
-SudachiDict-core>=20200330
-ja_ginza>=4.0.0,<=4.1.0
+spacy>=3.0.6,<3.1.0
+SudachiPy>=0.5.2
+SudachiDict-core>=20210608
+ja_ginza>=5.0.0,<=5.1.0

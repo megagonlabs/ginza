@@ -4,7 +4,7 @@ from collections import OrderedDict
 import srsly
 
 from spacy import util
-from spacy.language import component
+from spacy.language import Language
 from spacy.lang.ja import resolve_pos
 
 __all__ = [
@@ -48,11 +48,10 @@ def _replace_list_entries(lst, index, inserting_list):
     return lst[:index] + inserting_list + lst[index + 1:]
 
 
-@component("CompoundSplitter", retokenizes=True)
 class CompoundSplitter:
-    def __init__(self, nlp, **cfg):
+    def __init__(self, nlp, split_mode=None):
         self.nlp = nlp
-        self.split_mode = cfg.get("split_mode", None)
+        self.split_mode = split_mode
 
     def __call__(self, doc):
         if self._split_mode is None:

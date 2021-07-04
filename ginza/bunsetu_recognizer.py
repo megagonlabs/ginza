@@ -1,6 +1,6 @@
 from typing import Iterable, List
 
-from spacy.language import Language, component
+from spacy.language import Language
 from spacy.tokens import Doc, Span, Token
 
 __all__ = [
@@ -139,9 +139,8 @@ def bunsetu_position_types(span: Span) -> List[str]:
         return position_types[start:end]
 
 
-@component("BunsetuRecognizer", requires=("token.dep",), assigns=("token.dep",))
 class BunsetuRecognizer:
-    def __init__(self, nlp: Language, **_cfg) -> None:
+    def __init__(self, nlp: Language) -> None:
         self.nlp = nlp
 
     def __call__(self, doc: Doc) -> Doc:
