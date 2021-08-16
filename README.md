@@ -82,7 +82,7 @@ $ ginza
 
 ```
 `ginzame` command provides tokenization function like [MeCab](https://taku910.github.io/mecab/).
-The output format of `ginzame` is almost same as `mecab`, but the last `pronounciation` field is always '*'.
+The output format of `ginzame` is almost same as `mecab`, but the last `pronunciation` field is always '*'.
 ```console
 $ ginzame
 銀座でランチをご一緒しましょう。
