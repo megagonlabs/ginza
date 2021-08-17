@@ -1,0 +1,57 @@
+{
+  "lang":"ja",
+  "name":"ginza",
+  "version":"5.0.0a1",
+  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019). Assigns word2vec token vectors. Components: tok2vec, parser, ner, morphologizer, atteribute_ruler, compound_splitter, bunsetu_recognizer.",
+  "author":"Megagon Labs Tokyo.",
+  "email":"ginza@megagon.ai",
+  "url":"https://github.com/megagonlabs/ginza",
+  "license":"MIT License",
+  "sources":[
+    {
+      "name":"UD_Japanese-BCCWJ r2.8",
+      "url":"https://github.com/UniversalDependencies/UD_Japanese-BCCWJ",
+      "license":"CC BY-SA 4.0"
+    },
+    {
+      "name":"GSK2014-A(2019)",
+      "url":"https://www.gsk.or.jp/catalog/gsk2014-a/",
+      "license":"individually defined commercial license"
+    },
+    {
+      "name":"SudachiDict_core",
+      "url":"https://github.com/WorksApplications/SudachiDict",
+      "license":"Apache License 2.0"
+    },
+    {
+      "name":"chiVe",
+      "url":"https://github.com/WorksApplications/chiVe",
+      "license":"Apache License 2.0"
+    }
+  ],
+  "parent_package":"spacy",
+  "spacy_version":">=3.0.6,<3.2.0",
+  "pipeline":[
+    "tok2vec",
+    "parser",
+    "attribute_ruler",
+    "ner",
+    "morphologizer",
+    "compound_splitter",
+    "bunsetu_recognizer"
+  ],
+  "components":[
+    "tok2vec",
+    "parser",
+    "attribute_ruler",
+    "ner",
+    "morphologizer",
+    "compound_splitter",
+    "bunsetu_recognizer"
+  ],
+  "requirements":[
+    "sudachipy>=0.5.2,<0.6.0",
+    "sudachidict_core>=20210608",
+    "ginza>=5.0.0a1,<5.1.0"
+  ]
+}
