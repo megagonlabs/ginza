@@ -17,12 +17,13 @@ setup(
     },
     install_requires=[
         "spacy>=3.0.6,<3.2.0",
-        "SudachiPy>=0.5.2",
+        "plac>=1.3.3",
+        "SudachiPy>=0.5.2,<0.6.0",
         "SudachiDict-core>=20210608",
     ],
     license="MIT",
     name="ginza",
     packages=find_packages(include=["ginza"]),
     url="https://github.com/megagonlabs/ginza",
-    version='5.0.0a0',
+    version='5.0.0a1',
 )
