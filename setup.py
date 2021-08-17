@@ -16,7 +16,7 @@ setup(
         ],
     },
     install_requires=[
-        "spacy>=3.0.6,<3.1.0",
+        "spacy>=3.0.6,<3.2.0",
         "SudachiPy>=0.5.2",
         "SudachiDict-core>=20210608",
     ],
