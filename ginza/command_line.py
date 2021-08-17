@@ -19,7 +19,7 @@ MINI_BATCH_SIZE = 100
 
 def run(
         model_path=None,
-        model_select=None,
+        ensure_model=None,
         split_mode=False,
         hash_comment="print",
         output_path=None,
@@ -31,10 +31,11 @@ def run(
 ):
     if require_gpu:
         print("GPU enabled", file=sys.stderr)
+    assert model_path is None or ensure_model is None
 
     analyzer = Analyzer(
         model_path,
-        model_select,
+        ensure_model,
         split_mode,
         hash_comment,
         output_format,
@@ -149,7 +150,7 @@ class Analyzer:
     def __init__(
             self,
             model_path,
-            model_select,
+            ensure_model,
             split_mode,
             hash_comment,
             output_format,
@@ -157,7 +158,7 @@ class Analyzer:
             disable_sentencizer,
     ):
         self.model_path = model_path
-        self.model_select = model_select
+        self.ensure_model = ensure_model
         self.split_mode = split_mode
         self.hash_comment = hash_comment
         self.output_format = output_format
@@ -180,8 +181,8 @@ class Analyzer:
             # Work-around for pickle error. Need to share model data.
             if self.model_path:
                 nlp = spacy.load(self.model_path)
-            elif self.model_select:
-                    nlp = spacy.load(self.model_select)
+            elif self.ensure_model:
+                    nlp = spacy.load(self.ensure_model)
             else:
                 try:
                     nlp = spacy.load("ja_ginza_electra")
@@ -416,7 +417,7 @@ def run_ginzame(
 ):
     run(
         model_path=model_path,
-        model_select="ja_ginza",
+        ensure_model="ja_ginza",
         split_mode=split_mode,
         hash_comment=hash_comment,
         output_path=output_path,
@@ -434,7 +435,7 @@ def main_ginzame():
 
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
-    model_select=("select model either ja_ginza or ja_ginza_electra", "option", "m", str, ["ja_ginza", "ja_ginza_electra", None]),
+    ensure_model=("select model either ja_ginza or ja_ginza_electra", "option", "m", str, ["ja_ginza", "ja_ginza_electra", None]),
     split_mode=("split mode", "option", "s", str, ["A", "B", "C", None]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
@@ -446,7 +447,7 @@ def main_ginzame():
 )
 def run_ginza(
         model_path=None,
-        model_select=None,
+        ensure_model=None,
         split_mode=None,
         hash_comment="print",
         output_path=None,
@@ -458,7 +459,7 @@ def run_ginza(
 ):
     run(
         model_path=model_path,
-        model_select=model_select,
+        ensure_model=ensure_model,
         split_mode=split_mode,
         hash_comment=hash_comment,
         output_path=output_path,
