@@ -1,8 +1,0 @@
-[nlp]
-pipeline = ["tok2vec","parser","ner","CompoundSplitter","BunsetuRecognizer"]
-
-[components.CompoundSplitter]
-factory = "compound_splitter"
-
-[components.BunsetuRecognizer]
-factory  = "bunsetu_recognizer"
