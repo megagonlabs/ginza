@@ -1,12 +1,14 @@
 /bccwj*/
 /build/
-/corpus/
+/corpus*/
 /dist/
+/electra*
 /embedding*/
 /ja_*
 /log*
 /models/
 /old/
+/rtx*
 /submodules/
 /sudachi*
 /target/
