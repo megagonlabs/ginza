@@ -140,8 +140,17 @@ def bunsetu_position_types(span: Span) -> List[str]:
 
 
 class BunsetuRecognizer:
-    def __init__(self, nlp: Language) -> None:
+    def __init__(self, nlp: Language, remain_bunsetu_suffix: bool = False) -> None:
         self.nlp = nlp
+        self._remain_bunsetu_suffix = remain_bunsetu_suffix
+
+    @property
+    def remain_bunsetu_suffix(self) -> str:
+        return self._remain_bunsetu_suffix
+
+    @remain_bunsetu_suffix.setter
+    def remain_bunsetu_suffix(self, remain: bool):
+        self._remain_bunsetu_suffix = remain
 
     def __call__(self, doc: Doc) -> Doc:
         debug = False
@@ -151,7 +160,8 @@ class BunsetuRecognizer:
                 heads[t.i] = True
             elif t.dep_.endswith(BUNSETU_HEAD_SUFFIX):
                 heads[t.i] = True
-                t.dep_ = t.dep_[:-len(BUNSETU_HEAD_SUFFIX)]
+                if not self._remain_bunsetu_suffix:
+                    t.dep_ = t.dep_[:-len(BUNSETU_HEAD_SUFFIX)]
         for t in doc:  # recovering uncovered subtrees
             if heads[t.i]:
                 while t.head.i < t.i and not heads[t.head.i]:

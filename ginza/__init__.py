@@ -52,7 +52,7 @@ __all__ = [
 def make_compound_splitter(
     nlp: Language,
     name: str,
-    split_mode=None,
+    split_mode: str = None,
 ):
     return CompoundSplitter(
         nlp.vocab,
@@ -70,9 +70,11 @@ def make_compound_splitter(
 def make_bunsetu_recognizer(
     nlp: Language,
     name: str,
+    remain_bunsetu_suffix: bool = False,
 ):
     return BunsetuRecognizer(
         nlp.vocab,
+        remain_bunsetu_suffix,
     )
 
 
