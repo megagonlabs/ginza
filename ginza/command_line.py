@@ -187,7 +187,11 @@ class Analyzer:
                 try:
                     nlp = spacy.load("ja_ginza_electra")
                 except IOError as e:
-                    nlp = spacy.load("ja_ginza")
+                    try:
+                        nlp = spacy.load("ja_ginza")
+                    except IOError as e:
+                        print('Could not find the model. You need to install "ja_ginza_electra" or "ja_ginza" by executing pip like `pip install ja_ginza_electra`.', file=sys.stderr)
+                        raise e
 
             if self.disable_sentencizer:
                 def disable_sentencizer(doc):
