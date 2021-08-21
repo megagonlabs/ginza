@@ -6,6 +6,7 @@ import sys
 
 import plac
 import spacy
+from sudachipy.morpheme import Morpheme
 from spacy.tokens import Span
 
 from spacy.lang.ja import JapaneseDefaults
@@ -26,11 +27,15 @@ def run(
         output_format="0",
         require_gpu=False,
         disable_sentencizer=False,
+        use_normalized_form=False,
         parallel=1,
         files=None,
 ):
     if require_gpu:
         print("GPU enabled", file=sys.stderr)
+    if use_normalized_form:
+        print("overriding Token.lemma_ by normalized_form of SudachiPy", file=sys.stderr)
+        Morpheme.dictionary_form = Morpheme.normalized_form
     assert model_path is None or ensure_model is None
 
     analyzer = Analyzer(
@@ -187,7 +192,11 @@ class Analyzer:
                 try:
                     nlp = spacy.load("ja_ginza_electra")
                 except IOError as e:
-                    nlp = spacy.load("ja_ginza")
+                    try:
+                        nlp = spacy.load("ja_ginza")
+                    except IOError as e:
+                        print('Could not find the model. You need to install "ja_ginza_electra" or "ja_ginza" by executing pip like `pip install ja_ginza_electra`.', file=sys.stderr)
+                        raise e
 
             if self.disable_sentencizer:
                 def disable_sentencizer(doc):
@@ -404,6 +413,7 @@ def mecab_token_line(token):
     split_mode=("split mode", "option", "s", str, ["A", "B", "C", None]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
+    use_normalized_form=("overriding Token.lemma_ by normalized_form of SudachiPy", "flag", "n"),
     parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
 )
@@ -412,6 +422,7 @@ def run_ginzame(
         split_mode=None,
         hash_comment="print",
         output_path=None,
+        use_normalized_form=False,
         parallel=-1,
         *files,
 ):
@@ -423,6 +434,7 @@ def run_ginzame(
         output_path=output_path,
         output_format="mecab",
         require_gpu=False,
+        use_normalized_form=use_normalized_form,
         parallel=parallel,
         disable_sentencizer=False,
         files=files,
@@ -441,6 +453,7 @@ def main_ginzame():
     output_path=("output path", "option", "o", Path),
     output_format=("output format", "option", "f", str, ["0", "conllu", "1", "cabocha", "2", "mecab", "3", "json"]),
     require_gpu=("enable require_gpu", "flag", "g"),
+    use_normalized_form=("overriding Token.lemma_ by normalized_form of SudachiPy", "flag", "n"),
     disable_sentencizer=("disable spaCy's sentence separator", "flag", "d"),
     parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
@@ -453,6 +466,7 @@ def run_ginza(
         output_path=None,
         output_format="conllu",
         require_gpu=False,
+        use_normalized_form=False,
         disable_sentencizer=False,
         parallel=1,
         *files,
@@ -465,6 +479,7 @@ def run_ginza(
         output_path=output_path,
         output_format=output_format,
         require_gpu=require_gpu,
+        use_normalized_form=use_normalized_form,
         disable_sentencizer=disable_sentencizer,
         parallel=parallel,
         files=files,
