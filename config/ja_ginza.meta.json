@@ -49,6 +49,9 @@
     "compound_splitter",
     "bunsetu_recognizer"
   ],
+  "disabled": [
+    "attribute_ruler"
+  ],
   "requirements":[
     "sudachipy>=0.5.2,<0.6.0",
     "sudachidict_core>=20210608",

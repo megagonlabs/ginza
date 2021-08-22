@@ -1,8 +1,8 @@
 {
   "lang":"ja",
-  "name":"ginza_electra",
-  "version":"5.0.0a1",
-  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + transformers-ud-japanese-electra--base. Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
+  "name":"ginza_bert_v2",
+  "version":"5.0.0b1",
+  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + cl-tohoku/bert-base-japanese-v2. Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
   "author":"Megagon Labs Tokyo.",
   "email":"ginza@megagon.ai",
   "url":"https://github.com/megagonlabs/ginza",
@@ -24,9 +24,9 @@
       "license":"Apache License 2.0"
     },
     {
-      "name":"megagonlabs/transformers-ud-japanese-electra-base",
-      "url":"https://huggingface.co/megagonlabs/",
-      "license":"CC BY-SA 4.0"
+      "name":"cl-tohoku/bert-base-japanese-v2",
+      "url":"https://huggingface.co/cl-tohoku/bert-base-japanese-v2",
+      "license":"CC BY-SA 3.0"
     }
   ],
   "parent_package":"spacy",
@@ -56,7 +56,9 @@
     "sudachipy>=0.5.2,<0.6.0",
     "sudachidict_core>=20210608",
     "sudachitra>=0.1.4,<0.2.0",
-    "ginza-transformers>=0.2.0,<0.3.0",
+    "fugashi>=1.1.1",
+    "unidic-lite>=1.0.8",
+    "ginza-transformers>=0.3.0,<1.0.0",
     "ginza>=5.0.0a1,<5.1.0"
   ]
 }
