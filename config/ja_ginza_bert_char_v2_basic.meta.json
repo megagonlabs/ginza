@@ -1,8 +1,8 @@
 {
   "lang":"ja",
-  "name":"ginza_electra",
+  "name":"ginza_bert_v2",
   "version":"5.0.0a1",
-  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + transformers-ud-japanese-electra--base. Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
+  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + cl-tohoku/bert-base-japanese-char-v2(BasicTokenizer). Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
   "author":"Megagon Labs Tokyo.",
   "email":"ginza@megagon.ai",
   "url":"https://github.com/megagonlabs/ginza",
@@ -24,9 +24,9 @@
       "license":"Apache License 2.0"
     },
     {
-      "name":"megagonlabs/transformers-ud-japanese-electra-base",
-      "url":"https://huggingface.co/megagonlabs/",
-      "license":"CC BY-SA 4.0"
+      "name":"cl-tohoku/bert-base-japanese-char-v2",
+      "url":"https://huggingface.co/cl-tohoku/bert-base-japanese-char-v2",
+      "license":"CC BY-SA 3.0"
     }
   ],
   "parent_package":"spacy",
