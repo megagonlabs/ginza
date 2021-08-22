@@ -1,7 +1,7 @@
 {
   "lang":"ja",
   "name":"ginza_bert_v2",
-  "version":"5.0.0a1",
+  "version":"5.0.0b1",
   "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + cl-tohoku/bert-base-japanese-char-v2(BasicTokenizer). Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
   "author":"Megagon Labs Tokyo.",
   "email":"ginza@megagon.ai",
@@ -56,7 +56,7 @@
     "sudachipy>=0.5.2,<0.6.0",
     "sudachidict_core>=20210608",
     "sudachitra>=0.1.4,<0.2.0",
-    "ginza-transformers>=0.2.0,<0.3.0",
-    "ginza>=5.0.0a1,<5.1.0"
+    "ginza-transformers>=0.3.0,<1.0.0",
+    "ginza>=5.0.0b1,<5.1.0"
   ]
 }
