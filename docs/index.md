@@ -72,7 +72,7 @@ $ pip uninstall ginza ja-ginza
 $ pip install -U ginza ja-ginza-electra
 ```
 
-上記コマンドでインストールされるja-ginza-electraパッケージには大容量モデルファイルは含まれていません。大容量モデルファイルは初回実行時に自動的にダウンロードされて、以降の実行時にはローカルにキャッシュされたファイルが使用されます。
+上記コマンドでインストールされる`ja-ginza-electra`パッケージには大容量モデルファイルは含まれていません。大容量モデルファイルは初回実行時に自動的にダウンロードされて、以降の実行時にはローカルにキャッシュされたファイルが使用されます。
 
 大容量モデルファイルを含めたインストールを行うには、次のようにGitHubのリリースアーカイブを指定します。
 ```console
@@ -226,7 +226,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
 ### version 5.x
 
 #### ginza-5.0.0
-- 2021-08-25
+- 2021-08-26, Demantoid
 - 重要な変更
   - プラットフォームをspaCy v3に変更
   - transformersモデルを採用して飛躍的に精度を向上した解析モデルパッケージ`ja-ginza-electra`をリリースしました。
