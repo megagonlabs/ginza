@@ -1,6 +1,8 @@
 from functools import singledispatch
 from typing import Callable, Iterable, Union, Tuple, TypeVar
 
+from sudachipy.morpheme import Morpheme
+
 from spacy.lang.ja import DetailedToken
 from spacy.language import Language
 from spacy.tokens import Doc, Span, Token
@@ -12,7 +14,7 @@ from .ene_ontonotes_mapper import ENE_ONTONOTES_MAPPING
 
 __all__ = [
     "make_compound_splitter", "make_bunsetu_recognizer",
-    "set_split_mode",
+    "force_using_normalized_form_as_lemma", "set_split_mode",
     "token_i", "text", "text_with_ws", "orth", "orth_",
     "ent_type", "ent_type_", "ent_iob", "ent_iob_",
     "lemma", "lemma_", "norm", "norm_",
@@ -76,6 +78,18 @@ def make_bunsetu_recognizer(
         nlp.vocab,
         remain_bunsetu_suffix,
     )
+
+
+_morpheme_dictionary_form = None
+
+
+def force_using_normalized_form_as_lemma(force: bool):
+    global _morpheme_dictionary_form
+    if force and not _morpheme_dictionary_form:
+        _morpheme_dictionary_form = Morpheme.dictionary_form
+        Morpheme.dictionary_form = Morpheme.normalized_form
+    elif not force and _morpheme_dictionary_form:
+        Morpheme.dictionary_form = _morpheme_dictionary_form
 
 
 def set_split_mode(nlp: Language, mode: str):
