@@ -56,7 +56,7 @@ GiNZAをインストールする前に予めPython実行環境を構築してく
 
 #### 1. GiNZA + Transformersモデル
 
-※Transformersモデルの実行には16GB以上のメモリ容量が必要です。メモリ容量が不足する場合は後述のStandardモデルをお試しください。
+※Transformersモデルの実行には16GB以上のメモリ容量が必要です。メモリ容量が不足する場合は後述の従来型モデルをお試しください。
 
 旧バージョンのGiNZAをインストールしている場合は次のコマンドでアンインストールを実行します。
 ```console
@@ -82,14 +82,14 @@ CUDA 11.0を使用する場合:
 pip install -U "spacy[cuda110]"
 ```
 
-#### 2. GiNZA + Standardモデル
+#### 2. GiNZA + 従来型モデル
 
 旧バージョンのGiNZAをインストールしている場合は次のコマンドでアンインストールを実行します。
 ```console
 $ pip uninstall ginza ja-ginza
 ```
 
-次のコマンドを実行して最新のGiNZAとStandardモデルをインストールします。
+次のコマンドを実行して最新のGiNZAと従来型モデルをインストールします。
 ```console
 $ pip install -U ginza ja-ginza
 ```
@@ -120,7 +120,7 @@ $ ginza
 ### Pythonコードによる解析処理の実行
 
 次のコードは、Transformersモデルによる依存構造解析結果を文単位で出力します。
-Standardモデルを用いる場合は`ja_ginza_electra`を`ja_ginza`に置き換えます。
+従来型モデルを用いる場合は`ja_ginza_electra`を`ja_ginza`に置き換えます。
 ```python
 import spacy
 nlp = spacy.load('ja_ginza_electra')
