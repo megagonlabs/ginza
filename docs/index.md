@@ -37,15 +37,19 @@ GiNZA v5の解析精度は以前のバージョンから飛躍的な向上を遂
 
 次の表はUD_Japanese-BCCWJ r2.8で5万ステップ学習した時点での各種精度の比較です。
 
-| Model | LAS | UAS | UPOS | NER |
+| Model | LAS | UAS | UPOS | ENE |
 | --- | --- | --- | --- | --- |
 | ja_ginza_electra | 92.1 | 93.4 | 98.6 | 65.4 |
 | ja_ginza (v5)    | 89.0 | 90.8 | 97.2 | 54.0 |
 | ja_ginza (v4相当) |  |  |  |  |
 
-`ja_ginza_electra`は`ja_ginza`、依存関係ラベリング精度(Labeled Attachment Score)、および、単語依存構造解析精度(Unlabeled Attachment Score)の両指標において、5万ステップ学習時の誤り率を25%以上低減できました。また従来型モデルの`ja_ginza`においても、処理パイプラインにmorphologizerを追加することにより、以前のバージョンと比較してUD品詞推定精度(UPOS)を大幅に向上することができました。
+`ja_ginza_electra`は`ja_ginza`、依存関係ラベリング精度(Labeled Attachment Score)、および、単語依存構造解析精度(Unlabeled Attachment Score)の両指標において、5万ステップ学習時の誤り率を25%以上低減できました。
 
-※各モデルの学習と解析精度評価にはUD_Japanese-BCCWJ r2.8をSudachi辞書mode C(長単位))で再解析したコーパスを用いています。
+また従来型モデルの`ja_ginza`においても、処理パイプラインにmorphologizerを追加することにより、以前のバージョンと比較してUD品詞推定精度(UPOS)を大幅に向上することができました。
+
+[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)を用いた固有表現抽出精度(ENE)においても`ja_ginza_electra`は大幅な精度向上が得られています。GiNZAはこの拡張固有表現階層による固有表現抽出結果を、spaCyで標準的に用いられる[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)にマッピングして出力しています。OntoNotes5は関根の拡張固有表現階層よりカテゴリ数が非常に少ない(粗い)ため、OntoNotes5体系として解釈した場合の固有表現抽出精度は一般に関根の拡張固有表現階層での数値より高くなります。
+
+※各モデルの学習と解析精度評価にはUD_Japanese-BCCWJ r2.8をSudachi辞書mode C(長単位))で再解析した上で、さらに文節主辞情報を依存関係ラベルに組み合わせたコーパスを用いています。
 
 ## 実行環境
 
