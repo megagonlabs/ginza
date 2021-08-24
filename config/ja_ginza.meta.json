@@ -1,7 +1,7 @@
 {
   "lang":"ja",
   "name":"ginza",
-  "version":"5.0.0b1",
+  "version":"5.0.0",
   "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019). Assigns word2vec token vectors. Components: tok2vec, parser, ner, morphologizer, atteribute_ruler, compound_splitter, bunsetu_recognizer.",
   "author":"Megagon Labs Tokyo.",
   "email":"ginza@megagon.ai",
@@ -11,22 +11,26 @@
     {
       "name":"UD_Japanese-BCCWJ r2.8",
       "url":"https://github.com/UniversalDependencies/UD_Japanese-BCCWJ",
-      "license":"CC BY-SA 4.0"
+      "license":"CC BY-NC-SA 4.0",
+      "author":"Asahara, M., Kanayama, H., Tanaka, T., Miyao, Y., Uematsu, S., Mori, S., Matsumoto, Y., Omura, M., & Murawaki, Y."
     },
     {
       "name":"GSK2014-A(2019)",
       "url":"https://www.gsk.or.jp/catalog/gsk2014-a/",
-      "license":"individually defined commercial license"
+      "license":"Individually defined commercial license",
+      "author":"Tokyo Institute of Technology"
     },
     {
       "name":"SudachiDict_core",
       "url":"https://github.com/WorksApplications/SudachiDict",
-      "license":"Apache License 2.0"
+      "license":"Apache License 2.0",
+      "author":"Works Applications Enterprise Co., Ltd."
     },
     {
       "name":"chiVe",
       "url":"https://github.com/WorksApplications/chiVe",
-      "license":"Apache License 2.0"
+      "license":"Apache License 2.0",
+      "author":"Works Applications Enterprise Co., Ltd."
     }
   ],
   "parent_package":"spacy",
@@ -55,6 +59,6 @@
   "requirements":[
     "sudachipy>=0.5.2,<0.6.0",
     "sudachidict_core>=20210608",
-    "ginza>=5.0.0b1,<5.1.0"
+    "ginza>=5.0.0,<5.1.0"
   ]
 }

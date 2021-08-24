@@ -11,22 +11,26 @@
     {
       "name":"UD_Japanese-BCCWJ r2.8",
       "url":"https://github.com/UniversalDependencies/UD_Japanese-BCCWJ",
-      "license":"CC BY-SA 4.0"
+      "license":"CC BY-NC-SA 4.0",
+      "author":"Asahara, M., Kanayama, H., Tanaka, T., Miyao, Y., Uematsu, S., Mori, S., Matsumoto, Y., Omura, M., & Murawaki, Y."
     },
     {
       "name":"GSK2014-A(2019)",
       "url":"https://www.gsk.or.jp/catalog/gsk2014-a/",
-      "license":"individually defined commercial license"
+      "license":"Individually defined commercial license",
+      "author":"Tokyo Institute of Technology"
     },
     {
       "name":"SudachiDict_core",
       "url":"https://github.com/WorksApplications/SudachiDict",
-      "license":"Apache License 2.0"
+      "license":"Apache License 2.0",
+      "author":"Works Applications Enterprise Co., Ltd."
     },
     {
       "name":"cl-tohoku/bert-base-japanese-v2",
       "url":"https://huggingface.co/cl-tohoku/bert-base-japanese-v2",
-      "license":"CC BY-SA 3.0"
+      "license":"CC BY-SA 3.0",
+      "author":"Masatoshi Suzuki (Tohoku University)"
     }
   ],
   "parent_package":"spacy",
@@ -55,10 +59,9 @@
   "requirements":[
     "sudachipy>=0.5.2,<0.6.0",
     "sudachidict_core>=20210608",
-    "sudachitra>=0.1.4,<0.2.0",
     "fugashi>=1.1.1",
     "unidic-lite>=1.0.8",
-    "ginza-transformers>=0.3.0,<1.0.0",
-    "ginza>=5.0.0b1,<5.1.0"
+    "ginza-transformers>=0.3.1,<1.0.0",
+    "ginza>=5.0.0,<5.1.0"
   ]
 }
