@@ -1,174 +1,102 @@
 ![GiNZA logo](https://github.com/megagonlabs/ginza/raw/static/docs/images/GiNZA_logo_4c_y.png)
+
 # GiNZAの公開ページ
+
 [![Tweet](https://abs.twimg.com/favicons/favicon.ico)](https://twitter.com/intent/tweet?text=GiNZA%20-%20Japanese%20NLP%20Library%20https%3A%2F%2Fmegagonlabs.github.io%2Fginza%2F)
 &emsp;
 [![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza)
 
-### What's new!
-Megagon Labs Blogで
-[GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合](https://www.megagon.ai/jp/blog/ginza-version-4.0-integrating-bunsetu-api-into-multilingual-structural-analysis-technology/)
-が公開されました。
+## What's new!
 
-***GiNZAをアップグレードする際は [重要な変更](#ginza-400) の記述をご確認ください。***
-## Breaking Changes in v4.0
-- 解析モデルを`spaCy v2.3`の`spacy.lang.ja`に変更
-  - SudachiPy辞書をPyPI(SudachiDict-core)の公式パッケージに変更
-  - `Token.lemma_`に設定する値をSudachiPyの`Morpheme.dictionary_form()`に変更
-- コマンドラインツール起動オプションおよび出力(標準conllu形式)のmiscフィールドの変更
-  - use_sentence_separator(-s)オプションの廃止
-  - NE(OntoNotes)のBIラベル直後のセパレータをハイフン(B-GPE)に変更
-  - Reading(読み), Inf(活用), ENE(拡張固有表現)のサブフィールドを追加
-- トークン拡張フィールド(`Token._.*`)を廃止
-  - `Doc.user_data`に対応するエントリを追加
-- Pipelineの構成を変更
-  - BunsetuRecognizer・CompoundSplitterを追加しJapaneseCorrectorを廃止
-- 文節単位で解析を行うAPIを追加
-  - `from ginza import *`
-- 学習コーパスをUD_JAPANESE-BCCWJ v2.6にアップグレード
-  - 解析精度と一貫性が向上
-- 単語ベクトルをchiVe mc90(うち頻度上位35,000語)に変更
+- `spaCy v3`に対応した`GiNZA v5`をリリースしました。
+- transformersモデルを採用して飛躍的に精度を向上した解析モデルパッケージ`ja-ginza-electra`をリリースしました。
+- 従来型の解析モデルパッケージ`ja-ginza`のpiplelineに`morphologizer`を追加し、UD品詞解析精度を向上しました。
+- `Token.lemma_`にSudachiPyのnormalized_formを強制的にセットするオプション(`ginza -n`)を追加しました。
 
-## GiNZA v4の解析モデルと文節単位の解析API
-新しいGiNZAの解析モデルにより、Universal Dependenciesの枠組みの中で日本語に特徴的な文節構造を考慮することができます。
+***GiNZAをアップグレードする際は下記の互換性情報を確認してください。***
 
-![bunsetu_heads](https://github.com/megagonlabs/ginza/raw/static/docs/images/bunsetu_heads.png)
+## GiNZA v5.0 互換性情報
+- v4以前の`ginza`および`ja-ginza`パケージはGiNZA v5で使用できません（旧バージョン向けパッケージは事前にアンインストールが必要です）
+  - `pip uninstall ginza ja-ginza`
+- transformersモデルの追加に伴いGiNZA v5インストール時は`ginza`パッケージとともに解析モデルパッケージを明示的に指定する必要があります
+  - 解析精度重視モデル (メモリ容量16GB以上を推奨)
+    - `pip install -U ginza ja-ginza-electra`
+  - 実行速度重視モデル
+    - `pip install -U ginza ja-ginza`
+- `CompoundSplitter`および`BunsetuRecognizer`の名称を`compound_splitter`および`bunsetu_recognizer`に変更しました
+- 併せてspaCy v3の[Backwards Incompatibilities](https://spacy.io/usage/v3#incompat)も確認してください
 
-またGiNZA v4で追加された解析APIを用いることで、文節やその主辞を単位とした分析がこれまでよりずっと容易になります。
-```python
-from ginza import *
-import spacy
-nlp = spacy.load("ja_ginza")  # GiNZAモデルの読み込み
+## GiNZA v5 新機能
 
-from collections import defaultdict
-frames = defaultdict(lambda: 0)  # 依存関係の出現頻度を格納
-sentences = set()  # 重複文検出用のset
+### Transformersモデルによる解析精度の向上
 
-with open("sentences.txt", "r") as fin:  # 解析対象のテキストファイルから
-  for line in fin:  # 一行ごとに
-    try:
-      doc = nlp(line.rstrip())  # 解析を実行し
-    except:
-      continue
-    for sent in doc.sents:  # 文単位でループ
-      if sent.text in sentences:
-        continue  # 重複文はスキップ
-      sentences.add(sent.text)
-      for t in bunsetu_head_tokens(sent):  # 文節主辞トークンのうち
-        if t.pos_ not in {"ADJ", "VERB"}:
-          continue  # 述語以外はスキップ
-        v = phrase(lemma_)(t)  # 述語とその格要素(主語・目的語相当)の句を集める
-        dep_phrases = sub_phrases(t, phrase(lemma_), is_not_stop)
-        subj = [phrase for dep, phrase in dep_phrases if dep in {"nsubj"}]
-        obj  = [phrase for dep, phrase in dep_phrases if dep in {"obj", "iobj"}]
-        for s in subj:
-          for o in obj:
-            frames[(s, o, v)] += 1  # 格要素と述語の組み合わせをカウント
+GiNZA v5の解析精度は以前のバージョンから飛躍的な向上を遂げました。精度向上の主たる貢献はTransformers事前学習モデルの導入にあります。次の図は、UD_Japanese-BCCWJ r2.8における、従来型モデルの`ja_ginza`と、Transformers事前学習モデルを用いた`ja_ginza_electra`の学習曲線です。
 
-for frame, count in sorted(frames.items(), key=lambda t: -t[1]):
-  print(count, *frame, sep="\t")  # 出現頻度の高い順に表示
-```
+![LAS](https://github.com/megagonlabs/ginza/raw/static/docs/images/v5_las_graph.svg)
+![UAS](https://github.com/megagonlabs/ginza/raw/static/docs/images/v5_uas_graph.svg)
 
-#### 表1 GiNZA v4で追加された文節APIの一覧
+次の表はUD_Japanese-BCCWJ r2.8で5万ステップ学習した時点での各種精度の比較です。
 
-| category | func or variable | description |
-| --- | --- | --- |
-| Span-based | | |
-| | bunsetu_spans()           | 文節SpanのIterable。 |
-| | bunsetu_phrase_spans()    | 文節主辞SpanのIterable。 |
-| | bunsetu_span()            | トークンが属する文節のSpan。 |
-| | bunsetu_phrase_span()     | トークンが属する文節の主辞Span。 |
-| Construction | | |
-| | bunsetu()                 | 文節中のトークン列を指定された形に整形して返す。 |
-| | phrase()                  | 文節主辞中のトークン列を指定された形に整形して<br>返す。 |
-| | sub_phrases()             | 従属文節を指定された形に整形して返す。 |
-| | phrases()                 | スパンに含まれる文節を指定された形に整形して<br>返す。 |
-| Utility | | |
-| | traverse()                | 構文木を指定された方法で巡回し指定された形に<br>整形して返す。 |
-| | default_join_func()       | デフォルトのトークン列の結合方法。 |
-| | SEP                       | デフォルトのトークン区切り文字。 |
-| Token-based | | |
-| | bunsetu_head_list()       | DocやSpanに含まれる文節のヘッドトークンの<br>インデックスのリスト。 |
-| | bunsetu_head_tokens()     | DocやSpanに含まれる文節のヘッドトークンの<br>リスト。 |
-| | bunsetu_bi_labels()       | DocやSpanに含まれるトークンが文節開始位置<br>にある場合は"B"、それ以外は"I"とするリスト。 |
-| | bunsetu_position_types()  | DocやSpanに含まれるトークンを{"ROOT",<br>"SEM_HEAD", "SYN_HEAD", "NO_HEAD",<br>"FUNC", "CONT"}に分類したリスト。 |
-| | is_bunsetu_head()         | トークンが文節のヘッドの場合はTrue、<br>それ以外はFalse。 |
-| | bunsetu_bi_label()        | トークンが文節開始位置にある場合は"B"、<br>それ以外は"I"。 |
-| | bunsetu_position_type()   | トークンを{"ROOT", "SEM_HEAD",<br>"SYN_HEAD", "NO_HEAD", "FUNC",<br>"CONT"}に分類。 |
-| Proxy | | |
-| | *                         | spacy.tokens.Tokenクラスのプロパティと<br>同名・同機能の関数群。 |
-| Subtoken | | |
-| | sub_tokens()              | トークンの分割情報。 |
-| | set_split_mode()          | デフォルトの分割モードの変更。 |
+| Model | LAS | UAS | UPOS | NER |
+| --- | --- | --- | --- | --- |
+| ja_ginza_electra | 92.1 | 93.4 | 98.6 | 65.4 |
+| ja_ginza (v5)    | 89.0 | 90.8 | 97.2 | 54.0 |
+| ja_ginza (v4相当) |  |  |  |  |
 
-## 解説資料
-- [GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合 - Megagon Labs Blog](https://www.megagon.ai/jp/blog/ginza-version-4.0-integrating-bunsetu-api-into-multilingual-structural-analysis-technology/)
-- [GiNZA - Universal Dependenciesによる実用的日本語解析 - 自然言語処理 Volume 27 Number 3](https://anlp.jp/abst/vol27/no3.html)
-- [Universal Dependencies Symposium 2019 発表スライド](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp)
+`ja_ginza_electra`は`ja_ginza`、依存関係ラベリング精度(Labeled Attachment Score)、および、単語依存構造解析精度(Unlabeled Attachment Score)の両指標において、5万ステップ学習時の誤り率を25%以上低減できました。また従来型モデルの`ja_ginza`においても、処理パイプラインにmorphologizerを追加することにより、以前のバージョンと比較してUD品詞推定精度(UPOS)を大幅に向上することができました。
 
-## ライセンス
-GiNZA NLPライブラリおよびGiNZA日本語Universal Dependenciesモデルは
-[The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE)のもとで公開されています。
-利用にはThe MIT Licenseに合意し、規約を遵守する必要があります。
-
-### spaCy
-GiNZAはspaCyをNLP Frameworkとして使用しています。
-
-[spaCy LICENSE PAGE](https://github.com/explosion/spaCy/blob/master/LICENSE)
-
-### Sudachi/SudachiPy - SudachiDict - chiVe
-GiNZAはトークン化（形態素解析）処理にSudachiPyを使用することで、高い解析精度を得ています。
-
-[Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
-[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
-
-[SudachiDict LEGAL PAGE](https://github.com/WorksApplications/SudachiDict/blob/develop/LEGAL)
-
-[chiVe LICENSE PAGE](https://github.com/WorksApplications/chiVe/blob/master/LICENSE)
-
-## 訓練コーパス
-
-### UD Japanese BCCWJ v2.6
-GiNZA v4 の依存構造解析モデルは
-[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) v2.6
-([Omura and Asahara:2018](https://www.aclweb.org/anthology/W18-6014/))
-から新聞系文書を除外して学習しています。
-本モデルは国立国語研究所とMegagon Labsの共同研究成果です。
-
-### GSK2014-A (2019) BCCWJ版
-GiNZA v4 の固有表現抽出モデルは
-[GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ版
-([橋本・乾・村上(2008)](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf))
-から新聞系文書を除外して学習しています。
-固有表現抽出ラベル体系は[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)、
-および、[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)
-を独自に拡張したものを併用しています。
-本モデルは国立国語研究所とMegagon Labsの共同研究成果です。
+※各モデルの学習と解析精度評価にはUD_Japanese-BCCWJ r2.8をSudachi辞書mode C(長単位))で再解析したコーパスを用いています。
 
 ## 実行環境
-このプロジェクトは Python 3.6以上（および対応するpip）で動作検証を行っています。
 
-[(開発環境についての詳細はこちら)](#development-environment)
+GiNZAは Python 3.6以上（および対応するpip）で動作検証を行っています。
+GiNZAをインストールする前に予めPython実行環境を構築してください。
+
 ### 実行環境のセットアップ
-#### 1. GiNZA NLPライブラリと日本語Universal Dependenciesモデルのインストール
-最新版をインストールするにはコンソールで次のコマンドを実行します。
+
+#### 1. GiNZA + Transformersモデル
+
+※Transformersモデルの実行には16GB以上のメモリ容量が必要です。メモリ容量が不足する場合は後述のStandardモデルをお試しください。
+
+旧バージョンのGiNZAをインストールしている場合は次のコマンドでアンインストールを実行します。
 ```console
-$ pip install -U ginza
+$ pip uninstall ginza ja-ginza
 ```
 
-Google Colab 環境ではインストール後にパッケージ情報の再読込が必要な場合があります。詳細はリンクの記事をご確認下さい。
-```python
-import pkg_resources, imp
-imp.reload(pkg_resources)
-```
-[【GiNZA】GoogleColabで日本語NLPライブラリGiNZAがloadできない](https://www.sololance.tokyo/2019/10/colab-load-ginza.html)
-
-インストール時にCythonに関するエラーが発生した場合は、次のように環境変数CFLAGSを設定してください。
+次のコマンドを実行して最新のGiNZAおよびTransformersモデルをインストールします。
 ```console
-$ CFLAGS='-stdlib=libc++' pip install ginza
+$ pip install -U ginza ja-ginza-electra
 ```
 
-#### 2. ginzaコマンドの実行
-コンソールで次のコマンドを実行して、日本語の文に続けてEnterを入力すると、[CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) 形式で解析結果が出力されます。
+上記コマンドでインストールされるja-ginza-electraパッケージには大容量モデルファイルは含まれていません。大容量モデルファイルは初回実行時に自動的にダウンロードされて、以降の実行時にはローカルにキャッシュされたファイルが使用されます。
+
+大容量モデルファイルを含めたインストールを行うには、次のようにGitHubのリリースアーカイブを指定します。
+```console
+$ pip install -U ginza https://github.com/megagonlabs/ginza/releases/download/latest/ja_ginza_electra-latest-with-model.tar.gz
+```
+
+GPUを利用してtransformersモデルを高速に実行するには、実行環境のCUDAバージョンを指定してspacyを上書きインストールします。
+
+CUDA 11.0を使用する場合:
+```console
+pip install -U "spacy[cuda110]"
+```
+
+#### 2. GiNZA + Standardモデル
+
+旧バージョンのGiNZAをインストールしている場合は次のコマンドでアンインストールを実行します。
+```console
+$ pip uninstall ginza ja-ginza
+```
+
+次のコマンドを実行して最新のGiNZAとStandardモデルをインストールします。
+```console
+$ pip install -U ginza ja-ginza
+```
+
+### ginzaコマンドによる解析処理の実行
+
+`ginza`コマンドを実行して、日本語の文に続けてEnterを入力すると、[CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) 形式で解析結果が出力されます。
 ```console
 $ ginza
 銀座でランチをご一緒しましょう。
@@ -179,97 +107,23 @@ $ ginza
 4	を	を	ADP	助詞-格助詞	_	3	case	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=ヲ
 5	ご	ご	NOUN	接頭辞	_	6	compound	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=CONT|Reading=ゴ
 6	一緒	一緒	VERB	名詞-普通名詞-サ変可能	_	0	root	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=ROOT|Reading=イッショ
-7	し	する	AUX	動詞-非自立可能	_	6	advcl	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,連用形-一般|Reading=シ
+7	し	する	AUX	動詞-非自立可能	_	6	aux	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,連用形-一般|Reading=シ
 8	ましょう	ます	AUX	助動詞	_	6	aux	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=助動詞-マス,意志推量形|Reading=マショウ
 9	。	。	PUNCT	補助記号-句点	_	6	punct	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=CONT|Reading=。
 
 ```
-`ginzame`コマンドでオープンソース形態素解析エンジン [MeCab](https://taku910.github.io/mecab/) の`mecab`コマンドに近い形式で解析結果を出力することができます。
-`ginzame`コマンドは形態素解析処理のみをマルチプロセスで高速に実行します。
-このコマンドと`mecab`の出力形式の相違点として、 
-最終フィールド（発音）が常に`*`となることに注意して下さい。
+実行環境に`ja_ginza_electra`と`ja_ginza`の両方のモデルがインストールされている場合、`ginza`コマンドは`ja_ginza_electra`を優先して使用します。同じ状況で`ja_ginza`を使用するには`ginza -m`オプションでモデル名を指定します。
 ```console
-$ ginzame
-銀座でランチをご一緒しましょう。
-銀座	名詞,固有名詞,地名,一般,*,*,銀座,ギンザ,*
-で	助詞,格助詞,*,*,*,*,で,デ,*
-ランチ	名詞,普通名詞,一般,*,*,*,ランチ,ランチ,*
-を	助詞,格助詞,*,*,*,*,を,ヲ,*
-ご	接頭辞,*,*,*,*,*,御,ゴ,*
-一緒	名詞,普通名詞,サ変可能,*,*,*,一緒,イッショ,*
-し	動詞,非自立可能,*,*,サ行変格,連用形-一般,為る,シ,*
-ましょう	助動詞,*,*,*,助動詞-マス,意志推量形,ます,マショウ,*
-。	補助記号,句点,*,*,*,*,。,。,*
-EOS
-
+# ginza -m ja_ginza
 ```
-spaCyの学習用JSON形式での出力は`ginza -f 3` または `ginza -f json`を実行してください。
-```console
-$ ginza -f json
-銀座でランチをご一緒しましょう。
-[
- {
-  "paragraphs": [
-   {
-    "raw": "銀座でランチをご一緒しましょう。",
-    "sentences": [
-     {
-      "tokens": [
-       {"id": 1, "orth": "銀座", "tag": "名詞-固有名詞-地名-一般", "pos": "PROPN", "lemma": "銀座", "head": 5, "dep": "obl", "ner": "B-City"},
-       {"id": 2, "orth": "で", "tag": "助詞-格助詞", "pos": "ADP", "lemma": "で", "head": -1, "dep": "case", "ner": "O"},
-       {"id": 3, "orth": "ランチ", "tag": "名詞-普通名詞-一般", "pos": "NOUN", "lemma": "ランチ", "head": 3, "dep": "obj", "ner": "O"},
-       {"id": 4, "orth": "を", "tag": "助詞-格助詞", "pos": "ADP", "lemma": "を", "head": -1, "dep": "case", "ner": "O"},
-       {"id": 5, "orth": "ご", "tag": "接頭辞", "pos": "NOUN", "lemma": "ご", "head": 1, "dep": "compound", "ner": "O"},
-       {"id": 6, "orth": "一緒", "tag": "名詞-普通名詞-サ変可能", "pos": "VERB", "lemma": "一緒", "head": 0, "dep": "ROOT", "ner": "O"},
-       {"id": 7, "orth": "し", "tag": "動詞-非自立可能", "pos": "AUX", "lemma": "する", "head": -1, "dep": "advcl", "ner": "O"},
-       {"id": 8, "orth": "ましょう", "tag": "助動詞", "pos": "AUX", "lemma": "ます", "head": -2, "dep": "aux", "ner": "O"},
-       {"id": 9, "orth": "。", "tag": "補助記号-句点", "pos": "PUNCT", "lemma": "。", "head": -3, "dep": "punct", "ner": "O"}
-      ]
-     }
-    ]
-   }
-  ]
- }
-]
-```
-日本語係り受け解析器 [CaboCha](https://taku910.github.io/cabocha/) の`cabocha -f1`のラティス形式に近い解析結果を出力する場合は
-`ginza -f 1` または `ginza -f cabocha` を実行して下さい。
-このオプションと`cabocha -f1`の出力形式の相違点として、 
-スラッシュ記号`/`に続く`func_index`フィールドが常に自立語の終了位置（機能語があればその開始位置に一致）を示すこと、
-機能語認定基準が一部異なること、
-に注意して下さい。
-```console
-$ ginza -f cabocha
-銀座でランチをご一緒しましょう。
-* 0 2D 0/1 0.000000
-銀座	名詞,固有名詞,地名,一般,,銀座,ギンザ,*	B-City
-で	助詞,格助詞,*,*,,で,デ,*	O
-* 1 2D 0/1 0.000000
-ランチ	名詞,普通名詞,一般,*,,ランチ,ランチ,*	O
-を	助詞,格助詞,*,*,,を,ヲ,*	O
-* 2 -1D 0/2 0.000000
-ご	接頭辞,*,*,*,,ご,ゴ,*	O
-一緒	名詞,普通名詞,サ変可能,*,,一緒,イッショ,*	O
-し	動詞,非自立可能,*,*,サ行変格,連用形-一般,する,シ,*	O
-ましょう	助動詞,*,*,*,助動詞-マス,意志推量形,ます,マショウ,*	O
-。	補助記号,句点,*,*,,。,。,*	O
-EOS
 
-```
-### マルチプロセス実行 (Experimental)
-`-p NUM_PROCESS` オプションで解析処理のマルチプロセス実行が可能になります。
-`NUM_PROCESS`には並列実行するプロセス数を整数で指定します。
-0以下の値は`実行環境のCPUコア数＋NUM_PROCESS`を指定したのと等価になります。
+### Pythonコードによる解析処理の実行
 
-`ginza -f mecab`とそのエイリアスである`ginzame`以外で`-p NUM_PROCESS`オプションを使用する場合は、
-実行環境の空きメモリ容量が十分あることを事前に確認してください。
-マルチプロセス実行では1プロセスあたり約130MBのメモリが必要です。(今後のリリースで改善予定)
-
-### コーディング例
-次のコードは文単位で依存構造解析結果を出力します。
+次のコードは、Transformersモデルによる依存構造解析結果を文単位で出力します。
+Standardモデルを用いる場合は`ja_ginza_electra`を`ja_ginza`に置き換えます。
 ```python
 import spacy
-nlp = spacy.load('ja_ginza')
+nlp = spacy.load('ja_ginza_electra')
 doc = nlp('銀座でランチをご一緒しましょう。')
 for sent in doc.sents:
     for token in sent:
@@ -277,20 +131,117 @@ for sent in doc.sents:
     print('EOS')
 ```
 
-### API
-基本的な解析APIは [spaCy API documents](https://spacy.io/api/) を参照してください。
-その他、詳細についてはドキュメントが整備されるまでお手数ですがソースコードをご確認ください。
+## 解説資料
 
-### ユーザ辞書の使用
-GiNZAはTokenizer(形態素解析レイヤ)にSudachiPyを使用しています。
-GiNZAでユーザ辞書を使用するにはSudachiPyの辞書設定ファイル `sudachi.json` の `userDict` フィールドに、
-コンパイル済みのユーザ辞書ファイルのパスのリストを指定します。
+### マニュアル
 
-SudachiPyのユーザ辞書ファイルのコンパイル方法についてはSudachiPyのGitHubリポジトリで公開されているドキュメントを参照してください。  
-[SudachiPy - User defined Dictionary](https://github.com/WorksApplications/SudachiPy#user-defined-dictionary)  
-[Sudachi ユーザー辞書作成方法](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)
+- [コマンドラインツールの解説](./command_line_tool.md)
+- [文節APIの解説](./bunsetu_api.md)
+- [開発者向けの情報](./developer_reference.md)
+
+### 講演資料
+
+- [日本語Universal Dependenciesのための学習済みTransformersモデル公開に向けて](https://docs.google.com/presentation/d/1vJ-CeOwq0SG7KvjizjFOTh4A3-_nhY0b57NuKs-mow0/edit) - 第3回 Universal Dependencies 公開研究会 (2021.06)
+- [Japanese Language Analysis by GPU Ready Open Source NLP Frameworks](https://storage.googleapis.com/megagon-publications/GPU_Technology_Conference_2020/Japanese-Language-Analysis-by-GPU-Ready-Open-Source-NLP-Frameworks_Hiroshi-Matsuda.pdf) - NVIDIA GPU Technology Conference 2020 (2020.10)
+- [GiNZAで始める日本語依存構造解析 〜CaboCha, UDPipe, Stanford NLPとの比較〜](https://www.slideshare.net/MegagonLabs/ginza-cabocha-udpipe-stanford-nlp) - Universal Dependencies Symposium (2019.09)
+
+### 論文
+
+- [GiNZA - Universal Dependenciesによる実用的日本語解析](https://www.jstage.jst.go.jp/article/jnlp/27/3/27_695/_pdf) - 自然言語処理 Volume 27 Number 3 (2020.09)
+- [UD Japanese GSD の再整備と固有表現情報付与](https://anlp.jp/proceedings/annual_meeting/2020/pdf_dir/P1-34.pdf) - 言語処理学会第26回年次大会 (2020.03)
+- [短単位品詞の用法曖昧性解決と依存関係ラベリングの同時学習](https://www.anlp.jp/proceedings/annual_meeting/2019/pdf_dir/F2-3.pdf) - 言語処理学会第25回年次大会 (2019.03)
+
+### 解説記事
+
+- [GiNZA Version 4.0: Improving Syntactic Structure Analysis Through Japanese Bunsetsu-Phrase Extraction API Integration](https://megagon.ai/blog/ginza-version-4-0-improving-syntactic-structure-analysis-through-japanese-bunsetsu-phrase-extraction-api-integration/) - Megagon Labs Blog (2021.03)
+- [GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合](https://www.megagon.ai/jp/blog/ginza-version-4.0-integrating-bunsetu-api-into-multilingual-structural-analysis-technology/) - Megagon Labs Blog (2020.09)
+- [GiNZA: 日本語自然言語処理オープンソースライブラリ](https://www.megagon.ai/jp/projects/ginza-install-a-japanese-nlp-library-in-one-step/) - Megagon Labs (2019)
+
+## ライセンス
+GiNZA NLPライブラリおよびGiNZA日本語Universal Dependenciesモデルは
+[The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE)のもとで公開されています。
+利用にはThe MIT Licenseに合意し、規約を遵守する必要があります。
+
+### Explosion/ spaCy
+GiNZAはspaCyをNLP Frameworkとして使用しています。
+
+[spaCy LICENSE PAGE](https://github.com/explosion/spaCy/blob/master/LICENSE)
+
+### Works Applications Enterprise / Sudachi/SudachiPy - SudachiDict - chiVe
+GiNZAはトークン化（形態素解析）処理にSudachiPyを、単語ベクトル表現にchiVeを使用することで、高い解析精度を得ています。
+
+[Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
+[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE),
+[SudachiDict LEGAL PAGE](https://github.com/WorksApplications/SudachiDict/blob/develop/LEGAL),
+[chiVe LICENSE PAGE](https://github.com/WorksApplications/chiVe/blob/master/LICENSE)
+
+### Hugging Face / transformers
+GiNZA v5 Transformersモデル(ja_ginza_electra)はHugging Face社が提供するtransformersを事前学習フレームワークに用いています。
+
+[transformers LICENSE PAGE](https://github.com/huggingface/transformers/blob/master/LICENSE)
+
+## 訓練コーパス
+
+### UD Japanese BCCWJ r2.8
+GiNZA v5の依存構造解析モデルは
+[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) r2.8
+([Omura and Asahara:2018](https://www.aclweb.org/anthology/W18-6014/))
+から新聞系文書を除外して学習しています。
+GiNZA v5の依存構造解析モデルは国立国語研究所とMegagon Labsの共同研究成果です。
+
+### GSK2014-A (2019) BCCWJ版
+GiNZA v5の固有表現抽出モデルは
+[GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ版
+([橋本・乾・村上(2008)](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf))
+から新聞系文書を除外して学習しています。
+固有表現抽出ラベル体系は[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)、
+および、[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)
+を独自に拡張したものを併用しています。
+GiNZA v5の固有表現抽出モデルは国立国語研究所とMegagon Labsの共同研究成果です。
+
+### mC4
+GiNZA v5 Transformersモデル(ja-ginza-electra)は、[mC4](https://huggingface.co/datasets/mc4)から抽出した日本語20億文以上を用いて事前学習した[transformers-ud-japanese-electra-base-discriminator](https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-discriminator)を使用しています。
+mC4はODC-BYライセンスの規約に基づいて事前学習データとして利用しています。
+
+Contains information from mC4 which is made available under the ODC Attribution License.
+```
+@article{2019t5,
+    author = {Colin Raffel and Noam Shazeer and Adam Roberts and Katherine Lee and Sharan Narang and Michael Matena and Yanqi Zhou and Wei Li and Peter J. Liu},
+    title = {Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer},
+    journal = {arXiv e-prints},
+    year = {2019},
+    archivePrefix = {arXiv},
+    eprint = {1910.10683},
+}
+```
+
+
 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
+
+### version 5.x
+
+#### ginza-5.0.0
+- 2021-08-25
+- 重要な変更
+  - プラットフォームをspaCy v3に変更
+  - transformersモデルを採用して飛躍的に精度を向上した解析モデルパッケージ`ja-ginza-electra`をリリースしました。
+  - 従来型の解析モデルパッケージ`ja-ginza`のpiplelineに`morphologizer`を追加し、UD品詞解析精度を向上しました。
+  - transformersモデルの追加に伴いGiNZA v5インストール時は`ginza`パッケージとともに解析モデルパッケージを明示的に指定する必要があります
+    - 解析精度重視モデル (メモリ容量16GB以上を推奨)
+      - `pip install -U ginza ja-ginza-electra`
+    - 実行速度重視モデル
+      - `pip install -U ginza ja-ginza`
+  - `CompoundSplitter`および`BunsetuRecognizer`の名称を`compound_splitter`および`bunsetu_recognizer`に変更しました
+  - 併せてspaCy v3の[Backwards Incompatibilities](https://spacy.io/usage/v3#incompat)も確認してください
+- Improvements
+  - Add command line options
+    - `Token.lemma_`にSudachiPyのnormalized_formを強制的にセットするオプション`-n`を追加しました。
+    - `-m (ja_ginza|ja_ginza_electra)`
+      - Select model package
+  - Revise ENE category name
+    - `Degital_Game` to `Digital_Game`
+
 ### version 4.x
 
 #### ginza-4.0.6
@@ -509,28 +460,3 @@ with open('sample2.pickle', 'wb') as f:
 #### ja_ginza_nopn-1.0.0
 - 2019-04-01
 - 初回リリース
-
-## 開発環境
-### 開発環境のセットアップ
-#### 1. githubからclone
-```console
-$ git clone 'https://github.com/megagonlabs/ginza.git'
-```
-
-#### 2. pip install および setup.sh の実行
-```console
-$ pip install -U -r requirements.txt
-$ python setup.py develop
-```
-
-#### 3. GPU用ライブラリのセットアップ (Optional)
-CUDA v10.1の場合は次のように指定します。
-```console
-$ pip install -U thinc[cuda101]
-```
-
-### 訓練の実行
-GiNZAの解析モデル `ja_ginza` はspaCy標準コマンドを使用して学習を行っています。
-```console
-$ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/ja_ginza-ud-dev.json -b ja_vectors_chive_mc90_35k/ -ovl 0.3 -n 100 -m meta.json.ginza -V 4.0.0
-```
