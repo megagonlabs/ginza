@@ -11,7 +11,7 @@ from spacy.tokens import Span
 from spacy.lang.ja import JapaneseDefaults
 
 from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes,\
-    bunsetu_bi_label, bunsetu_position_type
+    bunsetu_bi_label, bunsetu_position_type, force_using_normalized_form_as_lemma
 from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
 
 MINI_BATCH_SIZE = 100
@@ -19,20 +19,27 @@ MINI_BATCH_SIZE = 100
 
 def run(
         model_path=None,
+        ensure_model=None,
         split_mode=False,
         hash_comment="print",
         output_path=None,
         output_format="0",
         require_gpu=False,
         disable_sentencizer=False,
+        use_normalized_form=False,
         parallel=1,
         files=None,
 ):
     if require_gpu:
         print("GPU enabled", file=sys.stderr)
+    if use_normalized_form:
+        print("overriding Token.lemma_ by normalized_form of SudachiPy", file=sys.stderr)
+        force_using_normalized_form_as_lemma(True)
+    assert model_path is None or ensure_model is None
 
     analyzer = Analyzer(
         model_path,
+        ensure_model,
         split_mode,
         hash_comment,
         output_format,
@@ -147,6 +154,7 @@ class Analyzer:
     def __init__(
             self,
             model_path,
+            ensure_model,
             split_mode,
             hash_comment,
             output_format,
@@ -154,6 +162,7 @@ class Analyzer:
             disable_sentencizer,
     ):
         self.model_path = model_path
+        self.ensure_model = ensure_model
         self.split_mode = split_mode
         self.hash_comment = hash_comment
         self.output_format = output_format
@@ -176,8 +185,17 @@ class Analyzer:
             # Work-around for pickle error. Need to share model data.
             if self.model_path:
                 nlp = spacy.load(self.model_path)
+            elif self.ensure_model:
+                    nlp = spacy.load(self.ensure_model)
             else:
-                nlp = spacy.load("ja_ginza")
+                try:
+                    nlp = spacy.load("ja_ginza_electra")
+                except IOError as e:
+                    try:
+                        nlp = spacy.load("ja_ginza")
+                    except IOError as e:
+                        print('Could not find the model. You need to install "ja_ginza_electra" or "ja_ginza" by executing pip like `pip install ja_ginza_electra`.', file=sys.stderr)
+                        raise e
 
             if self.disable_sentencizer:
                 def disable_sentencizer(doc):
@@ -394,6 +412,7 @@ def mecab_token_line(token):
     split_mode=("split mode", "option", "s", str, ["A", "B", "C", None]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
+    use_normalized_form=("overriding Token.lemma_ by normalized_form of SudachiPy", "flag", "n"),
     parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
 )
@@ -402,16 +421,19 @@ def run_ginzame(
         split_mode=None,
         hash_comment="print",
         output_path=None,
+        use_normalized_form=False,
         parallel=-1,
         *files,
 ):
     run(
         model_path=model_path,
+        ensure_model="ja_ginza",
         split_mode=split_mode,
         hash_comment=hash_comment,
         output_path=output_path,
         output_format="mecab",
         require_gpu=False,
+        use_normalized_form=use_normalized_form,
         parallel=parallel,
         disable_sentencizer=False,
         files=files,
@@ -424,33 +446,39 @@ def main_ginzame():
 
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
+    ensure_model=("select model either ja_ginza or ja_ginza_electra", "option", "m", str, ["ja_ginza", "ja_ginza_electra", None]),
     split_mode=("split mode", "option", "s", str, ["A", "B", "C", None]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
     output_format=("output format", "option", "f", str, ["0", "conllu", "1", "cabocha", "2", "mecab", "3", "json"]),
     require_gpu=("enable require_gpu", "flag", "g"),
+    use_normalized_form=("overriding Token.lemma_ by normalized_form of SudachiPy", "flag", "n"),
     disable_sentencizer=("disable spaCy's sentence separator", "flag", "d"),
     parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
 )
 def run_ginza(
         model_path=None,
+        ensure_model=None,
         split_mode=None,
         hash_comment="print",
         output_path=None,
         output_format="conllu",
         require_gpu=False,
+        use_normalized_form=False,
         disable_sentencizer=False,
         parallel=1,
         *files,
 ):
     run(
         model_path=model_path,
+        ensure_model=ensure_model,
         split_mode=split_mode,
         hash_comment=hash_comment,
         output_path=output_path,
         output_format=output_format,
         require_gpu=require_gpu,
+        use_normalized_form=use_normalized_form,
         disable_sentencizer=disable_sentencizer,
         parallel=parallel,
         files=files,

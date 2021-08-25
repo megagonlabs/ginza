@@ -2,6 +2,7 @@
 from __future__ import unicode_literals, print_function
 
 import json
+import math
 import random
 import re
 import sys
@@ -9,8 +10,8 @@ import os
 
 import plac
 
-from spacy.lang.ja import JapaneseDefaults
-from spacy.syntax.nonproj import is_nonproj_tree, contains_cycle
+from spacy.lang.ja import Japanese, JapaneseTokenizer
+from spacy.pipeline._parser_internals.nonproj import is_nonproj_tree, contains_cycle
 
 
 NEW_DOC_ID_PATTERN = re.compile(
@@ -194,6 +195,15 @@ def retokenize_gold(gold_tokens, doc, debug=False):
         raise Exception('cyclic')
 
 
+def calc_n_sents(n_sents):
+    if n_sents > 0:
+        return n_sents
+    elif n_sents < 0:
+        return math.floor(-n_sents * random.random() ** 2 + 1)
+    else:
+        return 0x7fffffff
+
+
 def convert_lines(
         path,
         lines,
@@ -208,6 +218,7 @@ def convert_lines(
     paragraphs = []
     raw = ''
     sentences = []
+    n_sents_current = calc_n_sents(n_sents)
     paragraph_id = None
     sentence_id = None
     sentence = ''
@@ -262,6 +273,7 @@ def convert_lines(
                     })
                     raw = ''
                     sentences = []
+                    n_sents_current = calc_n_sents(n_sents)
 
             state = 'text'
 
@@ -473,13 +485,14 @@ def convert_lines(
 
                 raw += sentence
                 sentences.append({'tokens': tokens})
-                if len(sentences) >= n_sents and (not ensure_end_period or tokens[-1]['orth'] == '。'):
+                if len(sentences) >= n_sents_current and (not ensure_end_period or tokens[-1]['orth'] == '。'):
                     paragraphs.append({
                         'raw': raw,
                         'sentences': sentences,
                     })
                     raw = ''
                     sentences = []
+                    n_sents_current = calc_n_sents(n_sents)
 
             sentence_id = None
             sentence = ""
@@ -670,9 +683,8 @@ def main(
         assert not retokenize, "retokenize option must be disabled if use luw_ent option"
 
     if retokenize:
-        tokenizer = JapaneseDefaults.create_tokenizer(config={
-            "split_mode": retokenize
-        })
+        nlp = Japanese()
+        tokenizer = JapaneseTokenizer(nlp=nlp, split_mode=retokenize)
     else:
         tokenizer = None
     out = sys.stdout

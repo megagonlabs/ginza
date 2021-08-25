@@ -1,0 +1,73 @@
+{
+  "lang":"ja",
+  "name":"ginza_electra",
+  "version":"5.0.0",
+  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + transformers-ud-japanese-electra--base. Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
+  "author":"Megagon Labs Tokyo.",
+  "email":"ginza@megagon.ai",
+  "url":"https://github.com/megagonlabs/ginza",
+  "license":"MIT License",
+  "sources":[
+    {
+      "name":"UD_Japanese-BCCWJ r2.8",
+      "url":"https://github.com/UniversalDependencies/UD_Japanese-BCCWJ",
+      "license":"CC BY-NC-SA 4.0",
+      "author":"Asahara, M., Kanayama, H., Tanaka, T., Miyao, Y., Uematsu, S., Mori, S., Matsumoto, Y., Omura, M., & Murawaki, Y."
+    },
+    {
+      "name":"GSK2014-A(2019)",
+      "url":"https://www.gsk.or.jp/catalog/gsk2014-a/",
+      "license":"Individually defined commercial license",
+      "author":"Tokyo Institute of Technology"
+    },
+    {
+      "name":"SudachiDict_core",
+      "url":"https://github.com/WorksApplications/SudachiDict",
+      "license":"Apache License 2.0",
+      "author":"Works Applications Enterprise Co., Ltd."
+    },
+    {
+      "name":"mC4",
+      "url":"https://huggingface.co/datasets/mc4",
+      "license":"ODC-BY-1.0",
+      "title":"Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer",
+      "author":"Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, & Peter J. Liu"
+    },
+    {
+      "name":"megagonlabs/transformers-ud-japanese-electra-base-ginza",
+      "url":"https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-ginza",
+      "license":"MIT Licence",
+      "author":"Hiroshi Matsuda (Megagon Labs Tokyo, Recruit Co., Ltd.)"
+    }
+  ],
+  "parent_package":"spacy",
+  "spacy_version":">=3.0.6,<3.2.0",
+  "pipeline":[
+    "transformer",
+    "parser",
+    "attribute_ruler",
+    "ner",
+    "morphologizer",
+    "compound_splitter",
+    "bunsetu_recognizer"
+  ],
+  "components":[
+    "transformer",
+    "parser",
+    "attribute_ruler",
+    "ner",
+    "morphologizer",
+    "compound_splitter",
+    "bunsetu_recognizer"
+  ],
+  "disabled": [
+    "attribute_ruler"
+  ],
+  "requirements":[
+    "sudachipy>=0.5.2,<0.6.0",
+    "sudachidict_core>=20210608",
+    "sudachitra>=0.1.5,<0.2.0",
+    "ginza-transformers>=0.3.1,<1.0.0",
+    "ginza>=5.0.0,<5.1.0"
+  ]
+}

@@ -7,8 +7,8 @@ setup(
     description="GiNZA, An Open Source Japanese NLP Library, based on Universal Dependencies",
     entry_points={
         "spacy_factories": [
-            "BunsetuRecognizer = ginza:BunsetuRecognizer",
-            "CompoundSplitter = ginza:CompoundSplitter",
+            "bunsetu_recognizer = ginza:make_bunsetu_recognizer",
+            "compound_splitter = ginza:make_compound_splitter",
         ],
         "console_scripts": [
             "ginza = ginza.command_line:main_ginza",
@@ -16,14 +16,14 @@ setup(
         ],
     },
     install_requires=[
-        "spacy>=2.3.2,<3.0.0",
-        "SudachiPy>=0.4.9 ; python_version >= '3.5'",
-        "SudachiDict-core>=20200330 ; python_version >= '3.5'",
-        "ja_ginza>=4.0.0,<4.1.0",
+        "spacy>=3.0.6,<3.2.0",
+        "plac>=1.3.3",
+        "SudachiPy>=0.5.2,<0.6.0",
+        "SudachiDict-core>=20210608",
     ],
     license="MIT",
     name="ginza",
     packages=find_packages(include=["ginza"]),
     url="https://github.com/megagonlabs/ginza",
-    version='4.0.6',
+    version='5.0.0',
 )
