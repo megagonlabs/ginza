@@ -30,26 +30,26 @@
 
 ### Transformersモデルによる解析精度の向上
 
-GiNZA v5の解析精度は以前のバージョンから飛躍的な向上を遂げました。精度向上の主たる貢献はTransformers事前学習モデルの導入にあります。次の図は、UD_Japanese-BCCWJ r2.8における、従来型モデルの`ja_ginza`と、Transformers事前学習モデルを用いた`ja_ginza_electra`の学習曲線です。
+GiNZA v5の解析精度は以前のバージョンから飛躍的な向上を遂げました。精度向上の主たる貢献はTransformers事前学習モデルの導入にあります。次の図は、UD_Japanese-BCCWJ r2.8における、従来型モデルの`ja_ginza`と、Transformers事前学習モデルを用いた`ja_ginza_electra`の、依存関係ラベリングおよび単語依存構造解析の学習曲線です。
 
 ![LAS](https://github.com/megagonlabs/ginza/raw/static/docs/images/v5_las_graph.svg)
 ![UAS](https://github.com/megagonlabs/ginza/raw/static/docs/images/v5_uas_graph.svg)
 
-次の表はUD_Japanese-BCCWJ r2.8で5万ステップ学習した時点での各種精度の比較です。
+次の表はUD_Japanese-BCCWJ r2.8で5万ステップ学習した時点でのテストセットでの依存関係ラベリング精度(LAS:Labeled Attachment Score)、単語依存構造解析精度(UAS:Unlabeled Attachment Score)、UD品詞推定精度(UPOS)、拡張固有表現抽出精度(ENE)の比較です。
 
 | Model | LAS | UAS | UPOS | ENE |
 | --- | --- | --- | --- | --- |
-| ja_ginza_electra | 92.1 | 93.4 | 98.6 | 65.4 |
-| ja_ginza (v5)    | 89.0 | 90.8 | 97.2 | 54.0 |
-| ja_ginza (v4相当) |  |  |  |  |
+| ja_ginza_electra | 92.3 | 93.7 | 98.1 | 61.3 |
+| ja_ginza (v5)    | 89.2 | 91.1 | 97.0 | 53.9 |
+| ja_ginza (v4相当) | 89.0 | 91.0 | 95.1 | 53.3 |
 
-`ja_ginza_electra`は`ja_ginza`、依存関係ラベリング精度(Labeled Attachment Score)、および、単語依存構造解析精度(Unlabeled Attachment Score)の両指標において、5万ステップ学習時の誤り率を25%以上低減できました。
+`ja_ginza_electra`は`ja_ginza`に対して、5万ステップ学習時の依存関係ラベリング・単語依存構造解析の誤りを、以前のバージョンと比較して25%以上低減できました。
 
-また従来型モデルの`ja_ginza`においても、処理パイプラインにmorphologizerを追加することにより、以前のバージョンと比較してUD品詞推定精度(UPOS)を大幅に向上することができました。
+また従来型モデルの`ja_ginza`においても、処理パイプラインに`morphologizer`を追加することにより、以前のバージョンと比較してUD品詞推定の誤りを4割低減できました。
 
-[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)を用いた固有表現抽出精度(ENE)においても`ja_ginza_electra`は大幅な精度向上が得られています。GiNZAはこの拡張固有表現階層による固有表現抽出結果を、spaCyで標準的に用いられる[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)にマッピングして出力しています。OntoNotes5は関根の拡張固有表現階層よりカテゴリ数が非常に少ない(粗い)ため、OntoNotes5体系として解釈した場合の固有表現抽出精度は一般に関根の拡張固有表現階層での数値より高くなります。
+[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)を用いた拡張固有表現抽出精度(ENE)においても`ja_ginza_electra`は大幅な精度向上が得られています。GiNZAは関根の拡張固有表現階層にもとづく固有表現抽出結果を、spaCyで標準的に用いられる[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)にマッピング(変換表を適用)して出力しています。OntoNotes5は関根の拡張固有表現階層よりカテゴリ数が非常に少ない(粗い)ため、拡張固有表現をOntoNotes5体系にマッピングした場合の固有表現抽出精度は、拡張固有表現での数値より一般に高くなります。
 
-※各モデルの学習と解析精度評価にはUD_Japanese-BCCWJ r2.8をSudachi辞書mode C(長単位))で再解析した上で、さらに文節主辞情報を依存関係ラベルに組み合わせたコーパスを用いています。
+※各モデルの学習と解析精度評価にはUD_Japanese-BCCWJ r2.8から新聞記事系のテキストを除外したものをSudachi辞書mode C(長単位))で再解析(retokenize)した上で、文節主辞情報を依存関係ラベルに組み合わせた状態のコーパスを用いています。
 
 ## 実行環境
 
