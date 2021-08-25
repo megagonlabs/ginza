@@ -1,11 +1,13 @@
 /bccwj*/
 /build/
+/config/ja_gsd*
 /corpus*/
 /dist/
 /electra*
 /embedding*/
 /ja_*
 /log*
+/megagonlabs/
 /models/
 /old/
 /rtx*
@@ -18,3 +20,4 @@
 __pycache__/
 *.pyc
 *.egg-info/
+.DS_Store

@@ -6,13 +6,12 @@ import sys
 
 import plac
 import spacy
-from sudachipy.morpheme import Morpheme
 from spacy.tokens import Span
 
 from spacy.lang.ja import JapaneseDefaults
 
 from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes,\
-    bunsetu_bi_label, bunsetu_position_type
+    bunsetu_bi_label, bunsetu_position_type, force_using_normalized_form_as_lemma
 from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
 
 MINI_BATCH_SIZE = 100
@@ -35,7 +34,7 @@ def run(
         print("GPU enabled", file=sys.stderr)
     if use_normalized_form:
         print("overriding Token.lemma_ by normalized_form of SudachiPy", file=sys.stderr)
-        Morpheme.dictionary_form = Morpheme.normalized_form
+        force_using_normalized_form_as_lemma(True)
     assert model_path is None or ensure_model is None
 
     analyzer = Analyzer(

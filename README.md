@@ -7,27 +7,32 @@
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
-***Please read the [Important changes](#ginza-400) before you upgrade GiNZA.***
+***Please read the [Important changes](#ginza-500) before you upgrade GiNZA.***
 
 ## License
-GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under
-[The MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE).
-You must agree and follow The MIT License to use GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models.
+GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under the
+[MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE).
+You must agree and follow the MIT License to use GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models.
 
-### spaCy
+### Explosion / spaCy
 spaCy is the key framework of GiNZA.
+
 [spaCy LICENSE PAGE](https://github.com/explosion/spaCy/blob/master/LICENSE)
 
-### Sudachi/SudachiPy - SudachiDict - chiVe
+### Works Applications Enterprise / Sudachi/SudachiPy - SudachiDict - chiVe
 SudachiPy provides high accuracies for tokenization and pos tagging.
+
 [Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
-[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE)
-
-[SudachiDict LEGAL PAGE](https://github.com/WorksApplications/SudachiDict/blob/develop/LEGAL)
-
+[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE),
+[SudachiDict LEGAL PAGE](https://github.com/WorksApplications/SudachiDict/blob/develop/LEGAL),
 [chiVe LICENSE PAGE](https://github.com/WorksApplications/chiVe/blob/master/LICENSE)
 
-## Training Data-sets
+### Hugging Face / transformers
+The GiNZA v5 Transformers model (ja_ginza_electra) is trained by using Hugging Face Transformers as a framework for pretrained models.
+
+[transformers LICENSE PAGE](https://github.com/huggingface/transformers/blob/master/LICENSE)
+
+## Training Datasets
 
 ### UD Japanese BCCWJ v2.6
 The parsing model of GiNZA v4 is trained on a part of
@@ -44,26 +49,62 @@ We use two of the named entity label systems, both
 and extended [OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf).
 This model is developed by National Institute for Japanese Language and Linguistics, and Megagon Labs.
 
+### mC4
+The GiNZA v5 Transformers model (ja-ginza-electra) is trained by using [transformers-ud-japanese-electra-base-discriminator](https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-discriminator) which is pretrained on more than 200 million Japanese sentences extracted from [mC4](https://huggingface.co/datasets/mc4).
+
+Contains information from mC4 which is made available under the ODC Attribution License.
+```
+@article{2019t5,
+    author = {Colin Raffel and Noam Shazeer and Adam Roberts and Katherine Lee and Sharan Narang and Michael Matena and Yanqi Zhou and Wei Li and Peter J. Liu},
+    title = {Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer},
+    journal = {arXiv e-prints},
+    year = {2019},
+    archivePrefix = {arXiv},
+    eprint = {1910.10683},
+}
+```
 
 ## Runtime Environment
 This project is developed with Python>=3.6 and pip for it.
 We do not recommend to use Anaconda environment because the pip install step may not work properly.
-(We'd like to support Anaconda in near future.)
 
 Please also see the Development Environment section below.
 ### Runtime set up
-#### 1. Install GiNZA NLP Library with Japanese Universal Dependencies Model
-Run following line
+
+#### 1. Install GiNZA NLP Library with Transformer-based Model
+Uninstall previous version:
 ```console
-$ pip install -U ginza
+$ pip uninstall ginza ja-ginza
+```
+Then, install the latest version of `ginza` and `ja-ginza-electra`:
+```console
+$ pip install -U ginza ja-ginza-electra
 ```
 
-If you encountered some install problems related to Cython, please try to set the CFLAGS like below.
+The package of `ja-ginza-electra` does not include `pytorch_model.bin` due to PyPI's archive size restrictions.
+This large model file will be automatically downloaded at the first run time, and the locally cached file will be used for subsequent runs.
+
+If you need to install `ja-ginza-electra` along with `pytorch_model.bin` at the install time, you can specify direct link for GitHub release archive as follows:
 ```console
-$ CFLAGS='-stdlib=libc++' pip install ginza
+$ pip install -U ginza https://github.com/megagonlabs/ginza/releases/download/latest/ja_ginza_electra-latest-with-model.tar.gz
 ```
 
-#### 2. Execute ginza from command line
+If you hope to accelarate the transformers-based models by using GPUs with CUDA support, you can install `spacy` by specifying the CUDA version as follows:
+```console
+pip install -U "spacy[cuda110]"
+```
+
+#### 2. Install GiNZA NLP Library with Standard Model
+Uninstall previous version:
+```console
+$ pip uninstall ginza ja-ginza
+```
+Then, install the latest version of `ginza` and `ja-ginza`:
+```console
+$ pip install -U ginza ja-ginza
+```
+
+### Execute ginza command
 Run `ginza` command from the console, then input some Japanese text.
 After pressing enter key, you will get the parsed results with [CoNLL-U Syntactic Annotation](https://universaldependencies.org/format.html#syntactic-annotation) format.
 ```console
@@ -76,7 +117,7 @@ $ ginza
 4	を	を	ADP	助詞-格助詞	_	3	case	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=ヲ
 5	ご	ご	NOUN	接頭辞	_	6	compound	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=CONT|Reading=ゴ
 6	一緒	一緒	VERB	名詞-普通名詞-サ変可能	_	0	root	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=ROOT|Reading=イッショ
-7	し	する	AUX	動詞-非自立可能	_	6	advcl	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,連用形-一般|Reading=シ
+7	し	する	AUX	動詞-非自立可能	_	6	aux	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,連用形-一般|Reading=シ
 8	ましょう	ます	AUX	助動詞	_	6	aux	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=助動詞-マス,意志推量形|Reading=マショウ
 9	。	。	PUNCT	補助記号-句点	_	6	punct	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=CONT|Reading=。
 
@@ -159,17 +200,13 @@ The memory requirement is about 130MB/process (to be improved).
 Following steps shows dependency parsing results with sentence boundary 'EOS'.
 ```python
 import spacy
-nlp = spacy.load('ja_ginza')
+nlp = spacy.load('ja_ginza_electra')
 doc = nlp('銀座でランチをご一緒しましょう。')
 for sent in doc.sents:
     for token in sent:
         print(token.i, token.orth_, token.lemma_, token.pos_, token.tag_, token.dep_, token.head.i)
     print('EOS')
 ```
-
-### APIs
-Please see [spaCy API documents](https://spacy.io/api/) for general analyzing functions.
-Or please refer the source codes of GiNZA on github until we'd write the documents.
 
 ### User Dictionary
 The user dictionary files should be set to `userDict` field of `sudachi.json` in the installed package directory of`ja_ginza_dict` package.
@@ -179,6 +216,31 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 [Sudachi User Dictionary Construction (Japanese Only)](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)
 
 ## Releases
+
+### version 5.x
+
+#### ginza-5.0.0
+- 2021-08-26, Demantoid
+- Important changes
+  - Upgrade spaCy to v3
+    - Release transformer-based `ja-ginza-electra` model
+    - Improve UPOS accuracy of the standard `ja-ginza` model by adding `morphologizer` to the tail of spaCy pipleline
+  - Need to insrtall analysis model along with `ginza` package
+    - High accuracy model (>=16GB memory needed)
+      - `pip install -U ginza ja-ginza-electra`
+    - Speed oriented model
+      - `pip install -U ginza ja-ginza`
+  - Change component names of `CompoundSplitter` and `BunsetuRecognizer` to `compound_splitter` and `bunsetu_recognizer` respectively
+  - Also see [spaCy v3 Backwards Incompatibilities](https://spacy.io/usage/v3#incompat)
+- Improvements
+  - Add command line options
+    - `-n`
+      - Force using SudachiPy's `normalized_form` as `Token.lemma_`
+    - `-m (ja_ginza|ja_ginza_electra)`
+      - Select model package
+  - Revise ENE category name
+    - `Degital_Game` to `Digital_Game`
+
 ### version 4.x
 
 #### ginza-4.0.6
