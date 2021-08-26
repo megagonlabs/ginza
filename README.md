@@ -9,6 +9,8 @@ An Open Source Japanese NLP Library, based on Universal Dependencies
 
 ***Please read the [Important changes](#ginza-500) before you upgrade GiNZA.***
 
+[日本語ページはこちら](https://megagonlabs.github.io/ginza/)
+
 ## License
 GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under the
 [MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE).
