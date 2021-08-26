@@ -41,7 +41,7 @@ GiNZA v5の解析精度は以前のバージョンから飛躍的な向上を遂
 | --- | --- | --- | --- | --- |
 | ja_ginza_electra | 92.3 | 93.7 | 98.1 | 61.3 |
 | ja_ginza (v5)    | 89.2 | 91.1 | 97.0 | 53.9 |
-| ja_ginza (v4相当) | 89.0 | 91.0 | 95.1 | 53.3 |
+| ja_ginza (v4相当) | 89.0 | 91.0 | 95.1 | 53.1 |
 
 `ja_ginza_electra`は`ja_ginza`に対して、5万ステップ学習時の依存関係ラベリング・単語依存構造解析の誤りを、以前のバージョンと比較して25%以上低減できました。
 
@@ -49,7 +49,7 @@ GiNZA v5の解析精度は以前のバージョンから飛躍的な向上を遂
 
 [関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)を用いた拡張固有表現抽出精度(ENE)においても`ja_ginza_electra`は大幅な精度向上が得られています。GiNZAは関根の拡張固有表現階層にもとづく固有表現抽出結果を、spaCyで標準的に用いられる[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)にマッピング(変換表を適用)して出力しています。OntoNotes5は関根の拡張固有表現階層よりカテゴリ数が非常に少ない(粗い)ため、拡張固有表現をOntoNotes5体系にマッピングした場合の固有表現抽出精度は、拡張固有表現での数値より一般に高くなります。
 
-※各モデルの学習と解析精度評価にはUD_Japanese-BCCWJ r2.8から新聞記事系のテキストを除外したものをSudachi辞書mode C(長単位))で再解析(retokenize)した上で、文節主辞情報を依存関係ラベルに組み合わせた状態のコーパスを用いています。
+※各モデルの学習と解析精度評価にはUD_Japanese-BCCWJ r2.8から新聞記事系のテキストを除外したものをSudachi辞書mode C(長単位)で再解析(retokenize)した上で、文節主辞情報を依存関係ラベルに組み合わせた状態のコーパスを用いています。
 
 ## 実行環境
 
@@ -224,6 +224,14 @@ Contains information from mC4 which is made available under the ODC Attribution 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 
 ### version 5.x
+
+#### ginza-5.0.1
+- 2021-08-26
+- Bug fix
+  - `ginzame not woriking in ginza ver. 5` #179
+  - `Command Line -d option not working in v5.0.0` #178
+- Improvement
+  - accept `ja-ginza` and `ja-ginza-electra` for `-m` option of `ginza` command
 
 #### ginza-5.0.0
 - 2021-08-26, Demantoid
