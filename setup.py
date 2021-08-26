@@ -9,6 +9,7 @@ setup(
         "spacy_factories": [
             "bunsetu_recognizer = ginza:make_bunsetu_recognizer",
             "compound_splitter = ginza:make_compound_splitter",
+            "disable_sentencizer = ginza:disable_sentencizer",
         ],
         "console_scripts": [
             "ginza = ginza.command_line:main_ginza",
@@ -25,5 +26,5 @@ setup(
     name="ginza",
     packages=find_packages(include=["ginza"]),
     url="https://github.com/megagonlabs/ginza",
-    version='5.0.0',
+    version='5.0.1',
 )

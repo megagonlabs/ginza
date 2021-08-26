@@ -9,6 +9,8 @@ An Open Source Japanese NLP Library, based on Universal Dependencies
 
 ***Please read the [Important changes](#ginza-500) before you upgrade GiNZA.***
 
+[日本語ページはこちら](https://megagonlabs.github.io/ginza/)
+
 ## License
 GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under the
 [MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE).
@@ -219,6 +221,14 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 
 ### version 5.x
 
+#### ginza-5.0.1
+- 2021-08-26
+- Bug fix
+  - `ginzame not woriking in ginza ver. 5` #179
+  - `Command Line -d option not working in v5.0.0` #178
+- Improvement
+  - accept `ja-ginza` and `ja-ginza-electra` for `-m` option of `ginza` command
+
 #### ginza-5.0.0
 - 2021-08-26, Demantoid
 - Important changes
@@ -387,7 +397,7 @@ with open('sample2.pickle', 'wb') as f:
   - upgrade `sudachipy` to v0.4.2
 
 ### version 2.x
-### version 2.x
+
 #### ginza-2.2.1
 - 2019-10-28
 - Improvements
