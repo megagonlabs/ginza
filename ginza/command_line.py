@@ -8,7 +8,7 @@ import plac
 import spacy
 from spacy.tokens import Span
 
-from spacy.lang.ja import JapaneseDefaults
+from spacy.lang.ja import Japanese, JapaneseTokenizer
 
 from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes,\
     bunsetu_bi_label, bunsetu_position_type, force_using_normalized_form_as_lemma
@@ -178,9 +178,7 @@ class Analyzer:
             spacy.require_gpu()
 
         if self.output_format in ["2", "mecab"]:
-            nlp = JapaneseDefaults.create_tokenizer(config={
-                "split_mode": self.split_mode
-            }).tokenizer
+            nlp = JapaneseTokenizer(nlp=Japanese(), split_mode=self.split_mode).tokenizer
         else:
             # Work-around for pickle error. Need to share model data.
             if self.model_path:
