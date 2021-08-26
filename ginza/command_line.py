@@ -11,7 +11,7 @@ from spacy.tokens import Span
 from spacy.lang.ja import Japanese, JapaneseTokenizer
 
 from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes,\
-    bunsetu_bi_label, bunsetu_position_type, force_using_normalized_form_as_lemma
+    bunsetu_bi_label, bunsetu_position_type, force_using_normalized_form_as_lemma, make_disable_sentencizer
 from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
 
 MINI_BATCH_SIZE = 100
@@ -184,7 +184,7 @@ class Analyzer:
             if self.model_path:
                 nlp = spacy.load(self.model_path)
             elif self.ensure_model:
-                    nlp = spacy.load(self.ensure_model)
+                    nlp = spacy.load(self.ensure_model.replace("-", "_"))
             else:
                 try:
                     nlp = spacy.load("ja_ginza_electra")
@@ -192,15 +192,11 @@ class Analyzer:
                     try:
                         nlp = spacy.load("ja_ginza")
                     except IOError as e:
-                        print('Could not find the model. You need to install "ja_ginza_electra" or "ja_ginza" by executing pip like `pip install ja_ginza_electra`.', file=sys.stderr)
+                        print('Could not find the model. You need to install "ja-ginza-electra" or "ja-ginza" by executing pip like `pip install ja-ginza-electra`.', file=sys.stderr)
                         raise e
 
             if self.disable_sentencizer:
-                def disable_sentencizer(doc):
-                    for t in doc:
-                        t.is_sent_start = False
-                    return doc
-                nlp.add_pipe(disable_sentencizer, before="parser")
+                nlp.add_pipe("disable_sentencizer", before="parser")
 
             if self.split_mode:
                 set_split_mode(nlp, self.split_mode)
@@ -444,7 +440,7 @@ def main_ginzame():
 
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
-    ensure_model=("select model either ja_ginza or ja_ginza_electra", "option", "m", str, ["ja_ginza", "ja_ginza_electra", None]),
+    ensure_model=("select model either ja_ginza or ja_ginza_electra", "option", "m", str, ["ja_ginza", "ja-ginza", "ja_ginza_electra", "ja-ginza-electra", None]),
     split_mode=("split mode", "option", "s", str, ["A", "B", "C", None]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
