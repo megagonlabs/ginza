@@ -77,5 +77,5 @@ for frame, count in sorted(frames.items(), key=lambda t: -t[1]):
 
 詳細な解説はこちらの記事をご覧ください。
 
-- [GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合 - Megagon Labs Blog](https://www.megagon.ai/jp/blog/ginza-version-4.0-integrating-bunsetu-api-into-multilingual-structural-analysis-technology/)
+- [GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合 - Megagon Labs Blog](https://www.megagon.ai/jp/blog/ginza-version-4-0/)
 - [GiNZA - Universal Dependenciesによる実用的日本語解析 - 自然言語処理 Volume 27 Number 3](https://www.jstage.jst.go.jp/article/jnlp/27/3/27_695/_article/-char/ja/)
