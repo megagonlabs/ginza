@@ -158,7 +158,7 @@ for sent in doc.sents:
 ### 解説記事
 
 - [GiNZA Version 4.0: Improving Syntactic Structure Analysis Through Japanese Bunsetsu-Phrase Extraction API Integration](https://megagon.ai/blog/ginza-version-4-0-improving-syntactic-structure-analysis-through-japanese-bunsetsu-phrase-extraction-api-integration/) - Megagon Labs Blog (2021.03)
-- [GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合](https://www.megagon.ai/jp/blog/ginza-version-4.0-integrating-bunsetu-api-into-multilingual-structural-analysis-technology/) - Megagon Labs Blog (2020.09)
+- [GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合](https://www.megagon.ai/jp/blog/ginza-version-4-0/) - Megagon Labs Blog (2020.09)
 - [GiNZA: 日本語自然言語処理オープンソースライブラリ](https://www.megagon.ai/jp/projects/ginza-install-a-japanese-nlp-library-in-one-step/) - Megagon Labs (2019)
 
 ## ライセンス
@@ -224,6 +224,11 @@ Contains information from mC4 which is made available under the ODC Attribution 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 
 ### version 5.x
+
+#### ginza-5.0.2
+- 2021-09-06
+- Bug fix
+  - `Command Line -s option and set_split_mode() not working in v5.0.x` #185
 
 #### ginza-5.0.1
 - 2021-08-26

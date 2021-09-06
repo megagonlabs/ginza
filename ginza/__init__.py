@@ -109,7 +109,7 @@ def force_using_normalized_form_as_lemma(force: bool):
 
 
 def set_split_mode(nlp: Language, mode: str):
-    splitter = nlp.get_pipe("CompoundSplitter")
+    splitter = nlp.get_pipe("compound_splitter")
     splitter.split_mode = mode
 
 
