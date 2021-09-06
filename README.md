@@ -221,6 +221,11 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 
 ### version 5.x
 
+#### ginza-5.0.2
+- 2021-09-06
+- Bug fix
+  - `Command Line -s option and set_split_mode() not working in v5.0.x` #185
+
 #### ginza-5.0.1
 - 2021-08-26
 - Bug fix
