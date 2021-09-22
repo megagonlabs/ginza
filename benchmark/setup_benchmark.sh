@@ -6,6 +6,6 @@ for t in train dev test ; do
 done
 echo
 echo '=== CUDA Related Installation Steps ==='
-echo 'The pytorch should be installed with cuda support. See https://pytorch.org/get-started/previous-versions/#linux-and-windows-1 .'
-echo 'Also you need to install spacy with appropriate cuda specifier as `pip install -U spacy[cudaXXX]`. See https://spacy.io/usage#gpu .'
-echo 'And then, install GiNZA as `pip install -U ginza ja-ginza ja-ginza-electra`'
+echo 'The pytorch should be installed with cuda support. See https://pytorch.org/get-started/previous-versions/#linux-and-windows-1'
+echo 'Also you need to install spacy with appropriate cuda specifier as `pip install -U spacy[cudaXXX]`. See https://spacy.io/usage#gpu'
+echo 'And then, install GiNZA as `pip install -U ginza ja-ginza ja-ginza-electra`.'
