@@ -1,5 +1,5 @@
 #!/bin/bash
-seet -e
+set -e
 mkdir -p gsd
 for t in train dev test ; do
   curl "https://raw.githubusercontent.com/megagonlabs/UD_Japanese-GSD/c614040872a74587912a15ef4637eabc0dc29a60/ja_gsd-ud-${t}.ne.conllu?raw=true" | grep "# text = " | sed 's/# text = //' > gsd/${t}.txt
