@@ -148,14 +148,14 @@ class TestCLIGinza:
         p_o = run_cmd(["ginza", "-o", output_file, input_file])
         assert p_o.returncode == 0
 
-        def file_output():
+        def _file_output():
             with open(output_file, "r") as fp:
                 return [l.strip() for l in fp if l.strip()]
 
-        def pipe_output():
+        def _pipe_output():
             return [l.strip() for l in p_s.stdout.split("\n") if l.strip()]
 
-        assert file_output() == pipe_output()
+        assert _file_output() == _pipe_output()
 
     @pytest.mark.parametrize(
         "output_format, result_parser",
@@ -204,7 +204,6 @@ class TestCLIGinza:
 
 
 class TestCLIGinzame:
-
     def test_ginzame(self, input_file):
         p_ginzame = run_cmd(["ginzame", input_file])
         p_ginza = run_cmd(["ginza", "-m", "ja_ginza", "-f", "2", input_file])
