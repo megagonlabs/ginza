@@ -9,22 +9,9 @@ from typing import Iterator, List
 
 import pytest
 
-TEST_TEXT = "今日はかつ丼を食べた。明日は東京で蕎麦を食べる。\n#コメント"
+TEST_TEXT = "#コメント\n今日はかつ丼を食べた。\n明日は東京で蕎麦を食べる。明後日は酒が飲みたい。"
 
 run_cmd = partial(sp.run, encoding="utf-8", stdout=sp.PIPE)
-
-
-@pytest.fixture(scope="module", autouse=True)
-def download_model() -> None:
-    run_cmd([sys.executable, "-m", "pip", "install", "ja-ginza"])
-    run_cmd([sys.executable, "-m", "pip", "install", "ja-ginza-electra"])
-    yield
-
-
-@pytest.fixture(scope="module")
-def tmpdir() -> Path:
-    with tempfile.TemporaryDirectory() as dir_name:
-        yield Path(dir_name)
 
 
 @pytest.fixture(scope="module")
@@ -37,6 +24,19 @@ def input_file(tmpdir: Path) -> Path:
 
 
 @pytest.fixture(scope="module")
+def input_files(tmpdir: Path) -> Iterator[Path]:
+    paths = []
+    for i, text in enumerate(TEST_TEXT.split('\n')):
+        file_path = (tmpdir / f"test_input_{i}.txt").resolve()
+        with open(file_path, "w") as fp:
+            print(text, file=fp)
+        paths.append(file_path)
+    yield paths
+    for file_path in paths:
+        file_path.unlink()
+
+
+@pytest.fixture
 def output_file(tmpdir: Path) -> Path:
     file_path = (tmpdir / "test_output.txt").resolve()
     file_path.touch()
@@ -74,6 +74,13 @@ class TestCLIGinza:
         o, e = p_stdin.communicate(input=TEST_TEXT.encode())
         assert e is None
         assert o.decode("utf-8") == p.stdout
+
+    def test_multiple_input(self, input_files, input_file):
+        p_multi = run_cmd(["ginza", *input_files])
+        assert p_multi.returncode == 0
+
+        p_single = run_cmd(["ginza", input_file])
+        assert p_multi.stdout == p_single.stdout
 
     # TODO: add user defined model to fixture and test it here
     @pytest.mark.parametrize(
@@ -126,9 +133,9 @@ class TestCLIGinza:
     @pytest.mark.parametrize(
         "hash_comment, n_sentence, n_analyzed_sentence, exit_ok",
         [
-            ("print", 3, 2, True),
-            ("skip", 2, 2, True),
-            ("analyze", 3, 3, True),
+            ("print", 4, 3, True),
+            ("skip", 3, 3, True),
+            ("analyze", 4, 4, True),
         ],
     )
     def test_hash_comment(self, hash_comment, n_sentence, n_analyzed_sentence, exit_ok, input_file):
@@ -189,14 +196,14 @@ class TestCLIGinza:
         assert p.returncode == 0
         assert "カツ丼" in lemmas
 
-    def test_diable_sentencizer(self, input_file):
+    def test_disable_sentencizer(self, input_file):
         p = run_cmd(["ginza", "-d", input_file])
 
         def _n_analyzed_sentence(lines: Iterator) -> int:
             return len(list(filter(lambda x: x.startswith("# text = "), lines)))
 
         assert p.returncode == 0
-        assert _n_analyzed_sentence(p.stdout.split("\n")) == 1
+        assert _n_analyzed_sentence(p.stdout.split("\n")) == 2
 
     def test_parallel(self, input_file):
         p = run_cmd(["ginza", "-p", "2", input_file])
