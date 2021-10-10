@@ -11,17 +11,17 @@ MINI_BATCH_SIZE = 100
 
 
 def run(
-        model_path=None,
-        ensure_model=None,
-        split_mode=False,
-        hash_comment="print",
-        output_path=None,
-        output_format="0",
-        require_gpu=False,
-        disable_sentencizer=False,
-        use_normalized_form=False,
-        parallel=1,
-        files=None,
+    model_path=None,
+    ensure_model=None,
+    split_mode=False,
+    hash_comment="print",
+    output_path=None,
+    output_format="0",
+    require_gpu=False,
+    disable_sentencizer=False,
+    use_normalized_form=False,
+    parallel=1,
+    files=None,
 ):
     if require_gpu:
         print("GPU enabled", file=sys.stderr)
@@ -107,7 +107,7 @@ def run(
 
                         mini_batch_size = (len(buffer) - 1) // parallel + 1
                         mini_batches = [
-                            buffer[idx * mini_batch_size:(idx + 1) * mini_batch_size] for idx in range(parallel)
+                            buffer[idx * mini_batch_size : (idx + 1) * mini_batch_size] for idx in range(parallel)
                         ]
                         for mini_batch_result in pool.map(analyzer.analyze_lines_mp, mini_batches):
                             for sents in mini_batch_result:
@@ -143,8 +143,6 @@ def fill_buffer(f, batch_size, buffer=None):
     return True, buffer
 
 
-
-
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
     split_mode=("split mode", "option", "s", str, ["A", "B", "C", None]),
@@ -155,13 +153,13 @@ def fill_buffer(f, batch_size, buffer=None):
     files=("input files", "positional"),
 )
 def run_ginzame(
-        model_path=None,
-        split_mode=None,
-        hash_comment="print",
-        output_path=None,
-        use_normalized_form=False,
-        parallel=-1,
-        *files,
+    model_path=None,
+    split_mode=None,
+    hash_comment="print",
+    output_path=None,
+    use_normalized_form=False,
+    parallel=-1,
+    *files,
 ):
     run(
         model_path=model_path,
@@ -196,17 +194,17 @@ def main_ginzame():
     files=("input files", "positional"),
 )
 def run_ginza(
-        model_path=None,
-        ensure_model=None,
-        split_mode=None,
-        hash_comment="print",
-        output_path=None,
-        output_format="conllu",
-        require_gpu=False,
-        use_normalized_form=False,
-        disable_sentencizer=False,
-        parallel=1,
-        *files,
+    model_path=None,
+    ensure_model=None,
+    split_mode=None,
+    hash_comment="print",
+    output_path=None,
+    output_format="conllu",
+    require_gpu=False,
+    use_normalized_form=False,
+    disable_sentencizer=False,
+    parallel=1,
+    *files,
 ):
     run(
         model_path=model_path,
