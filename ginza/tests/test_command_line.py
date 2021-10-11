@@ -174,9 +174,6 @@ class TestCLIGinza:
         ],
     )
     def test_output_format(self, output_format, result_parser, input_file):
-        # TODO: add more detailed tests.
-        # difference between output_formats are complicated.
-        # FIXME: output_format = mecab works more than 'format'.
         p = run_cmd(["ginza", "-c", "skip", "-f", output_format, input_file])
         assert p.returncode == 0
         try:
