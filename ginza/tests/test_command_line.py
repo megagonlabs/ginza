@@ -1,11 +1,9 @@
 import json
 import os
 import subprocess as sp
-import sys
-import tempfile
 from functools import partial
 from pathlib import Path
-from typing import Iterator, List
+from typing import Iterable, List
 
 import pytest
 
@@ -24,9 +22,9 @@ def input_file(tmpdir: Path) -> Path:
 
 
 @pytest.fixture(scope="module")
-def input_files(tmpdir: Path) -> Iterator[Path]:
+def input_files(tmpdir: Path) -> Iterable[Path]:
     paths = []
-    for i, text in enumerate(TEST_TEXT.split('\n')):
+    for i, text in enumerate(TEST_TEXT.split("\n")):
         file_path = (tmpdir / f"test_input_{i}.txt").resolve()
         with open(file_path, "w") as fp:
             print(text, file=fp)
@@ -125,7 +123,7 @@ class TestCLIGinza:
         p = run_cmd(["ginza", "-s", split_mode], input=input_text)
         assert p.returncode == 0
 
-        def _sub_words(lines: Iterator) -> List[str]:
+        def _sub_words(lines: Iterable) -> List[str]:
             return [l.split("\t")[1] for l in lines if len(l.split("\t")) > 1]
 
         assert _sub_words(p.stdout.split("\n")) == expected
@@ -139,10 +137,10 @@ class TestCLIGinza:
         ],
     )
     def test_hash_comment(self, hash_comment, n_sentence, n_analyzed_sentence, exit_ok, input_file):
-        def _n_sentence(lines: Iterator) -> int:
+        def _n_sentence(lines: Iterable) -> int:
             return len(list(filter(lambda x: x.startswith("#"), lines)))
 
-        def _n_analyzed_sentence(lines: Iterator) -> int:
+        def _n_analyzed_sentence(lines: Iterable) -> int:
             return len(list(filter(lambda x: x.startswith("# text = "), lines)))
 
         p = run_cmd(["ginza", "-c", hash_comment, input_file])
@@ -196,7 +194,7 @@ class TestCLIGinza:
     def test_disable_sentencizer(self, input_file):
         p = run_cmd(["ginza", "-d", input_file])
 
-        def _n_analyzed_sentence(lines: Iterator) -> int:
+        def _n_analyzed_sentence(lines: Iterable) -> int:
             return len(list(filter(lambda x: x.startswith("# text = "), lines)))
 
         assert p.returncode == 0

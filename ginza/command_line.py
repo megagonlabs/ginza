@@ -1,5 +1,4 @@
 # coding: utf8
-import io
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 import sys
@@ -17,7 +16,7 @@ def run(
     ensure_model: Optional[str] = None,
     split_mode: Optional[str] = None,
     hash_comment: str = "print",
-    output_path: Optional[str] = None,
+    output_path: Optional[Path] = None,
     output_format: str = "0",
     require_gpu: bool = False,
     disable_sentencizer: bool = False,
