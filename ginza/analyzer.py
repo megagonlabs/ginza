@@ -1,10 +1,11 @@
 # coding: utf8
 import json
 import sys
+from typing import Iterable, Iterator, Optional, Tuple
 
 import spacy
 from spacy.tokens import Span
-
+from spacy.language import Language
 from spacy.lang.ja import Japanese, JapaneseTokenizer
 
 from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes, bunsetu_bi_label, bunsetu_position_type
@@ -14,14 +15,14 @@ from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_ph
 class Analyzer:
     def __init__(
         self,
-        model_path,
-        ensure_model,
-        split_mode,
-        hash_comment,
-        output_format,
-        require_gpu,
-        disable_sentencizer,
-    ):
+        model_path: str,
+        ensure_model: str,
+        split_mode: str,
+        hash_comment: str,
+        output_format: str,
+        require_gpu: bool,
+        disable_sentencizer: bool,
+    ) -> None:
         self.model_path = model_path
         self.ensure_model = ensure_model
         self.split_mode = split_mode
@@ -29,9 +30,9 @@ class Analyzer:
         self.output_format = output_format
         self.require_gpu = require_gpu
         self.disable_sentencizer = disable_sentencizer
-        self.nlp = None
+        self.nlp: Optional[Language] = None
 
-    def set_nlp(self):
+    def set_nlp(self) -> None:
         if self.nlp:
             return
 
@@ -67,15 +68,17 @@ class Analyzer:
 
         self.nlp = nlp
 
-    def analyze_lines_mp(self, lines):
+    def analyze_lines_mp(self, lines: Iterable[str]) -> Tuple[Iterable[Iterable[str]]]:
         self.set_nlp()
         return tuple(self.analyze_line(line) for line in lines)
 
-    def analyze_line(self, line):
+    def analyze_line(self, line: str) -> Iterable[Iterable[str]]:
         return analyze(self.nlp, self.hash_comment, self.output_format, line)
 
 
-def analyze(nlp, hash_comment, output_format, line):
+def analyze(
+    nlp: Language, hash_comment: str, output_format: str, line: str
+) -> Iterable[Iterable[str]]:
     line = line.rstrip("\n")
     if line.startswith("#"):
         if hash_comment == "print":
@@ -100,7 +103,7 @@ def analyze(nlp, hash_comment, output_format, line):
         raise Exception(output_format + " is not supported")
 
 
-def analyze_json(sent: Span):
+def analyze_json(sent: Span) -> Iterator[str]:
     tokens = []
     for token in sent:
         t = {
@@ -137,7 +140,7 @@ def analyze_json(sent: Span):
     )
 
 
-def analyze_conllu(sent: Span, print_origin=True):
+def analyze_conllu(sent: Span, print_origin=True) -> Iterator[str]:
     if print_origin:
         yield "# text = {}".format(sent.text)
     np_labels = [""] * len(sent)
@@ -154,7 +157,7 @@ def analyze_conllu(sent: Span, print_origin=True):
     yield ""
 
 
-def conllu_token_line(sent, token, np_label, use_bunsetu):
+def conllu_token_line(sent, token, np_label, use_bunsetu) -> str:
     bunsetu_bi = bunsetu_bi_label(token) if use_bunsetu else None
     position_type = bunsetu_position_type(token) if use_bunsetu else None
     inf = inflection(token)
@@ -193,7 +196,7 @@ def conllu_token_line(sent, token, np_label, use_bunsetu):
     )
 
 
-def analyze_cabocha(sent: Span):
+def analyze_cabocha(sent: Span) -> Iterable[str]:
     bunsetu_index_list = {}
     bunsetu_index = -1
     for token in sent:
@@ -211,7 +214,7 @@ def analyze_cabocha(sent: Span):
     return lines
 
 
-def cabocha_bunsetu_line(sent: Span, bunsetu_index_list, token):
+def cabocha_bunsetu_line(sent: Span, bunsetu_index_list, token) -> str:
     bunsetu_head_index = None
     bunsetu_dep_index = None
     bunsetu_func_index = None
@@ -243,7 +246,7 @@ def cabocha_bunsetu_line(sent: Span, bunsetu_index_list, token):
     )
 
 
-def cabocha_token_line(token):
+def cabocha_token_line(token) -> str:
     part_of_speech = token.tag_.replace("-", ",")
     part_of_speech += ",*" * (3 - part_of_speech.count(",")) + "," + inflection(token)
     reading = reading_form(token)
@@ -257,11 +260,11 @@ def cabocha_token_line(token):
     )
 
 
-def analyze_mecab(sudachipy_tokens):
+def analyze_mecab(sudachipy_tokens) -> Iterable[str]:
     return tuple(mecab_token_line(t) for t in sudachipy_tokens) + ("EOS", "")
 
 
-def mecab_token_line(token):
+def mecab_token_line(token) -> str:
     reading = token.reading_form()
     return "{}\t{},{},{},{}".format(
         token.surface(),

@@ -1,7 +1,9 @@
 # coding: utf8
+import io
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 import sys
+from typing import Optional, List
 
 import plac
 from . import force_using_normalized_form_as_lemma
@@ -11,17 +13,17 @@ MINI_BATCH_SIZE = 100
 
 
 def run(
-    model_path=None,
-    ensure_model=None,
-    split_mode=False,
-    hash_comment="print",
-    output_path=None,
-    output_format="0",
-    require_gpu=False,
-    disable_sentencizer=False,
-    use_normalized_form=False,
-    parallel=1,
-    files=None,
+    model_path: Optional[str] = None,
+    ensure_model: Optional[str] = None,
+    split_mode: Optional[str] = None,
+    hash_comment: str = "print",
+    output_path: Optional[str] = None,
+    output_format: str = "0",
+    require_gpu: bool = False,
+    disable_sentencizer: bool = False,
+    use_normalized_form: bool = False,
+    parallel: int = 1,
+    files: List[str] = None,
 ):
     if require_gpu:
         print("GPU enabled", file=sys.stderr)
