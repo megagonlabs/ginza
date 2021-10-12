@@ -1,11 +1,14 @@
 import json
 import os
 import subprocess as sp
+from multiprocessing import Pool, cpu_count
 from functools import partial
 from pathlib import Path
 from typing import Iterable, List
 
 import pytest
+
+import ginza.command_line as cli
 
 TEST_TEXT = "#コメント\n今日はかつ丼を食べた。\n明日は東京で蕎麦を食べる。明後日は酒が飲みたい。"
 
@@ -32,6 +35,16 @@ def input_files(tmpdir: Path) -> Iterable[Path]:
     yield paths
     for file_path in paths:
         file_path.unlink()
+
+
+@pytest.fixture(scope="module")
+def long_input_file(tmpdir: Path) -> Iterable[Path]:
+    file_path = (tmpdir / "test_long_input.txt").resolve()
+    with open(file_path, "w") as fp:
+        for _ in range(10):
+            print(TEST_TEXT, file=fp)
+    yield file_path
+    file_path.unlink()
 
 
 @pytest.fixture
@@ -212,3 +225,71 @@ class TestCLIGinzame:
 
         assert p_ginzame.returncode == 0
         assert p_ginzame.stdout == p_ginza.stdout
+
+
+class TestRun:
+    # TODO: define pool_obj mock as fixture
+    def test_run_as_single_when_file_is_small(self, mocker, output_file, long_input_file):
+        mocker.patch.object(cli, "MINI_BATCH_SIZE", 50)
+        pool_mock = mocker.patch.object(cli, "Pool")
+        cli.run(parallel=2, output_path=output_file, files=[long_input_file])
+        pool_mock.assert_not_called()
+
+    def test_run_as_single_when_input_is_a_tty(self, mocker, output_file, long_input_file):
+        i = 0
+
+        def f_mock_input():
+            nonlocal i
+            if i >= 1:
+                raise KeyboardInterrupt
+            else:
+                i += 1
+                return "今日はいい天気だ"
+
+        mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
+        mocker.patch("ginza.command_line.sys.stdin.isatty", return_value=True)
+        input_mock = mocker.patch.object(cli, "input", side_effect=f_mock_input)
+        pool_mock = mocker.patch.object(cli, "Pool")
+        cli.run(parallel=2, output_path=output_file, files=None)
+        assert input_mock.call_count == 2
+        pool_mock.assert_not_called()
+
+    def test_parallel(self, mocker, output_file, long_input_file):
+        mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
+        _pool_obj_mock = mocker.Mock(spec=Pool)
+        _pool_obj_mock.map = mocker.MagicMock(side_effect=lambda a, b: [a(c) for c in b])
+        _pool_obj_mock.close = mocker.Mock()
+        pool_mock = mocker.patch.object(cli, "Pool", return_value=_pool_obj_mock)
+        cli.run(parallel=2, output_path=output_file, files=[long_input_file])
+        pool_mock.assert_called_once_with(2)
+        _pool_obj_mock.map.assert_called()
+        _pool_obj_mock.close.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "output_format",
+        ["mecab"],
+    )
+    def test_parallel_output_same_as_single(self, output_format, mocker, tmpdir, long_input_file):
+        mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
+
+        out_single = tmpdir / "single_output.txt"
+        if out_single.exists():
+            out_single.unlink()
+        cli.run(parallel=1, output_path=out_single, output_format=output_format, files=[long_input_file])
+
+        out_parallel = tmpdir / "parallel_output.txt"
+        if out_parallel.exists():
+            out_parallel.unlink()
+        try:
+            cli.run(parallel=2, output_path=out_parallel, output_format=output_format, files=[long_input_file])
+        except:
+            pytest.fail('parallel run failed')
+
+        def f_len(path):
+            return int(run_cmd(["wc", "-l", path]).stdout.split()[0])
+
+        assert f_len(out_single) == f_len(out_parallel)
+        with open(out_single, "r") as f_s:
+            with open(out_parallel, "r") as f_p:
+                for s, p in zip(f_s, f_p):
+                    assert s == p

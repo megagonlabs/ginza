@@ -69,5 +69,4 @@ class TestAnalyzer:
         except:
             pytest.fail("failed to analyze_line")
 
-        print(ret)
         assert len(ret) == n_sentence
