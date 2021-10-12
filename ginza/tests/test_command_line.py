@@ -267,7 +267,7 @@ class TestRun:
 
     @pytest.mark.parametrize(
         "output_format",
-        ["mecab"],
+        ["conllu", "cabocha", "mecab", "json"],
     )
     def test_parallel_output_same_as_single(self, output_format, mocker, tmpdir, long_input_file):
         mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
@@ -275,15 +275,27 @@ class TestRun:
         out_single = tmpdir / "single_output.txt"
         if out_single.exists():
             out_single.unlink()
-        cli.run(parallel=1, output_path=out_single, output_format=output_format, files=[long_input_file])
+        cli.run(
+            parallel=1,
+            output_path=out_single,
+            output_format=output_format,
+            files=[long_input_file],
+            ensure_model="ja_ginza",
+        )
 
         out_parallel = tmpdir / "parallel_output.txt"
         if out_parallel.exists():
             out_parallel.unlink()
         try:
-            cli.run(parallel=2, output_path=out_parallel, output_format=output_format, files=[long_input_file])
+            cli.run(
+                parallel=2,
+                output_path=out_parallel,
+                output_format=output_format,
+                files=[long_input_file],
+                ensure_model="ja_ginza",
+            )
         except:
-            pytest.fail('parallel run failed')
+            pytest.fail("parallel run failed")
 
         def f_len(path):
             return int(run_cmd(["wc", "-l", path]).stdout.split()[0])
