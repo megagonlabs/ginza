@@ -130,7 +130,8 @@ def run(
         finally:
             if output_json and output_json_opened:
                 print("]", file=output)
-            output.close()
+            if output.name != '<stdout>':
+                output.close()
 
 
 def fill_buffer(f, batch_size, buffer=None):
