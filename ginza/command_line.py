@@ -11,6 +11,41 @@ from .analyzer import Analyzer
 MINI_BATCH_SIZE = 100
 
 
+class _OutputWrapper:
+    def __init__(self, output_path, output_format):
+        self.output = None
+        self.output_path = output_path
+        self.output_format = output_format
+        self.output_json_opened = False
+
+    @property
+    def is_json(self):
+        return self.output_format in ["3", "json"]
+
+    def open(self):
+        if self.output_path:
+            self.output = open(self.output_path, "w")
+        else:
+            self.output = sys.stdout
+
+    def close(self):
+        if self.is_json and self.output_json_opened:
+            print("]", file=self.output)
+            self.output_json_opened = False
+        if self.output_path:
+            self.output.close()
+        else:
+            pass
+
+    def write(self, *args, **kwargs):
+        if self.is_json and not self.output_json_opened:
+            print("[", file=self.output)
+            self.output_json_opened = True
+        elif self.is_json:
+            print(" ,", file=self.output)
+        print(*args, **kwargs, file=self.output)
+
+
 def run(
     model_path: Optional[str] = None,
     ensure_model: Optional[str] = None,
@@ -46,21 +81,8 @@ def run(
 
     pool = None
 
-    if output_path:
-        output = open(str(output_path), "w")
-    else:
-        output = sys.stdout
-
-    output_json = output_format in ["3", "json"]
-    output_json_opened = False
-
-    def output_json_open():
-        nonlocal output_json_opened
-        if output_json and not output_json_opened:
-            print("[", file=output)
-            output_json_opened = True
-        elif output_json:
-            print(" ,", file=output)
+    output = _OutputWrapper(output_path, output_format)
+    output.open()
 
     try:
         if not files:
@@ -75,8 +97,7 @@ def run(
                 line = input()
                 for sent in analyzer.analyze_line(line):
                     for ol in sent:
-                        output_json_open()
-                        print(ol, file=output)
+                        output.write(ol)
         elif parallel == 1:
             analyzer.set_nlp()
             for path in files:
@@ -84,8 +105,7 @@ def run(
                     for line in f:
                         for sent in analyzer.analyze_line(line):
                             for ol in sent:
-                                output_json_open()
-                                print(ol, file=output)
+                                output.write(ol)
         else:
             buffer = []
             for file_idx, path in enumerate(files):
@@ -100,8 +120,7 @@ def run(
                                 for line in buffer:
                                     for sent in analyzer.analyze_line(line):
                                         for ol in sent:
-                                            output_json_open()
-                                            print(ol, file=output)
+                                            output.write(ol)
                                 break  # continue to next file
                             parallel = (len(buffer) - 1) // MINI_BATCH_SIZE + 1
                             pool = Pool(parallel)
@@ -114,8 +133,7 @@ def run(
                             for sents in mini_batch_result:
                                 for lines in sents:
                                     for ol in lines:
-                                        output_json_open()
-                                        print(ol, file=output)
+                                        output.write(ol)
 
                         buffer.clear()  # process remaining part of current file
 
@@ -128,10 +146,7 @@ def run(
             if pool:
                 pool.close()
         finally:
-            if output_json and output_json_opened:
-                print("]", file=output)
-            if output.name != '<stdout>':
-                output.close()
+            output.close()
 
 
 def fill_buffer(f, batch_size, buffer=None):
