@@ -70,7 +70,7 @@ class Analyzer:
 
     def analyze_lines_mp(self, lines: Iterable[str]) -> Tuple[Iterable[Iterable[str]]]:
         self.set_nlp()
-        return tuple(self.analyze_line(line) for line in lines)
+        return tuple(list(map(list, self.analyze_line(line))) for line in lines)
 
     def analyze_line(self, line: str) -> Iterable[Iterable[str]]:
         return analyze(self.nlp, self.hash_comment, self.output_format, line)
