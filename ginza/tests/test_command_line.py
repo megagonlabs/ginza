@@ -1,10 +1,11 @@
 import json
 import os
 import subprocess as sp
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
 from functools import partial
 from pathlib import Path
 from typing import Iterable, List
+from unittest.mock import Mock
 
 import pytest
 
@@ -53,6 +54,14 @@ def output_file(tmpdir: Path) -> Path:
     file_path.touch()
     yield file_path
     file_path.unlink()
+
+
+@pytest.fixture
+def pool_obj_mock(mocker) -> Mock:
+    pool_obj_mock = mocker.Mock(spec=Pool)
+    pool_obj_mock.map = mocker.MagicMock(side_effect=lambda a, b: [a(c) for c in b])
+    pool_obj_mock.close = mocker.Mock()
+    yield pool_obj_mock
 
 
 def _parse_conllu(result: str):
@@ -228,7 +237,6 @@ class TestCLIGinzame:
 
 
 class TestRun:
-    # TODO: define pool_obj mock as fixture
     def test_run_as_single_when_file_is_small(self, mocker, output_file, long_input_file):
         mocker.patch.object(cli, "MINI_BATCH_SIZE", 50)
         pool_mock = mocker.patch.object(cli, "Pool")
@@ -254,16 +262,13 @@ class TestRun:
         assert input_mock.call_count == 2
         pool_mock.assert_not_called()
 
-    def test_parallel(self, mocker, output_file, long_input_file):
+    def test_parallel(self, mocker, pool_obj_mock, output_file, long_input_file):
         mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
-        _pool_obj_mock = mocker.Mock(spec=Pool)
-        _pool_obj_mock.map = mocker.MagicMock(side_effect=lambda a, b: [a(c) for c in b])
-        _pool_obj_mock.close = mocker.Mock()
-        pool_mock = mocker.patch.object(cli, "Pool", return_value=_pool_obj_mock)
+        pool_mock = mocker.patch.object(cli, "Pool", return_value=pool_obj_mock)
         cli.run(parallel=2, output_path=output_file, files=[long_input_file])
         pool_mock.assert_called_once_with(2)
-        _pool_obj_mock.map.assert_called()
-        _pool_obj_mock.close.assert_called_once()
+        pool_obj_mock.map.assert_called()
+        pool_obj_mock.close.assert_called_once()
 
     @pytest.mark.parametrize(
         "output_format",
