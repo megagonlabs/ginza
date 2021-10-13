@@ -1,13 +1,15 @@
 import json
 import os
 import subprocess as sp
-import sys
-import tempfile
+from multiprocessing import Pool
 from functools import partial
 from pathlib import Path
-from typing import Iterator, List
+from typing import Iterable, List
+from unittest.mock import Mock
 
 import pytest
+
+import ginza.command_line as cli
 
 TEST_TEXT = "#コメント\n今日はかつ丼を食べた。\n明日は東京で蕎麦を食べる。明後日は酒が飲みたい。"
 
@@ -24,9 +26,9 @@ def input_file(tmpdir: Path) -> Path:
 
 
 @pytest.fixture(scope="module")
-def input_files(tmpdir: Path) -> Iterator[Path]:
+def input_files(tmpdir: Path) -> Iterable[Path]:
     paths = []
-    for i, text in enumerate(TEST_TEXT.split('\n')):
+    for i, text in enumerate(TEST_TEXT.split("\n")):
         file_path = (tmpdir / f"test_input_{i}.txt").resolve()
         with open(file_path, "w") as fp:
             print(text, file=fp)
@@ -36,12 +38,30 @@ def input_files(tmpdir: Path) -> Iterator[Path]:
         file_path.unlink()
 
 
+@pytest.fixture(scope="module")
+def long_input_file(tmpdir: Path) -> Iterable[Path]:
+    file_path = (tmpdir / "test_long_input.txt").resolve()
+    with open(file_path, "w") as fp:
+        for _ in range(10):
+            print(TEST_TEXT, file=fp)
+    yield file_path
+    file_path.unlink()
+
+
 @pytest.fixture
 def output_file(tmpdir: Path) -> Path:
     file_path = (tmpdir / "test_output.txt").resolve()
     file_path.touch()
     yield file_path
     file_path.unlink()
+
+
+@pytest.fixture
+def pool_obj_mock(mocker) -> Mock:
+    pool_obj_mock = mocker.Mock(spec=Pool)
+    pool_obj_mock.map = mocker.MagicMock(side_effect=lambda a, b: [a(c) for c in b])
+    pool_obj_mock.close = mocker.Mock()
+    yield pool_obj_mock
 
 
 def _parse_conllu(result: str):
@@ -125,7 +145,7 @@ class TestCLIGinza:
         p = run_cmd(["ginza", "-s", split_mode], input=input_text)
         assert p.returncode == 0
 
-        def _sub_words(lines: Iterator) -> List[str]:
+        def _sub_words(lines: Iterable) -> List[str]:
             return [l.split("\t")[1] for l in lines if len(l.split("\t")) > 1]
 
         assert _sub_words(p.stdout.split("\n")) == expected
@@ -139,10 +159,10 @@ class TestCLIGinza:
         ],
     )
     def test_hash_comment(self, hash_comment, n_sentence, n_analyzed_sentence, exit_ok, input_file):
-        def _n_sentence(lines: Iterator) -> int:
+        def _n_sentence(lines: Iterable) -> int:
             return len(list(filter(lambda x: x.startswith("#"), lines)))
 
-        def _n_analyzed_sentence(lines: Iterator) -> int:
+        def _n_analyzed_sentence(lines: Iterable) -> int:
             return len(list(filter(lambda x: x.startswith("# text = "), lines)))
 
         p = run_cmd(["ginza", "-c", hash_comment, input_file])
@@ -196,7 +216,7 @@ class TestCLIGinza:
     def test_disable_sentencizer(self, input_file):
         p = run_cmd(["ginza", "-d", input_file])
 
-        def _n_analyzed_sentence(lines: Iterator) -> int:
+        def _n_analyzed_sentence(lines: Iterable) -> int:
             return len(list(filter(lambda x: x.startswith("# text = "), lines)))
 
         assert p.returncode == 0
@@ -214,3 +234,79 @@ class TestCLIGinzame:
 
         assert p_ginzame.returncode == 0
         assert p_ginzame.stdout == p_ginza.stdout
+
+
+class TestRun:
+    def test_run_as_single_when_file_is_small(self, mocker, output_file, long_input_file):
+        mocker.patch.object(cli, "MINI_BATCH_SIZE", 50)
+        pool_mock = mocker.patch.object(cli, "Pool")
+        cli.run(parallel=2, output_path=output_file, files=[long_input_file])
+        pool_mock.assert_not_called()
+
+    def test_run_as_single_when_input_is_a_tty(self, mocker, output_file, long_input_file):
+        i = 0
+
+        def f_mock_input():
+            nonlocal i
+            if i >= 1:
+                raise KeyboardInterrupt
+            else:
+                i += 1
+                return "今日はいい天気だ"
+
+        mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
+        mocker.patch("ginza.command_line.sys.stdin.isatty", return_value=True)
+        input_mock = mocker.patch.object(cli, "input", side_effect=f_mock_input)
+        pool_mock = mocker.patch.object(cli, "Pool")
+        cli.run(parallel=2, output_path=output_file, files=None)
+        assert input_mock.call_count == 2
+        pool_mock.assert_not_called()
+
+    def test_parallel(self, mocker, pool_obj_mock, output_file, long_input_file):
+        mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
+        pool_mock = mocker.patch.object(cli, "Pool", return_value=pool_obj_mock)
+        cli.run(parallel=2, output_path=output_file, files=[long_input_file])
+        pool_mock.assert_called_once_with(2)
+        pool_obj_mock.map.assert_called()
+        pool_obj_mock.close.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "output_format",
+        ["conllu", "cabocha", "mecab", "json"],
+    )
+    def test_parallel_output_same_as_single(self, output_format, mocker, tmpdir, long_input_file):
+        mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
+
+        out_single = tmpdir / "single_output.txt"
+        if out_single.exists():
+            out_single.unlink()
+        cli.run(
+            parallel=1,
+            output_path=out_single,
+            output_format=output_format,
+            files=[long_input_file],
+            ensure_model="ja_ginza",
+        )
+
+        out_parallel = tmpdir / "parallel_output.txt"
+        if out_parallel.exists():
+            out_parallel.unlink()
+        try:
+            cli.run(
+                parallel=2,
+                output_path=out_parallel,
+                output_format=output_format,
+                files=[long_input_file],
+                ensure_model="ja_ginza",
+            )
+        except:
+            pytest.fail("parallel run failed")
+
+        def f_len(path):
+            return int(run_cmd(["wc", "-l", path]).stdout.split()[0])
+
+        assert f_len(out_single) == f_len(out_parallel)
+        with open(out_single, "r") as f_s:
+            with open(out_parallel, "r") as f_p:
+                for s, p in zip(f_s, f_p):
+                    assert s == p
