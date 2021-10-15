@@ -82,11 +82,11 @@ def analyze(
     line = line.rstrip("\n")
     if line.startswith("#"):
         if hash_comment == "print":
-            return (line,)
+            return ((line,),)
         elif hash_comment == "skip":
-            return ((),)
+            return (((),),)
     if line == "":
-        return ("",)
+        return (("",),)
     if output_format in ["0", "conllu"]:
         doc = nlp(line)
         return [analyze_conllu(sent) for sent in doc.sents]
