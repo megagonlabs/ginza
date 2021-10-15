@@ -225,6 +225,11 @@ Contains information from mC4 which is made available under the ODC Attribution 
 
 ### version 5.x
 
+#### ginza-5.0.3
+- 2021-10-15
+- Bug fix
+  - `Bunsetu span should not cross the sentence boundary` #195
+
 #### ginza-5.0.2
 - 2021-09-06
 - Bug fix
