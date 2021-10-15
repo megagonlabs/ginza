@@ -79,7 +79,7 @@ def bunsetu_span(token: Token) -> Span:
     start = token.i
     end = start + 1
     for idx in range(start, 0, -1):
-        if bunsetu_bi_list[idx] == "B":
+        if bunsetu_bi_list[idx] == "B" or token.doc[idx].is_sent_start:
             start = idx
             break
     else:
