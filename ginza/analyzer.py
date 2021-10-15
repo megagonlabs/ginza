@@ -70,7 +70,7 @@ class Analyzer:
 
     def analyze_lines_mp(self, lines: Iterable[str]) -> Tuple[Iterable[Iterable[str]]]:
         self.set_nlp()
-        return tuple(list(map(list, self.analyze_line(line))) for line in lines)
+        return tuple(list(map(list, self.analyze_line(line))) for line in lines)  # to avoid generator serialization inside of results of analyze_line
 
     def analyze_line(self, line: str) -> Iterable[Iterable[str]]:
         return analyze(self.nlp, self.hash_comment, self.output_format, line)
@@ -176,7 +176,7 @@ def conllu_token_line(sent, token, np_label, use_bunsetu) -> str:
                 "" if not reading else "Reading={}".format(reading.replace("|", "\\|").replace("\\", "\\\\")),
                 "" if not ne or ne == "O" else "NE={}".format(ne),
                 "" if not ene or ene == "O" else "ENE={}".format(ene),
-            ),
+            )
         )
     )
 
