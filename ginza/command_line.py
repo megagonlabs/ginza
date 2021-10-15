@@ -123,17 +123,6 @@ def _analyze_single(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[
         pass
 
 
-def _enough_for_single_process(files: List[str], batch_size: int):
-    c = 0
-    for path in files:
-        with open(path, "r") as f:
-            for line in f:
-                c += 1
-                if c > batch_size:
-                    return False
-    return True
-
-
 def _data_loader(
     files: List[str], batch_size: int
 ) -> Generator[List[str], None, None]:
@@ -152,12 +141,19 @@ def _data_loader(
 def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel: int) -> None:
     pool = None
     try:
-        if _enough_for_single_process(files, MINI_BATCH_SIZE):
-            _analyze_single(analyzer, output, files)
-            return
-
+        first_batch = True
         mini_batches = []
         for mini_batch in _data_loader(files, MINI_BATCH_SIZE):
+            if first_batch:
+                if len(mini_batch) < MINI_BATCH_SIZE:
+                    analyzer.set_nlp()
+                    for line in mini_batch:
+                        for sent in analyzer.analyze_line(line):
+                            for ol in sent:
+                                output.write(ol)
+                    return
+                else:
+                    first_batch = False
             mini_batches.append(mini_batch)
             if len(mini_batches) == parallel:
                 if not pool:
