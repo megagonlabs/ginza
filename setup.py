@@ -22,6 +22,8 @@ setup(
         "SudachiPy>=0.5.2,<0.6.0",
         "SudachiDict-core>=20210608",
     ],
+    setup_requires=["pytest-runner"],
+    tests_require=["pytest", "pytest-cov", "pytest-mock"],
     license="MIT",
     name="ginza",
     packages=find_packages(include=["ginza"]),
