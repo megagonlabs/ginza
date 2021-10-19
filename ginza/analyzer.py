@@ -84,7 +84,7 @@ def analyze(
         if hash_comment == "print":
             return ((line,),)
         elif hash_comment == "skip":
-            return (((),),)
+            return ((),)
     if line == "":
         return (("",),)
     if output_format in ["0", "conllu"]:
