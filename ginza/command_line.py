@@ -49,7 +49,7 @@ class _OutputWrapper:
 def run(
     model_path: Optional[str] = None,
     ensure_model: Optional[str] = None,
-    split_mode: Optional[str] = None,
+    split_mode: Optional[str] = "C",
     hash_comment: str = "print",
     output_path: Optional[Path] = None,
     output_format: str = "0",
@@ -185,7 +185,7 @@ def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterabl
 
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
-    split_mode=("split mode", "option", "s", str, ["A", "B", "C", None]),
+    split_mode=("split mode", "option", "s", str, ["A", "B", "C"]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
     use_normalized_form=("overriding Token.lemma_ by normalized_form of SudachiPy", "flag", "n"),
@@ -194,7 +194,7 @@ def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterabl
 )
 def run_ginzame(
     model_path=None,
-    split_mode=None,
+    split_mode="C",
     hash_comment="print",
     output_path=None,
     use_normalized_form=False,
@@ -223,7 +223,7 @@ def main_ginzame():
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
     ensure_model=("select model either ja_ginza or ja_ginza_electra", "option", "m", str, ["ja_ginza", "ja-ginza", "ja_ginza_electra", "ja-ginza-electra", None]),
-    split_mode=("split mode", "option", "s", str, ["A", "B", "C", None]),
+    split_mode=("split mode", "option", "s", str, ["A", "B", "C"]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
     output_format=("output format", "option", "f", str, ["0", "conllu", "1", "cabocha", "2", "mecab", "3", "json"]),
@@ -236,7 +236,7 @@ def main_ginzame():
 def run_ginza(
     model_path=None,
     ensure_model=None,
-    split_mode=None,
+    split_mode="C",
     hash_comment="print",
     output_path=None,
     output_format="conllu",

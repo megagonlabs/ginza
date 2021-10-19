@@ -23,8 +23,8 @@ $ ginza
 
 `ginzame`コマンドでオープンソース形態素解析エンジン [MeCab](https://taku910.github.io/mecab/) の`mecab`コマンドに近い形式で解析結果を出力することができます。
 `ginzame`コマンドは形態素解析処理のみをマルチプロセスで高速に実行します。
-このコマンドと`mecab`の出力形式の相違点として、 
-最終フィールド（発音）が常に`*`となることに注意して下さい。
+このコマンドと`mecab`の出力形式の相違点として、最終フィールド（発音）が常に`*`となること、
+ginza の split_mode はデフォルトが `C` なので unidic 相当の単語分割を得るためには `-s A` を指定する必要があることに注意して下さい。
 ```console
 $ ginzame
 銀座でランチをご一緒しましょう。
@@ -55,7 +55,8 @@ EOS
     使用するモデルに応じて、事前に `pip install ja-ginza-electra` のようにパッケージをダウンロードする必要があります。
     `--model-path`, `--ensure-model` のどちらも指定されない場合には `ja_ginza_electra`、`ja_ginza` の順の優先度でロード可能なモデルを利用します。
 - `--split-mode <string>`, `-s <string>`
-     複合名詞の分割モードを指定します。モードは [sudachi](https://github.com/WorksApplications/Sudachi#the-modes-of-splitting) に準拠し、`A`、`B`、`C`のいずれかを指定できます。`A`が分割が最も短く複合名詞が UniDic 短単位まで分割され、 `C` では固有名詞が抽出されます。`B` は二つの中間の単位に分割されます。
+     複合名詞の分割モードを指定します。モードは [sudachi](https://github.com/WorksApplications/Sudachi#the-modes-of-splitting) に準拠し、`A`、`B`、`C`のいずれかを指定できます。デフォルト値は `C` です。
+     `A`が分割が最も短く複合名詞が UniDic 短単位まで分割され、 `C` では固有名詞が抽出されます。`B` は二つの中間の単位に分割されます。
 - `--hash-comment <string>`, `-c <string>`
     行頭が `#` から始まる行を解析対象とするかのモードを指定します。次の値のいずれかを指定できます。
         - `print`
@@ -121,7 +122,7 @@ $ ginza -f json
 
 日本語係り受け解析器 [CaboCha](https://taku910.github.io/cabocha/) の`cabocha -f1`のラティス形式に近い解析結果を出力する場合は
 `ginza -f 1` または `ginza -f cabocha` を実行して下さい。
-このオプションと`cabocha -f1`の出力形式の相違点として、 
+このオプションと`cabocha -f1`の出力形式の相違点として、
 スラッシュ記号`/`に続く`func_index`フィールドが常に自立語の終了位置（機能語があればその開始位置に一致）を示すこと、
 機能語認定基準が一部異なること、
 に注意して下さい。
