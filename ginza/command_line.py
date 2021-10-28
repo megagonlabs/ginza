@@ -1,7 +1,8 @@
 # coding: utf8
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Process, Queue, Event, cpu_count
 from pathlib import Path
 import sys
+import queue
 from typing import Generator, Iterable, Optional, List
 
 import plac
@@ -139,48 +140,92 @@ def _data_loader(
 
 
 def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel: int) -> None:
-    pool = None
     try:
-        first_batch = True
-        mini_batches = []
-        for mini_batch in _data_loader(files, MINI_BATCH_SIZE):
-            if first_batch:
-                if len(mini_batch) < MINI_BATCH_SIZE:
-                    analyzer.set_nlp()
-                    for line in mini_batch:
-                        for sent in analyzer.analyze_line(line):
-                            for ol in sent:
-                                output.write(ol)
-                    return
-                else:
-                    first_batch = False
-            mini_batches.append(mini_batch)
-            if len(mini_batches) == parallel:
-                if not pool:
-                    pool = Pool(parallel)
-                for mini_batch_result in pool.map(analyzer.analyze_lines_mp, mini_batches):
-                    for sents in mini_batch_result:
+        def f_load(in_queue: Queue, files: List[str], batch_size: int, load_end: Event):
+            for i, mini_batch in enumerate(_data_loader(files, batch_size)):
+                in_queue.put((i, mini_batch))
+            load_end.set()
+
+        def f_analyze(analyzer: Analyzer, in_queue: Queue, out_queue: Queue, load_end: Event, analyze_end: Event):
+            while True:
+                try:
+                    i, mini_batch = in_queue.get(timeout=5)
+                except queue.Empty:
+                    if load_end.is_set():
+                        analyze_end.set()
+                        break
+                    else:
+                        continue
+                result = analyzer.analyze_lines_mp(mini_batch)
+                out_queue.put((i, result))
+                if load_end.is_set() and in_queue.empty():
+                    analyze_end.set()
+                    break
+
+        def f_write(out_queue: queue, output: _OutputWrapper, analyze_ends: List[Event]):
+            cur = 0
+            results = dict()
+            while True:
+                try:
+                    i, result = out_queue.get(timeout=5)
+                except queue.Empty:
+                    is_analyze_complete = all([e.is_set() for e in analyze_ends])
+                    if is_analyze_complete:
+                        break
+                    else:
+                        continue
+
+                # output must be ordered same as input text
+                results[i] = result
+                while True:
+                    if cur not in results.keys():
+                        break
+                    result = results[cur]
+                    del results[cur]
+                    cur += 1
+
+                    for sents in result:
                         for lines in sents:
                             for ol in lines:
                                 output.write(ol)
-                mini_batches = []
-        if not pool:
-            parallel = len(mini_batches)
-            pool = Pool(parallel)
-        for mini_batch_result in pool.map(analyzer.analyze_lines_mp, mini_batches):
-            for sents in mini_batch_result:
-                for lines in sents:
-                    for ol in lines:
-                        output.write(ol)
+
+                is_analyze_complete = all([e.is_set() for e in analyze_ends])
+                if is_analyze_complete and out_queue.empty():
+                    break
+
+        in_queue = Queue(maxsize=parallel*2)
+        out_queue = Queue()
+        e_load = Event()
+        p_load = Process(target=f_load, args=(in_queue, files, MINI_BATCH_SIZE, e_load), daemon=True)
+        p_load.start()
+        p_analyzes = []
+        e_analyzes = []
+        for _ in range(parallel):
+            e = Event()
+            e_analyzes.append(e)
+            p = Process(target=f_analyze, args=(analyzer, in_queue, out_queue, e_load, e), daemon=True)
+            p.start()
+            p_analyzes.append(p)
+
+        f_write(out_queue, output, e_analyzes)
+
+        p_load.join()
+        for p in p_analyzes:
+            p.join()
 
     except KeyboardInterrupt:
         pass
     finally:
-        if pool:
-            try:
-                pool.close()
-            except:
-                pass
+        try:
+            if p_load.is_alive():
+                p_load.terminate()
+                p_load.join()
+            for p in p_analyzes:
+                if p.is_alive():
+                    p.terminate()
+                    p.join()
+        except:
+            pass
 
 
 @plac.annotations(

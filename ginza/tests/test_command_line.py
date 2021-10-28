@@ -1,11 +1,9 @@
 import json
 import os
 import subprocess as sp
-from multiprocessing import Pool
 from functools import partial
 from pathlib import Path
 from typing import Iterable, List
-from unittest.mock import Mock
 
 import pytest
 
@@ -54,14 +52,6 @@ def output_file(tmpdir: Path) -> Path:
     file_path.touch()
     yield file_path
     file_path.unlink()
-
-
-@pytest.fixture
-def pool_obj_mock(mocker) -> Mock:
-    pool_obj_mock = mocker.Mock(spec=Pool)
-    pool_obj_mock.map = mocker.MagicMock(side_effect=lambda a, b: [a(c) for c in b])
-    pool_obj_mock.close = mocker.Mock()
-    yield pool_obj_mock
 
 
 def _parse_conllu(result: str):
@@ -237,12 +227,6 @@ class TestCLIGinzame:
 
 
 class TestRun:
-    def test_run_as_single_when_file_is_small(self, mocker, output_file, long_input_file):
-        mocker.patch.object(cli, "MINI_BATCH_SIZE", 50)
-        pool_mock = mocker.patch.object(cli, "Pool")
-        cli.run(parallel=2, output_path=output_file, files=[long_input_file])
-        pool_mock.assert_not_called()
-
     def test_run_as_single_when_input_is_a_tty(self, mocker, output_file, long_input_file):
         i = 0
 
@@ -257,18 +241,10 @@ class TestRun:
         mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
         mocker.patch("ginza.command_line.sys.stdin.isatty", return_value=True)
         input_mock = mocker.patch.object(cli, "input", side_effect=f_mock_input)
-        pool_mock = mocker.patch.object(cli, "Pool")
+        analyze_parallel_mock = mocker.patch.object(cli, "_analyze_parallel")
         cli.run(parallel=2, output_path=output_file, files=None)
         assert input_mock.call_count == 2
-        pool_mock.assert_not_called()
-
-    def test_parallel(self, mocker, pool_obj_mock, output_file, long_input_file):
-        mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
-        pool_mock = mocker.patch.object(cli, "Pool", return_value=pool_obj_mock)
-        cli.run(parallel=2, output_path=output_file, files=[long_input_file])
-        pool_mock.assert_called_once_with(2)
-        pool_obj_mock.map.assert_called()
-        pool_obj_mock.close.assert_called_once()
+        analyze_parallel_mock.assert_not_called()
 
     @pytest.mark.parametrize(
         "output_format",
@@ -303,7 +279,8 @@ class TestRun:
             pytest.fail("parallel run failed")
 
         def f_len(path):
-            return int(run_cmd(["wc", "-l", path]).stdout.split()[0])
+            with open(path, "r") as f:
+                return sum([1 for _ in f])
 
         assert f_len(out_single) == f_len(out_parallel)
         with open(out_single, "r") as f_s:
