@@ -83,16 +83,15 @@ def run(
     output = _OutputWrapper(output_path, output_format)
     output.open()
     try:
-        if not files:
-            if sys.stdin.isatty():
-                parallel = 1
-                _analyze_tty(analyzer, output)
-            else:
-                _analyze_single(analyzer, output, files=[0])
-        elif parallel == 1:
-            _analyze_single(analyzer, output, files)
+        if not files and sys.stdin.isatty():
+            _analyze_tty(analyzer, output)
         else:
-            _analyze_parallel(analyzer, output, files, parallel)
+            if not files:
+                files = [0]
+            if parallel == 1:
+                _analyze_single(analyzer, output, files)
+            else:
+                _analyze_parallel(analyzer, output, files, parallel)
     finally:
         output.close()
 
