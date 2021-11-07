@@ -140,26 +140,24 @@ def _data_loader(
 
 def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel: int) -> None:
     try:
-        def f_load(in_queue: Queue, files: List[str], batch_size: int, load_end: Event):
-            for i, mini_batch in enumerate(_data_loader(files, batch_size)):
-                in_queue.put((i, mini_batch))
-            load_end.set()
 
-        def f_analyze(analyzer: Analyzer, in_queue: Queue, out_queue: Queue, load_end: Event, analyze_end: Event):
+        def f_load(in_queue: Queue, files: List[str], batch_size: int, n_analyze_process: int):
+            try:
+                for i, mini_batch in enumerate(_data_loader(files, batch_size)):
+                    in_queue.put((i, mini_batch))
+            finally:
+                for _ in range(n_analyze_process):
+                    in_queue.put("terminate")
+
+        def f_analyze(analyzer: Analyzer, in_queue: Queue, out_queue: Queue, analyze_end: Event):
             while True:
-                try:
-                    i, mini_batch = in_queue.get(timeout=5)
-                except queue.Empty:
-                    if load_end.is_set():
-                        analyze_end.set()
-                        break
-                    else:
-                        continue
-                result = analyzer.analyze_lines_mp(mini_batch)
-                out_queue.put((i, result))
-                if load_end.is_set() and in_queue.empty():
+                msg = in_queue.get(timeout=0.1)
+                if msg == "terminate":
                     analyze_end.set()
                     break
+                i, mini_batch = msg
+                result = analyzer.analyze_lines_mp(mini_batch)
+                out_queue.put((i, result))
 
         def f_write(out_queue: queue, output: _OutputWrapper, analyze_ends: List[Event]):
             cur = 0
@@ -194,15 +192,14 @@ def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterabl
 
         in_queue = Queue(maxsize=parallel*2)
         out_queue = Queue()
-        e_load = Event()
-        p_load = Process(target=f_load, args=(in_queue, files, MINI_BATCH_SIZE, e_load), daemon=True)
+        p_load = Process(target=f_load, args=(in_queue, files, MINI_BATCH_SIZE, parallel), daemon=True)
         p_load.start()
         p_analyzes = []
         e_analyzes = []
         for _ in range(parallel):
             e = Event()
             e_analyzes.append(e)
-            p = Process(target=f_analyze, args=(analyzer, in_queue, out_queue, e_load, e), daemon=True)
+            p = Process(target=f_analyze, args=(analyzer, in_queue, out_queue, e), daemon=True)
             p.start()
             p_analyzes.append(p)
 
