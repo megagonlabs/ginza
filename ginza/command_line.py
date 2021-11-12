@@ -123,9 +123,7 @@ def _analyze_single(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[
         pass
 
 
-def _data_loader(
-    files: List[str], batch_size: int
-) -> Generator[List[str], None, None]:
+def _data_loader(files: List[str], batch_size: int) -> Generator[List[str], None, None]:
     mini_batch = []
     for path in files:
         with open(path, "r") as f:
@@ -156,21 +154,28 @@ def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterabl
                     analyze_end.set()
                     break
                 i, mini_batch = msg
-                result = analyzer.analyze_lines_mp(mini_batch)
-                out_queue.put((i, result))
+                try:
+                    result = analyzer.analyze_lines_mp(mini_batch)
+                    out_queue.put((None, i, result))
+                except Exception as err:
+                    out_queue.put((err, i, None))
 
         def f_write(out_queue: queue, output: _OutputWrapper, analyze_ends: List[Event]):
             cur = 0
             results = dict()
             while True:
                 try:
-                    i, result = out_queue.get(timeout=5)
+                    err, i, result = out_queue.get(timeout=5)
                 except queue.Empty:
                     is_analyze_complete = all([e.is_set() for e in analyze_ends])
                     if is_analyze_complete:
                         break
                     else:
                         continue
+
+                if err is not None:
+                    print("failed to analyze mini_batch {}".format(i), file=sys.stderr)
+                    print(err, file=sys.stderr)
 
                 # output must be ordered same as input text
                 results[i] = result
@@ -181,6 +186,9 @@ def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterabl
                     del results[cur]
                     cur += 1
 
+                    if result is None:
+                        continue
+
                     for sents in result:
                         for lines in sents:
                             for ol in lines:
@@ -190,7 +198,7 @@ def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterabl
                 if is_analyze_complete and out_queue.empty():
                     break
 
-        in_queue = Queue(maxsize=parallel*2)
+        in_queue = Queue(maxsize=parallel * 2)
         out_queue = Queue()
         p_load = Process(target=f_load, args=(in_queue, files, MINI_BATCH_SIZE, parallel), daemon=True)
         p_load.start()
