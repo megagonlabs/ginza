@@ -5,10 +5,33 @@ from typing import Iterable, Optional
 import spacy
 from spacy.tokens import Doc, Span
 from spacy.language import Language
-from spacy.lang.ja import Japanese, JapaneseTokenizer
 
 from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes, bunsetu_bi_label, bunsetu_position_type
 from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
+
+
+def try_sudachi_import(split_mode: str):
+    """SudachiPy is required for Japanese support, so check for it.
+    It it's not available blow up and explain how to fix it.
+    split_mode should be one of these values: "A", "B", "C", None->"A"."""
+    try:
+        from sudachipy import dictionary, tokenizer
+
+        split_mode = {
+            None: tokenizer.Tokenizer.SplitMode.A,
+            "A": tokenizer.Tokenizer.SplitMode.A,
+            "B": tokenizer.Tokenizer.SplitMode.B,
+            "C": tokenizer.Tokenizer.SplitMode.C,
+        }[split_mode]
+        tok = dictionary.Dictionary().create(mode=split_mode)
+        return tok
+    except ImportError:
+        raise ImportError(
+            "Japanese support requires SudachiPy and SudachiDict-core "
+            "(https://github.com/WorksApplications/SudachiPy). "
+            "Install with `pip install sudachipy sudachidict_core` or "
+            "install spaCy with `pip install spacy[ja]`."
+        ) from None
 
 
 class Analyzer:
@@ -39,7 +62,7 @@ class Analyzer:
             spacy.require_gpu()
 
         if self.output_format in ["2", "mecab"]:
-            nlp = JapaneseTokenizer(nlp=Japanese(), split_mode=self.split_mode).tokenizer
+            nlp = try_sudachi_import(self.split_mode)
         else:
             # Work-around for pickle error. Need to share model data.
             if self.model_path:
