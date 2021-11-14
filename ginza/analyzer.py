@@ -74,7 +74,7 @@ class Analyzer:
             return "".join(self.analyze_line(line) for line in lines)
 
         if self.hash_comment == "print":
-            batch = self.nlp.pipe(line for line in lines if not line.startswith("#"))
+            batch = list(self.nlp.pipe(line.rstrip("\n") for line in lines if not line.startswith("#")))
             docs = []
             index = 0
             for line in lines:
@@ -84,8 +84,7 @@ class Analyzer:
                     docs.append(batch[index])
                     index += 1
         else:
-            if self.hash_comment == "skip":
-                lines = [line for line in lines if not line.startswith("#")]
+            lines = [line.rstrip("\n") for line in lines if self.hash_comment != "skip" or not line.startswith("#")]
             docs = self.nlp.pipe(lines)
  
         if self.output_format in ["3", "json"]:
