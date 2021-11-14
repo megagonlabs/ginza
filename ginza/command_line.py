@@ -120,6 +120,44 @@ def _analyze_single(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[
         pass
 
 
+def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel_level: int) -> None:
+    try:
+        in_queue = Queue(maxsize=parallel_level * 2)
+        out_queue = Queue()
+
+        p_analyzes = []
+        e_analyzes = []
+        for _ in range(parallel_level):
+            e = Event()
+            e_analyzes.append(e)
+            p = Process(target=_multi_process_analyze, args=(analyzer, in_queue, out_queue, e), daemon=True)
+            p.start()
+            p_analyzes.append(p)
+
+        p_load = Process(target=_multi_process_load, args=(in_queue, files, MINI_BATCH_SIZE, parallel_level), daemon=True)
+        p_load.start()
+
+        _multi_process_write(out_queue, output, e_analyzes)
+
+        p_load.join()
+        for p in p_analyzes:
+            p.join()
+
+    except KeyboardInterrupt:
+        pass
+    finally:
+        try:
+            if p_load.is_alive():
+                p_load.terminate()
+                p_load.join()
+            for p in p_analyzes:
+                if p.is_alive():
+                    p.terminate()
+                    p.join()
+        except:
+            pass
+
+
 def _data_loader(files: List[str], batch_size: int) -> Generator[List[str], None, None]:
     mini_batch = []
     for path in files:
@@ -194,44 +232,6 @@ def _multi_process_write(out_queue: queue, output: _OutputWrapper, analyze_ends:
         is_analyze_complete = all([e.is_set() for e in analyze_ends])
         if is_analyze_complete and out_queue.empty():
             break
-
-
-def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel_level: int) -> None:
-    try:
-        in_queue = Queue(maxsize=parallel_level * 2)
-        out_queue = Queue()
-
-        p_analyzes = []
-        e_analyzes = []
-        for _ in range(parallel_level):
-            e = Event()
-            e_analyzes.append(e)
-            p = Process(target=_multi_process_analyze, args=(analyzer, in_queue, out_queue, e), daemon=True)
-            p.start()
-            p_analyzes.append(p)
-
-        p_load = Process(target=_multi_process_load, args=(in_queue, files, MINI_BATCH_SIZE, parallel_level), daemon=True)
-        p_load.start()
-
-        _multi_process_write(out_queue, output, e_analyzes)
-
-        p_load.join()
-        for p in p_analyzes:
-            p.join()
-
-    except KeyboardInterrupt:
-        pass
-    finally:
-        try:
-            if p_load.is_alive():
-                p_load.terminate()
-                p_load.join()
-            for p in p_analyzes:
-                if p.is_alive():
-                    p.terminate()
-                    p.join()
-        except:
-            pass
 
 
 @plac.annotations(
