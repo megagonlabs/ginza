@@ -58,7 +58,7 @@ def run(
     require_gpu: bool = False,
     disable_sentencizer: bool = False,
     use_normalized_form: bool = False,
-    parallel: int = 1,
+    parallel_level: int = 1,
     files: List[str] = None,
 ):
     if require_gpu:
@@ -78,8 +78,8 @@ def run(
         disable_sentencizer,
     )
 
-    if parallel <= 0:
-        parallel = max(1, cpu_count() + parallel)
+    if parallel_level <= 0:
+        parallel_level = max(1, cpu_count() + parallel_level)
 
     output = _OutputWrapper(output_path, output_format)
     output.open()
@@ -89,10 +89,10 @@ def run(
         else:
             if not files:
                 files = [0]
-            if parallel == 1:
+            if parallel_level == 1:
                 _analyze_single(analyzer, output, files)
             else:
-                _analyze_parallel(analyzer, output, files, parallel)
+                _analyze_parallel(analyzer, output, files, parallel_level)
     finally:
         output.close()
 
@@ -196,21 +196,21 @@ def _multi_process_write(out_queue: queue, output: _OutputWrapper, analyze_ends:
             break
 
 
-def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel: int) -> None:
+def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel_level: int) -> None:
     try:
-        in_queue = Queue(maxsize=parallel * 2)
+        in_queue = Queue(maxsize=parallel_level * 2)
         out_queue = Queue()
 
         p_analyzes = []
         e_analyzes = []
-        for _ in range(parallel):
+        for _ in range(parallel_level):
             e = Event()
             e_analyzes.append(e)
             p = Process(target=_multi_process_analyze, args=(analyzer, in_queue, out_queue, e), daemon=True)
             p.start()
             p_analyzes.append(p)
 
-        p_load = Process(target=_multi_process_load, args=(in_queue, files, MINI_BATCH_SIZE, parallel), daemon=True)
+        p_load = Process(target=_multi_process_load, args=(in_queue, files, MINI_BATCH_SIZE, parallel_level), daemon=True)
         p_load.start()
 
         _multi_process_write(out_queue, output, e_analyzes)
@@ -261,7 +261,7 @@ def run_ginzame(
         output_format="mecab",
         require_gpu=False,
         use_normalized_form=use_normalized_form,
-        parallel=parallel,
+        parallel_level=parallel,
         disable_sentencizer=False,
         files=files,
     )
@@ -307,7 +307,7 @@ def run_ginza(
         require_gpu=require_gpu,
         use_normalized_form=use_normalized_form,
         disable_sentencizer=disable_sentencizer,
-        parallel=parallel,
+        parallel_level=parallel,
         files=files,
     )
 
