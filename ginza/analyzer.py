@@ -1,7 +1,6 @@
 # coding: utf8
-import json
 import sys
-from typing import Iterable, Iterator, Optional, Tuple
+from typing import Iterable, Optional
 
 import spacy
 from spacy.tokens import Doc, Span
