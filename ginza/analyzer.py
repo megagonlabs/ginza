@@ -1,15 +1,37 @@
 # coding: utf8
-import json
 import sys
-from typing import Iterable, Iterator, Optional, Tuple
+from typing import Iterable, Optional
 
 import spacy
-from spacy.tokens import Span
+from spacy.tokens import Doc, Span
 from spacy.language import Language
-from spacy.lang.ja import Japanese, JapaneseTokenizer
 
 from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes, bunsetu_bi_label, bunsetu_position_type
 from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
+
+
+def try_sudachi_import(split_mode: str):
+    """SudachiPy is required for Japanese support, so check for it.
+    It it's not available blow up and explain how to fix it.
+    split_mode should be one of these values: "A", "B", "C", None->"A"."""
+    try:
+        from sudachipy import dictionary, tokenizer
+
+        split_mode = {
+            None: tokenizer.Tokenizer.SplitMode.A,
+            "A": tokenizer.Tokenizer.SplitMode.A,
+            "B": tokenizer.Tokenizer.SplitMode.B,
+            "C": tokenizer.Tokenizer.SplitMode.C,
+        }[split_mode]
+        tok = dictionary.Dictionary().create(mode=split_mode)
+        return tok
+    except ImportError:
+        raise ImportError(
+            "Japanese support requires SudachiPy and SudachiDict-core "
+            "(https://github.com/WorksApplications/SudachiPy). "
+            "Install with `pip install sudachipy sudachidict_core` or "
+            "install spaCy with `pip install spacy[ja]`."
+        ) from None
 
 
 class Analyzer:
@@ -40,7 +62,7 @@ class Analyzer:
             spacy.require_gpu()
 
         if self.output_format in ["2", "mecab"]:
-            nlp = JapaneseTokenizer(nlp=Japanese(), split_mode=self.split_mode).tokenizer
+            nlp = try_sudachi_import(self.split_mode)
         else:
             # Work-around for pickle error. Need to share model data.
             if self.model_path:
@@ -68,81 +90,103 @@ class Analyzer:
 
         self.nlp = nlp
 
-    def analyze_lines_mp(self, lines: Iterable[str]) -> Tuple[Iterable[Iterable[str]]]:
+    def analyze_batch(self, lines: Iterable[str]) -> str:
         self.set_nlp()
-        return tuple(list(map(list, self.analyze_line(line))) for line in lines)  # to avoid generator serialization inside of results of analyze_line
+        if self.output_format in ["2", "mecab"]:
+            return "".join(self.analyze_line(line) for line in lines)
 
-    def analyze_line(self, line: str) -> Iterable[Iterable[str]]:
-        return analyze(self.nlp, self.hash_comment, self.output_format, line)
+        if self.hash_comment == "print":
+            batch = list(self.nlp.pipe(line.rstrip("\n") for line in lines if not line.startswith("#")))
+            docs = []
+            index = 0
+            for line in lines:
+                if line.startswith("#"):
+                    docs.append(line)
+                else:
+                    docs.append(batch[index])
+                    index += 1
+        else:
+            lines = [line.rstrip("\n") for line in lines if self.hash_comment != "skip" or not line.startswith("#")]
+            docs = self.nlp.pipe(lines)
+ 
+        if self.output_format in ["3", "json"]:
+            sep = ",\n"
+        else:
+            sep = ""
+        return sep.join(format_doc(doc, self.output_format) if isinstance(doc, Doc) else doc for doc in docs)
+
+    def analyze_line(self, input_line: str) -> str:
+        line = input_line.rstrip("\n")
+        if line.startswith("#"):
+            if self.hash_comment == "print":
+                return input_line
+            elif self.hash_comment == "skip":
+                return ""
+        if line == "":
+            return "\n"
+        if self.output_format in ["2", "mecab"]:
+            doc = self.nlp.tokenize(line)
+        else:
+            doc = self.nlp(line)
+        return format_doc(doc, self.output_format)
 
 
-def analyze(
-    nlp: Language, hash_comment: str, output_format: str, line: str
-) -> Iterable[Iterable[str]]:
-    line = line.rstrip("\n")
-    if line.startswith("#"):
-        if hash_comment == "print":
-            return ((line,),)
-        elif hash_comment == "skip":
-            return ((),)
-    if line == "":
-        return (("",),)
+def format_doc(
+   doc: Doc, output_format: str
+) -> str:
     if output_format in ["0", "conllu"]:
-        doc = nlp(line)
-        return [analyze_conllu(sent) for sent in doc.sents]
+        return "".join(format_conllu(sent) for sent in doc.sents)
     elif output_format in ["1", "cabocha"]:
-        doc = nlp(line)
-        return [analyze_cabocha(sent) for sent in doc.sents]
+        return "".join(format_cabocha(sent) for sent in doc.sents)
     elif output_format in ["2", "mecab"]:
-        doc = nlp.tokenize(line)
-        return [analyze_mecab(doc)]
+        return "".join(format_mecab(doc))
     elif output_format in ["3", "json"]:
-        doc = nlp(line)
-        return [analyze_json(sent) for sent in doc.sents]
+        return ",\n".join(format_json(sent) for sent in doc.sents)
     else:
         raise Exception(output_format + " is not supported")
 
 
-def analyze_json(sent: Span) -> Iterator[str]:
-    tokens = []
-    for token in sent:
-        t = {
-            "id": token.i - sent.start + 1,
-            "orth": token.orth_,
-            "tag": token.tag_,
-            "pos": token.pos_,
-            "lemma": token.lemma_,
-            "head": token.head.i - token.i,
-            "dep": token.dep_,
-            "ner": "{}-{}".format(token.ent_iob_, token.ent_type_) if token.ent_type_ else token.ent_iob_,
-        }
-        if token.whitespace_:
-            t["whitespace"] = token.whitespace_
-        tokens.append("       " + json.dumps(t, ensure_ascii=False))
-    tokens = ",\n".join(tokens)
-
-    yield """ {{
+def format_json(sent: Span) -> str:
+    token_lines = ",\n".join(
+        f"""       {{"id":{
+            token.i - sent.start + 1
+        },"orth":"{
+            token.orth_
+        }","tag":"{
+            token.tag_
+        }","pos":"{
+            token.pos_
+        }","lemma":"{
+            token.lemma_
+        }","head":{
+            token.head.i - token.i
+        },"dep":"{
+            token.dep_
+        }","ner":"{
+            token.ent_iob_
+        }{
+            "-" + token.ent_type_ if token.ent_type_ else ""
+        }"{
+            ',"whitespacce":"' + token.whitespace_ + '"' if token.whitespace_ else ""
+        }}}""" for token in sent
+    )
+    return f""" {{
   "paragraphs": [
    {{
-    "raw": "{}",
+    "raw": "{sent.text}",
     "sentences": [
      {{
       "tokens": [
-{}
+{token_lines}
       ]
      }}
     ]
    }}
   ]
- }}""".format(
-        sent.text,
-        tokens,
-    )
+ }}"""
 
 
-def analyze_conllu(sent: Span, print_origin=True) -> Iterator[str]:
-    if print_origin:
-        yield "# text = {}".format(sent.text)
+def format_conllu(sent: Span, print_origin=True) -> str:
     np_labels = [""] * len(sent)
     use_bunsetu = bunsetu_available(sent)
     if use_bunsetu:
@@ -152,9 +196,11 @@ def analyze_conllu(sent: Span, print_origin=True) -> Iterator[str]:
             if phrase.label_ == "NP":
                 for idx in range(phrase.start - sent.start, phrase.end - sent.start):
                     np_labels[idx] = "NP_B" if idx == phrase.start else "NP_I"
-    for token, np_label in zip(sent, np_labels):
-        yield conllu_token_line(sent, token, np_label, use_bunsetu)
-    yield ""
+    token_lines = "".join(conllu_token_line(sent, token, np_label, use_bunsetu) for token, np_label in zip(sent, np_labels))
+    if print_origin:
+        return f"# text = {sent.text}\n{token_lines}\n"
+    else:
+        return f"{token_lines}\n"
 
 
 def conllu_token_line(sent, token, np_label, use_bunsetu) -> str:
@@ -193,10 +239,10 @@ def conllu_token_line(sent, token, np_label, use_bunsetu) -> str:
             "_",
             misc if misc else "_",
         ]
-    )
+    ) + "\n"
 
 
-def analyze_cabocha(sent: Span) -> Iterable[str]:
+def format_cabocha(sent: Span) -> str:
     bunsetu_index_list = {}
     bunsetu_index = -1
     for token in sent:
@@ -209,9 +255,8 @@ def analyze_cabocha(sent: Span) -> Iterable[str]:
         if bunsetu_bi_label(token) == "B":
             lines.append(cabocha_bunsetu_line(sent, bunsetu_index_list, token))
         lines.append(cabocha_token_line(token))
-    lines.append("EOS")
-    lines.append("")
-    return lines
+    lines.append("EOS\n\n")
+    return "".join(lines)
 
 
 def cabocha_bunsetu_line(sent: Span, bunsetu_index_list, token) -> str:
@@ -237,7 +282,7 @@ def cabocha_bunsetu_line(sent: Span, bunsetu_index_list, token) -> str:
         bunsetu_head_index = 0
     if bunsetu_dep_index is None:
         bunsetu_dep_index = -1
-    return "* {} {}{} {}/{} 0.000000".format(
+    return "* {} {}{} {}/{} 0.000000\n".format(
         bunsetu_index_list[token.i],
         bunsetu_dep_index,
         dep_type,
@@ -250,7 +295,7 @@ def cabocha_token_line(token) -> str:
     part_of_speech = token.tag_.replace("-", ",")
     part_of_speech += ",*" * (3 - part_of_speech.count(",")) + "," + inflection(token)
     reading = reading_form(token)
-    return "{}\t{},{},{},{}\t{}".format(
+    return "{}\t{},{},{},{}\t{}\n".format(
         token.orth_,
         part_of_speech,
         token.lemma_,
@@ -260,13 +305,13 @@ def cabocha_token_line(token) -> str:
     )
 
 
-def analyze_mecab(sudachipy_tokens) -> Iterable[str]:
-    return tuple(mecab_token_line(t) for t in sudachipy_tokens) + ("EOS", "")
+def format_mecab(sudachipy_tokens) -> str:
+    return "".join(mecab_token_line(t) for t in sudachipy_tokens) + "EOS\n\n"
 
 
 def mecab_token_line(token) -> str:
     reading = token.reading_form()
-    return "{}\t{},{},{},{}".format(
+    return "{}\t{},{},{},{}\n".format(
         token.surface(),
         ",".join(token.part_of_speech()),
         token.normalized_form(),

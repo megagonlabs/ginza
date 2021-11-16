@@ -1,8 +1,9 @@
 # coding: utf8
 from multiprocessing import Process, Queue, Event, cpu_count
 from pathlib import Path
-import sys
 import queue
+import sys
+import traceback
 from typing import Generator, Iterable, Optional, List
 
 import plac
@@ -31,20 +32,20 @@ class _OutputWrapper:
 
     def close(self):
         if self.is_json and self.output_json_opened:
-            print("]", file=self.output)
+            print("\n]", file=self.output)
             self.output_json_opened = False
         if self.output_path:
             self.output.close()
         else:
             pass
 
-    def write(self, *args, **kwargs):
+    def write(self, result: str):
         if self.is_json and not self.output_json_opened:
             print("[", file=self.output)
             self.output_json_opened = True
         elif self.is_json:
-            print(" ,", file=self.output)
-        print(*args, **kwargs, file=self.output)
+            print(",", file=self.output)
+        print(result, end="", file=self.output)
 
 
 def run(
@@ -57,7 +58,7 @@ def run(
     require_gpu: bool = False,
     disable_sentencizer: bool = False,
     use_normalized_form: bool = False,
-    parallel: int = 1,
+    parallel_level: int = 1,
     files: List[str] = None,
 ):
     if require_gpu:
@@ -77,8 +78,8 @@ def run(
         disable_sentencizer,
     )
 
-    if parallel <= 0:
-        parallel = max(1, cpu_count() + parallel)
+    if parallel_level <= 0:
+        parallel_level = max(1, cpu_count() + parallel_level)
 
     output = _OutputWrapper(output_path, output_format)
     output.open()
@@ -88,10 +89,10 @@ def run(
         else:
             if not files:
                 files = [0]
-            if parallel == 1:
+            if parallel_level == 1:
                 _analyze_single(analyzer, output, files)
             else:
-                _analyze_parallel(analyzer, output, files, parallel)
+                _analyze_parallel(analyzer, output, files, parallel_level)
     finally:
         output.close()
 
@@ -101,9 +102,7 @@ def _analyze_tty(analyzer: Analyzer, output: _OutputWrapper) -> None:
         analyzer.set_nlp()
         while True:
             line = input()
-            for sent in analyzer.analyze_line(line):
-                for ol in sent:
-                    output.write(ol)
+            output.write(analyzer.analyze_line(line))
     except EOFError:
         pass
     except KeyboardInterrupt:
@@ -116,11 +115,38 @@ def _analyze_single(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[
         for path in files:
             with open(path, "r") as f:
                 for line in f:
-                    for sent in analyzer.analyze_line(line):
-                        for ol in sent:
-                            output.write(ol)
+                    output.write(analyzer.analyze_line(line))
     except KeyboardInterrupt:
         pass
+
+
+def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel_level: int) -> None:
+    try:
+        in_queue = Queue(maxsize=parallel_level * 2)
+        out_queue = Queue()
+
+        p_analyzes = []
+        abort = Event()
+        for _ in range(parallel_level):
+            p = Process(target=_multi_process_analyze, args=(analyzer, in_queue, out_queue, abort), daemon=True)
+            p.start()
+            p_analyzes.append(p)
+
+        p_load = Process(target=_multi_process_load, args=(in_queue, files, MINI_BATCH_SIZE, parallel_level, abort), daemon=True)
+        p_load.start()
+
+        _main_process_write(out_queue, output, parallel_level, abort)
+
+    except KeyboardInterrupt:
+        abort.set()
+    finally:
+        for p in [p_load] + p_analyzes:
+            try:
+                p.join(timeout=1)
+            except:
+                if p.is_alive():
+                    p.terminate()
+                    p.join()
 
 
 def _data_loader(files: List[str], batch_size: int) -> Generator[List[str], None, None]:
@@ -136,100 +162,77 @@ def _data_loader(files: List[str], batch_size: int) -> Generator[List[str], None
         yield mini_batch
 
 
-def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel: int) -> None:
+def _multi_process_load(in_queue: Queue, files: List[str], batch_size: int, n_analyze_process: int, abort: Event):
     try:
-
-        def f_load(in_queue: Queue, files: List[str], batch_size: int, n_analyze_process: int):
-            try:
-                for i, mini_batch in enumerate(_data_loader(files, batch_size)):
-                    in_queue.put((i, mini_batch))
-            finally:
-                for _ in range(n_analyze_process):
-                    in_queue.put("terminate")
-
-        def f_analyze(analyzer: Analyzer, in_queue: Queue, out_queue: Queue, analyze_end: Event):
-            while True:
-                msg = in_queue.get(timeout=0.1)
-                if msg == "terminate":
-                    analyze_end.set()
-                    break
-                i, mini_batch = msg
-                try:
-                    result = analyzer.analyze_lines_mp(mini_batch)
-                    out_queue.put((None, i, result))
-                except Exception as err:
-                    out_queue.put((err, i, None))
-
-        def f_write(out_queue: queue, output: _OutputWrapper, analyze_ends: List[Event]):
-            cur = 0
-            results = dict()
-            while True:
-                try:
-                    err, i, result = out_queue.get(timeout=5)
-                except queue.Empty:
-                    is_analyze_complete = all([e.is_set() for e in analyze_ends])
-                    if is_analyze_complete:
-                        break
-                    else:
-                        continue
-
-                if err is not None:
-                    print("failed to analyze mini_batch {}".format(i), file=sys.stderr)
-                    print(err, file=sys.stderr)
-
-                # output must be ordered same as input text
-                results[i] = result
-                while True:
-                    if cur not in results.keys():
-                        break
-                    result = results[cur]
-                    del results[cur]
-                    cur += 1
-
-                    if result is None:
-                        continue
-
-                    for sents in result:
-                        for lines in sents:
-                            for ol in lines:
-                                output.write(ol)
-
-                is_analyze_complete = all([e.is_set() for e in analyze_ends])
-                if is_analyze_complete and out_queue.empty():
-                    break
-
-        in_queue = Queue(maxsize=parallel * 2)
-        out_queue = Queue()
-        p_load = Process(target=f_load, args=(in_queue, files, MINI_BATCH_SIZE, parallel), daemon=True)
-        p_load.start()
-        p_analyzes = []
-        e_analyzes = []
-        for _ in range(parallel):
-            e = Event()
-            e_analyzes.append(e)
-            p = Process(target=f_analyze, args=(analyzer, in_queue, out_queue, e), daemon=True)
-            p.start()
-            p_analyzes.append(p)
-
-        f_write(out_queue, output, e_analyzes)
-
-        p_load.join()
-        for p in p_analyzes:
-            p.join()
-
+        for i, mini_batch in enumerate(_data_loader(files, batch_size)):
+            if abort.is_set():
+                break
+            in_queue.put((i, mini_batch))
+        else:
+            for _ in range(n_analyze_process):
+                in_queue.put("terminate")
     except KeyboardInterrupt:
         pass
-    finally:
+    except:
+        traceback.print_exc()
+        abort.set()
+
+
+def _multi_process_analyze(analyzer: Analyzer, in_queue: Queue, out_queue: Queue, abort: Event):
+    try:
+        while True:
+            if abort.is_set():
+                break
+            try:
+                msg = in_queue.get(timeout=0.1)
+            except queue.Empty:
+                continue
+            if msg == "terminate":
+                out_queue.put(("terminating", i, None))
+                break
+            i, mini_batch = msg
+            result = analyzer.analyze_batch(mini_batch)
+            out_queue.put((None, i, result))
+    except KeyboardInterrupt:
+        pass
+    except Exception as err:
+        out_queue.put(("Error: {}\n{}".format(err, "".join(mini_batch)), i, None))
+        traceback.print_exc()
+        abort.set()
+
+
+def _main_process_write(out_queue: queue, output: _OutputWrapper, parallel_level: int, abort: Event):
+    cur = 0
+    results = dict()
+    terminating = 0
+    while True:
+        if abort.is_set():
+            return
         try:
-            if p_load.is_alive():
-                p_load.terminate()
-                p_load.join()
-            for p in p_analyzes:
-                if p.is_alive():
-                    p.terminate()
-                    p.join()
-        except:
-            pass
+            msg, mini_batch_index, result = out_queue.get(timeout=0.1)
+        except queue.Empty:
+            continue
+
+        if msg is not None:
+            if msg == "terminating":
+                terminating += 1
+                if terminating == parallel_level:
+                    return
+                continue
+            else:
+                print(f"Analysis failed in mini_batch #{mini_batch_index}. Stopping all the processes.", file=sys.stderr)
+                print(msg, file=sys.stderr)
+                return
+
+        # output must be ordered same as input text
+        results[mini_batch_index] = result
+        while results:
+            if cur not in results.keys():
+                break
+            result = results[cur]
+            del results[cur]
+            cur += 1
+            output.write(result)
 
 
 @plac.annotations(
@@ -259,7 +262,7 @@ def run_ginzame(
         output_format="mecab",
         require_gpu=False,
         use_normalized_form=use_normalized_form,
-        parallel=parallel,
+        parallel_level=parallel,
         disable_sentencizer=False,
         files=files,
     )
@@ -305,7 +308,7 @@ def run_ginza(
         require_gpu=require_gpu,
         use_normalized_form=use_normalized_form,
         disable_sentencizer=disable_sentencizer,
-        parallel=parallel,
+        parallel_level=parallel,
         files=files,
     )
 
