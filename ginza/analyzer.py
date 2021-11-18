@@ -297,7 +297,8 @@ def cabocha_bunsetu_line(sent: Span, bunsetu_index_list, token) -> str:
 
 def cabocha_token_line(token, use_normalized_form) -> str:
     part_of_speech = token.tag_.replace("-", ",")
-    part_of_speech += ",*" * (3 - part_of_speech.count(",")) + "," + inflection(token)
+    inf = inflection(token)
+    part_of_speech += ",*" * (3 - part_of_speech.count(",")) + "," + (inf if inf else "*,*")
     reading = reading_form(token)
     return "{}\t{},{},{},{}\t{}\n".format(
         token.orth_,
