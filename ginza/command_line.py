@@ -40,11 +40,12 @@ class _OutputWrapper:
             pass
 
     def write(self, result: str):
-        if self.is_json and not self.output_json_opened:
-            print("[", file=self.output)
-            self.output_json_opened = True
-        elif self.is_json:
-            print(",", file=self.output)
+        if self.is_json:
+            if not self.output_json_opened:
+                print("[", file=self.output)
+                self.output_json_opened = True
+            else:
+                print(",", file=self.output)
         print(result, end="", file=self.output)
 
 
@@ -179,6 +180,8 @@ def _multi_process_load(in_queue: Queue, files: List[str], batch_size: int, n_an
 
 
 def _multi_process_analyze(analyzer: Analyzer, in_queue: Queue, out_queue: Queue, abort: Event):
+    i = None
+    mini_batch = []
     try:
         while True:
             if abort.is_set():

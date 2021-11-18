@@ -108,7 +108,7 @@ class Analyzer:
         else:
             lines = [line.rstrip("\n") for line in lines if self.hash_comment != "skip" or not line.startswith("#")]
             docs = self.nlp.pipe(lines)
- 
+
         if self.output_format in ["3", "json"]:
             sep = ",\n"
         else:

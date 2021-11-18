@@ -54,19 +54,41 @@ def output_file(tmpdir: Path) -> Path:
     file_path.unlink()
 
 
-def _parse_conllu(result: str):
-    # TODO: implement
-    pass
+def _conllu_parsable(result: str):
+    for line in result.split("\n"):
+        if line.startswith("# text = ") or line.strip() == "":
+            continue
+        if not len(line.strip().split("\t")) == 10:
+            raise Exception
 
 
-def _parse_cabocha(result: str):
-    # TODO: implement
-    pass
+def _cabocha_parsable(result: str):
+    for line in result.split("\n"):
+        if line.strip() in ("", "EOS") or line.startswith("*"):
+            continue
+        if not len(line.split("\t")) == 3:
+            raise Exception
+        if not len(line.split("\t")[1].split(",")) in [8, 9]:
+            raise Exception
 
 
-def _parse_mecab(result: str):
-    # TODO: implement
-    pass
+def _mecab_parsable(result: str):
+    for line in result.split("\n"):
+        if line.strip() in ("", "EOS"):
+            continue
+        if not len(line.split("\t")) == 2:
+            raise Exception
+        if not len(line.split("\t")[1].split(",")) == 9:
+            raise Exception
+
+
+def _json_parsable(result: str):
+    data = json.loads(result)
+    for d in data:
+        if not type(d) == dict:
+            raise Exception
+        if not "paragraphs" in d.keys():
+            raise Exception
 
 
 class TestCLIGinza:
@@ -175,21 +197,18 @@ class TestCLIGinza:
         assert _file_output() == _pipe_output()
 
     @pytest.mark.parametrize(
-        "output_format, result_parser",
+        "output_format, result_parsable",
         [
-            ("conllu", _parse_conllu),
-            ("cabocha", _parse_cabocha),
-            ("mecab", _parse_mecab),
-            ("json", json.loads),
+            ("conllu", _conllu_parsable),
+            ("cabocha", _cabocha_parsable),
+            ("mecab", _mecab_parsable),
+            ("json", _json_parsable),
         ],
     )
-    def test_output_format(self, output_format, result_parser, input_file):
-        p = run_cmd(["ginza", "-c", "skip", "-f", output_format, input_file])
+    def test_output_format(self, output_format, result_parsable, input_file):
+        p = run_cmd(["ginza", "-c", "analyze", "-f", output_format, input_file])
         assert p.returncode == 0
-        try:
-            result_parser(p.stdout.strip())
-        except:
-            pytest.fail("invalid output format.")
+        result_parsable(p.stdout.strip())
 
     def test_require_gpu(self, input_file):
         p = run_cmd(["ginza", "-g", input_file])
@@ -242,7 +261,7 @@ class TestRun:
         mocker.patch("ginza.command_line.sys.stdin.isatty", return_value=True)
         input_mock = mocker.patch.object(cli, "input", side_effect=f_mock_input)
         analyze_parallel_mock = mocker.patch.object(cli, "_analyze_parallel")
-        cli.run(parallel=2, output_path=output_file, files=None)
+        cli.run(parallel_level=2, output_path=output_file, files=None)
         assert input_mock.call_count == 2
         analyze_parallel_mock.assert_not_called()
 
@@ -257,7 +276,7 @@ class TestRun:
         if out_single.exists():
             out_single.unlink()
         cli.run(
-            parallel=1,
+            parallel_level=1,
             output_path=out_single,
             output_format=output_format,
             files=[long_input_file],
@@ -269,7 +288,7 @@ class TestRun:
             out_parallel.unlink()
         try:
             cli.run(
-                parallel=2,
+                parallel_level=2,
                 output_path=out_parallel,
                 output_format=output_format,
                 files=[long_input_file],
