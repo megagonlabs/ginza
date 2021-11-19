@@ -20,6 +20,7 @@ def analyzer() -> Analyzer:
         output_format="conllu",
         require_gpu=False,
         disable_sentencizer=False,
+        use_normalized_form=False,
     )
     yield Analyzer(**default_params)
 
