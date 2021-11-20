@@ -213,8 +213,8 @@ for sent in doc.sents:
 ### User Dictionary
 The user dictionary files should be set to `userDict` field of `sudachi.json` in the installed package directory of`ja_ginza_dict` package.
 
-Please read the official documents to compile user dictionaries with `sudachipy` command.  
-[SudachiPy - User defined Dictionary](https://github.com/WorksApplications/SudachiPy#user-defined-dictionary)  
+Please read the official documents to compile user dictionaries with `sudachipy` command.
+[SudachiPy - User defined Dictionary](https://github.com/WorksApplications/SudachiPy#user-defined-dictionary)
 [Sudachi User Dictionary Construction (Japanese Only)](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)
 
 ## Releases
@@ -433,8 +433,8 @@ with open('sample2.pickle', 'wb') as f:
     - `sudachi`: SudachiPy's morpheme instance (or its list when then tokens are gathered by JapaneseCorrector)
 - Performance improvements
   - Tokenizer
-    - Use latest SudachiDict (SudachiDict_core-20190927.tar.gz) 
-    - Use Cythonized SudachiPy (v0.4.0) 
+    - Use latest SudachiDict (SudachiDict_core-20190927.tar.gz)
+    - Use Cythonized SudachiPy (v0.4.0)
   - Dependency parser
     - Apply `spacy pretrain` command to capture the language model from UD-Japanese BCCWJ, UD_Japanese-PUD and KWDLC.
     - Apply multitask objectives by using `-pt 'tag,dep'` option of `spacy train`
@@ -494,4 +494,17 @@ Copy `system.dic` from installed package directory of `ja_ginza_dict` to `./ja_g
 The analysis model of GiNZA is trained by `spacy train` command.
 ```console
 $ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/ja_ginza-ud-dev.json -b ja_vectors_chive_mc90_35k/ -ovl 0.3 -n 100 -m meta.json.ginza -V 4.0.0
+```
+
+## Run tests
+Ginza uses the pytest framework for testing, and you can run the tests via `setup.py` without install test requirements explicitly.
+Some tests depends on the ginza default models (`ja-ginza`, `ja-ginza-electra`), so install them before the tests is needed.
+
+```console
+pip install ja-ginza ja-ginza-electra
+pip install -e .
+# full test
+python setup.py test
+# test single file
+python setup.py test --addopts ginza/tests/test_analyzer.py
 ```
