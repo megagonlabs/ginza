@@ -44,6 +44,7 @@ class Analyzer:
         output_format: str,
         require_gpu: bool,
         disable_sentencizer: bool,
+        use_normalized_form: bool,
     ) -> None:
         self.model_path = model_path
         self.ensure_model = ensure_model
@@ -52,6 +53,7 @@ class Analyzer:
         self.output_format = output_format
         self.require_gpu = require_gpu
         self.disable_sentencizer = disable_sentencizer
+        self.use_normalized_form = use_normalized_form
         self.nlp: Optional[Language] = None
 
     def set_nlp(self) -> None:
@@ -113,7 +115,7 @@ class Analyzer:
             sep = ",\n"
         else:
             sep = ""
-        return sep.join(format_doc(doc, self.output_format) if isinstance(doc, Doc) else doc for doc in docs)
+        return sep.join(format_doc(doc, self.output_format, self.use_normalized_form) if isinstance(doc, Doc) else doc for doc in docs)
 
     def analyze_line(self, input_line: str) -> str:
         line = input_line.rstrip("\n")
@@ -128,18 +130,18 @@ class Analyzer:
             doc = self.nlp.tokenize(line)
         else:
             doc = self.nlp(line)
-        return format_doc(doc, self.output_format)
+        return format_doc(doc, self.output_format, self.use_normalized_form)
 
 
 def format_doc(
-   doc: Doc, output_format: str
+   doc: Doc, output_format: str, use_normalized_form: bool,
 ) -> str:
     if output_format in ["0", "conllu"]:
-        return "".join(format_conllu(sent) for sent in doc.sents)
+        return "".join(format_conllu(sent, use_normalized_form) for sent in doc.sents)
     elif output_format in ["1", "cabocha"]:
-        return "".join(format_cabocha(sent) for sent in doc.sents)
+        return "".join(format_cabocha(sent, use_normalized_form) for sent in doc.sents)
     elif output_format in ["2", "mecab"]:
-        return "".join(format_mecab(doc))
+        return "".join(format_mecab(doc, use_normalized_form))
     elif output_format in ["3", "json"]:
         return ",\n".join(format_json(sent) for sent in doc.sents)
     else:
@@ -158,6 +160,8 @@ def format_json(sent: Span) -> str:
             token.pos_
         }","lemma":"{
             token.lemma_
+        }","norm":"{
+            token.norm_
         }","head":{
             token.head.i - token.i
         },"dep":"{
@@ -186,7 +190,7 @@ def format_json(sent: Span) -> str:
  }}"""
 
 
-def format_conllu(sent: Span, print_origin=True) -> str:
+def format_conllu(sent: Span, use_normalized_form, print_origin=True) -> str:
     np_labels = [""] * len(sent)
     use_bunsetu = bunsetu_available(sent)
     if use_bunsetu:
@@ -196,14 +200,14 @@ def format_conllu(sent: Span, print_origin=True) -> str:
             if phrase.label_ == "NP":
                 for idx in range(phrase.start - sent.start, phrase.end - sent.start):
                     np_labels[idx] = "NP_B" if idx == phrase.start else "NP_I"
-    token_lines = "".join(conllu_token_line(sent, token, np_label, use_bunsetu) for token, np_label in zip(sent, np_labels))
+    token_lines = "".join(conllu_token_line(sent, token, np_label, use_bunsetu, use_normalized_form) for token, np_label in zip(sent, np_labels))
     if print_origin:
         return f"# text = {sent.text}\n{token_lines}\n"
     else:
         return f"{token_lines}\n"
 
 
-def conllu_token_line(sent, token, np_label, use_bunsetu) -> str:
+def conllu_token_line(sent, token, np_label, use_bunsetu, use_normalized_form) -> str:
     bunsetu_bi = bunsetu_bi_label(token) if use_bunsetu else None
     position_type = bunsetu_position_type(token) if use_bunsetu else None
     inf = inflection(token)
@@ -230,7 +234,7 @@ def conllu_token_line(sent, token, np_label, use_bunsetu) -> str:
         [
             str(token.i - sent.start + 1),
             token.orth_,
-            token.lemma_,
+            token.norm_ if use_normalized_form else token.lemma_,
             token.pos_,
             token.tag_.replace(",*", "").replace(",", "-"),
             "NumType=Card" if token.pos_ == "NUM" else "_",
@@ -242,7 +246,7 @@ def conllu_token_line(sent, token, np_label, use_bunsetu) -> str:
     ) + "\n"
 
 
-def format_cabocha(sent: Span) -> str:
+def format_cabocha(sent: Span, use_normalized_form) -> str:
     bunsetu_index_list = {}
     bunsetu_index = -1
     for token in sent:
@@ -254,7 +258,7 @@ def format_cabocha(sent: Span) -> str:
     for token in sent:
         if bunsetu_bi_label(token) == "B":
             lines.append(cabocha_bunsetu_line(sent, bunsetu_index_list, token))
-        lines.append(cabocha_token_line(token))
+        lines.append(cabocha_token_line(token, use_normalized_form))
     lines.append("EOS\n\n")
     return "".join(lines)
 
@@ -291,30 +295,31 @@ def cabocha_bunsetu_line(sent: Span, bunsetu_index_list, token) -> str:
     )
 
 
-def cabocha_token_line(token) -> str:
+def cabocha_token_line(token, use_normalized_form) -> str:
     part_of_speech = token.tag_.replace("-", ",")
-    part_of_speech += ",*" * (3 - part_of_speech.count(",")) + "," + inflection(token)
+    inf = inflection(token)
+    part_of_speech += ",*" * (3 - part_of_speech.count(",")) + "," + (inf if inf else "*,*")
     reading = reading_form(token)
     return "{}\t{},{},{},{}\t{}\n".format(
         token.orth_,
         part_of_speech,
-        token.lemma_,
+        token.norm_ if use_normalized_form else token.lemma_,
         reading if reading else token.orth_,
         "*",
         "O" if token.ent_iob_ == "O" else "{}-{}".format(token.ent_iob_, token.ent_type_),
     )
 
 
-def format_mecab(sudachipy_tokens) -> str:
-    return "".join(mecab_token_line(t) for t in sudachipy_tokens) + "EOS\n\n"
+def format_mecab(sudachipy_tokens, use_normalized_form) -> str:
+    return "".join(mecab_token_line(t, use_normalized_form) for t in sudachipy_tokens) + "EOS\n\n"
 
 
-def mecab_token_line(token) -> str:
+def mecab_token_line(token, use_normalized_form) -> str:
     reading = token.reading_form()
     return "{}\t{},{},{},{}\n".format(
         token.surface(),
         ",".join(token.part_of_speech()),
-        token.normalized_form(),
+        token.normalized_form() if use_normalized_form else token.dictionary_form(),
         reading if reading else token.surface(),
         "*",
     )

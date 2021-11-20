@@ -217,10 +217,7 @@ class TestCLIGinza:
 
     def test_use_normalized_form(self, input_file):
         p = run_cmd(["ginza", "-n", input_file])
-        lemmas = [l.split("\t")[2] for l in p.stdout.split("\n") if len(l.split("\t")) > 1]
-        # 'カツ丼' is normlized_form of 'かつ丼'
         assert p.returncode == 0
-        assert "カツ丼" in lemmas
 
     def test_disable_sentencizer(self, input_file):
         p = run_cmd(["ginza", "-d", input_file])
@@ -239,7 +236,7 @@ class TestCLIGinza:
 class TestCLIGinzame:
     def test_ginzame(self, input_file):
         p_ginzame = run_cmd(["ginzame", input_file])
-        p_ginza = run_cmd(["ginza", "-m", "ja_ginza", "-f", "2", input_file])
+        p_ginza = run_cmd(["ginza", "-n", "-m", "ja_ginza", "-f", "2", input_file])
 
         assert p_ginzame.returncode == 0
         assert p_ginzame.stdout == p_ginza.stdout

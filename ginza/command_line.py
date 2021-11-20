@@ -7,7 +7,6 @@ import traceback
 from typing import Generator, Iterable, Optional, List
 
 import plac
-from . import force_using_normalized_form_as_lemma
 from .analyzer import Analyzer
 
 MINI_BATCH_SIZE = 100
@@ -64,9 +63,6 @@ def run(
 ):
     if require_gpu:
         print("GPU enabled", file=sys.stderr)
-    if use_normalized_form:
-        print("overriding Token.lemma_ by normalized_form of SudachiPy", file=sys.stderr)
-        force_using_normalized_form_as_lemma(True)
     assert model_path is None or ensure_model is None
 
     analyzer = Analyzer(
@@ -77,6 +73,7 @@ def run(
         output_format,
         require_gpu,
         disable_sentencizer,
+        use_normalized_form,
     )
 
     if parallel_level <= 0:
@@ -243,7 +240,6 @@ def _main_process_write(out_queue: queue, output: _OutputWrapper, parallel_level
     split_mode=("split mode", "option", "s", str, ["A", "B", "C"]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
-    use_normalized_form=("overriding Token.lemma_ by normalized_form of SudachiPy", "flag", "n"),
     parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
 )
@@ -252,7 +248,6 @@ def run_ginzame(
     split_mode="C",
     hash_comment="print",
     output_path=None,
-    use_normalized_form=False,
     parallel=-1,
     *files,
 ):
@@ -264,7 +259,7 @@ def run_ginzame(
         output_path=output_path,
         output_format="mecab",
         require_gpu=False,
-        use_normalized_form=use_normalized_form,
+        use_normalized_form=True,
         parallel_level=parallel,
         disable_sentencizer=False,
         files=files,
@@ -283,7 +278,7 @@ def main_ginzame():
     output_path=("output path", "option", "o", Path),
     output_format=("output format", "option", "f", str, ["0", "conllu", "1", "cabocha", "2", "mecab", "3", "json"]),
     require_gpu=("enable require_gpu", "flag", "g"),
-    use_normalized_form=("overriding Token.lemma_ by normalized_form of SudachiPy", "flag", "n"),
+    use_normalized_form=("Use Token.norm_ instead of Token.lemma_", "flag", "n"),
     disable_sentencizer=("disable spaCy's sentence separator", "flag", "d"),
     parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
