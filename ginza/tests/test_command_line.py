@@ -215,9 +215,19 @@ class TestCLIGinza:
         gpu_available = int(os.environ.get("CUDA_VISIBLE_DEVICES", -1)) > 0
         assert (p.returncode == 0) is gpu_available
 
+    def test_do_not_use_normalized_form(self, input_file):
+        p = run_cmd(["ginza", input_file])
+        lemmas = [l.split("\t")[2] for l in p.stdout.split("\n") if len(l.split("\t")) > 1]
+        # 'かつ丼' is dictionary_form of 'かつ丼'
+        assert p.returncode == 0
+        assert "かつ丼" in lemmas
+
     def test_use_normalized_form(self, input_file):
         p = run_cmd(["ginza", "-n", input_file])
+        lemmas = [l.split("\t")[2] for l in p.stdout.split("\n") if len(l.split("\t")) > 1]
+        # 'カツ丼' is normlized_form of 'かつ丼'
         assert p.returncode == 0
+        assert "カツ丼" in lemmas
 
     def test_disable_sentencizer(self, input_file):
         p = run_cmd(["ginza", "-d", input_file])
