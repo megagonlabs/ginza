@@ -1,11 +1,12 @@
 # coding: utf8
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Process, Queue, Event, cpu_count
 from pathlib import Path
+import queue
 import sys
+import traceback
 from typing import Generator, Iterable, Optional, List
 
 import plac
-from . import force_using_normalized_form_as_lemma
 from .analyzer import Analyzer
 
 MINI_BATCH_SIZE = 100
@@ -30,20 +31,21 @@ class _OutputWrapper:
 
     def close(self):
         if self.is_json and self.output_json_opened:
-            print("]", file=self.output)
+            print("\n]", file=self.output)
             self.output_json_opened = False
         if self.output_path:
             self.output.close()
         else:
             pass
 
-    def write(self, *args, **kwargs):
-        if self.is_json and not self.output_json_opened:
-            print("[", file=self.output)
-            self.output_json_opened = True
-        elif self.is_json:
-            print(" ,", file=self.output)
-        print(*args, **kwargs, file=self.output)
+    def write(self, result: str):
+        if self.is_json:
+            if not self.output_json_opened:
+                print("[", file=self.output)
+                self.output_json_opened = True
+            else:
+                print(",", file=self.output)
+        print(result, end="", file=self.output)
 
 
 def run(
@@ -56,14 +58,11 @@ def run(
     require_gpu: bool = False,
     disable_sentencizer: bool = False,
     use_normalized_form: bool = False,
-    parallel: int = 1,
+    parallel_level: int = 1,
     files: List[str] = None,
 ):
     if require_gpu:
         print("GPU enabled", file=sys.stderr)
-    if use_normalized_form:
-        print("overriding Token.lemma_ by normalized_form of SudachiPy", file=sys.stderr)
-        force_using_normalized_form_as_lemma(True)
     assert model_path is None or ensure_model is None
 
     analyzer = Analyzer(
@@ -74,24 +73,24 @@ def run(
         output_format,
         require_gpu,
         disable_sentencizer,
+        use_normalized_form,
     )
 
-    if parallel <= 0:
-        parallel = max(1, cpu_count() + parallel)
+    if parallel_level <= 0:
+        parallel_level = max(1, cpu_count() + parallel_level)
 
     output = _OutputWrapper(output_path, output_format)
     output.open()
     try:
-        if not files:
-            if sys.stdin.isatty():
-                parallel = 1
-                _analyze_tty(analyzer, output)
-            else:
-                _analyze_single(analyzer, output, files=[0])
-        elif parallel == 1:
-            _analyze_single(analyzer, output, files)
+        if not files and sys.stdin.isatty():
+            _analyze_tty(analyzer, output)
         else:
-            _analyze_parallel(analyzer, output, files, parallel)
+            if not files:
+                files = [0]
+            if parallel_level == 1:
+                _analyze_single(analyzer, output, files)
+            else:
+                _analyze_parallel(analyzer, output, files, parallel_level)
     finally:
         output.close()
 
@@ -101,9 +100,7 @@ def _analyze_tty(analyzer: Analyzer, output: _OutputWrapper) -> None:
         analyzer.set_nlp()
         while True:
             line = input()
-            for sent in analyzer.analyze_line(line):
-                for ol in sent:
-                    output.write(ol)
+            output.write(analyzer.analyze_line(line))
     except EOFError:
         pass
     except KeyboardInterrupt:
@@ -116,16 +113,41 @@ def _analyze_single(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[
         for path in files:
             with open(path, "r") as f:
                 for line in f:
-                    for sent in analyzer.analyze_line(line):
-                        for ol in sent:
-                            output.write(ol)
+                    output.write(analyzer.analyze_line(line))
     except KeyboardInterrupt:
         pass
 
 
-def _data_loader(
-    files: List[str], batch_size: int
-) -> Generator[List[str], None, None]:
+def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel_level: int) -> None:
+    try:
+        in_queue = Queue(maxsize=parallel_level * 2)
+        out_queue = Queue()
+
+        p_analyzes = []
+        abort = Event()
+        for _ in range(parallel_level):
+            p = Process(target=_multi_process_analyze, args=(analyzer, in_queue, out_queue, abort), daemon=True)
+            p.start()
+            p_analyzes.append(p)
+
+        p_load = Process(target=_multi_process_load, args=(in_queue, files, MINI_BATCH_SIZE, parallel_level, abort), daemon=True)
+        p_load.start()
+
+        _main_process_write(out_queue, output, parallel_level, abort)
+
+    except KeyboardInterrupt:
+        abort.set()
+    finally:
+        for p in [p_load] + p_analyzes:
+            try:
+                p.join(timeout=1)
+            except:
+                if p.is_alive():
+                    p.terminate()
+                    p.join()
+
+
+def _data_loader(files: List[str], batch_size: int) -> Generator[List[str], None, None]:
     mini_batch = []
     for path in files:
         with open(path, "r") as f:
@@ -138,49 +160,79 @@ def _data_loader(
         yield mini_batch
 
 
-def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str], parallel: int) -> None:
-    pool = None
+def _multi_process_load(in_queue: Queue, files: List[str], batch_size: int, n_analyze_process: int, abort: Event):
     try:
-        first_batch = True
-        mini_batches = []
-        for mini_batch in _data_loader(files, MINI_BATCH_SIZE):
-            if first_batch:
-                if len(mini_batch) < MINI_BATCH_SIZE:
-                    analyzer.set_nlp()
-                    for line in mini_batch:
-                        for sent in analyzer.analyze_line(line):
-                            for ol in sent:
-                                output.write(ol)
-                    return
-                else:
-                    first_batch = False
-            mini_batches.append(mini_batch)
-            if len(mini_batches) == parallel:
-                if not pool:
-                    pool = Pool(parallel)
-                for mini_batch_result in pool.map(analyzer.analyze_lines_mp, mini_batches):
-                    for sents in mini_batch_result:
-                        for lines in sents:
-                            for ol in lines:
-                                output.write(ol)
-                mini_batches = []
-        if not pool:
-            parallel = len(mini_batches)
-            pool = Pool(parallel)
-        for mini_batch_result in pool.map(analyzer.analyze_lines_mp, mini_batches):
-            for sents in mini_batch_result:
-                for lines in sents:
-                    for ol in lines:
-                        output.write(ol)
-
+        for i, mini_batch in enumerate(_data_loader(files, batch_size)):
+            if abort.is_set():
+                break
+            in_queue.put((i, mini_batch))
+        else:
+            for _ in range(n_analyze_process):
+                in_queue.put("terminate")
     except KeyboardInterrupt:
         pass
-    finally:
-        if pool:
+    except:
+        traceback.print_exc()
+        abort.set()
+
+
+def _multi_process_analyze(analyzer: Analyzer, in_queue: Queue, out_queue: Queue, abort: Event):
+    i = None
+    mini_batch = []
+    try:
+        while True:
+            if abort.is_set():
+                break
             try:
-                pool.close()
-            except:
-                pass
+                msg = in_queue.get(timeout=0.1)
+            except queue.Empty:
+                continue
+            if msg == "terminate":
+                out_queue.put(("terminating", i, None))
+                break
+            i, mini_batch = msg
+            result = analyzer.analyze_batch(mini_batch)
+            out_queue.put((None, i, result))
+    except KeyboardInterrupt:
+        pass
+    except Exception as err:
+        out_queue.put(("Error: {}\n{}".format(err, "".join(mini_batch)), i, None))
+        traceback.print_exc()
+        abort.set()
+
+
+def _main_process_write(out_queue: queue, output: _OutputWrapper, parallel_level: int, abort: Event):
+    cur = 0
+    results = dict()
+    terminating = 0
+    while True:
+        if abort.is_set():
+            return
+        try:
+            msg, mini_batch_index, result = out_queue.get(timeout=0.1)
+        except queue.Empty:
+            continue
+
+        if msg is not None:
+            if msg == "terminating":
+                terminating += 1
+                if terminating == parallel_level:
+                    return
+                continue
+            else:
+                print(f"Analysis failed in mini_batch #{mini_batch_index}. Stopping all the processes.", file=sys.stderr)
+                print(msg, file=sys.stderr)
+                return
+
+        # output must be ordered same as input text
+        results[mini_batch_index] = result
+        while results:
+            if cur not in results.keys():
+                break
+            result = results[cur]
+            del results[cur]
+            cur += 1
+            output.write(result)
 
 
 @plac.annotations(
@@ -188,7 +240,6 @@ def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterabl
     split_mode=("split mode", "option", "s", str, ["A", "B", "C"]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
-    use_normalized_form=("overriding Token.lemma_ by normalized_form of SudachiPy", "flag", "n"),
     parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
 )
@@ -197,7 +248,6 @@ def run_ginzame(
     split_mode="C",
     hash_comment="print",
     output_path=None,
-    use_normalized_form=False,
     parallel=-1,
     *files,
 ):
@@ -209,8 +259,8 @@ def run_ginzame(
         output_path=output_path,
         output_format="mecab",
         require_gpu=False,
-        use_normalized_form=use_normalized_form,
-        parallel=parallel,
+        use_normalized_form=True,
+        parallel_level=parallel,
         disable_sentencizer=False,
         files=files,
     )
@@ -228,7 +278,7 @@ def main_ginzame():
     output_path=("output path", "option", "o", Path),
     output_format=("output format", "option", "f", str, ["0", "conllu", "1", "cabocha", "2", "mecab", "3", "json"]),
     require_gpu=("enable require_gpu", "flag", "g"),
-    use_normalized_form=("overriding Token.lemma_ by normalized_form of SudachiPy", "flag", "n"),
+    use_normalized_form=("Use Token.norm_ instead of Token.lemma_", "flag", "n"),
     disable_sentencizer=("disable spaCy's sentence separator", "flag", "d"),
     parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
@@ -256,7 +306,7 @@ def run_ginza(
         require_gpu=require_gpu,
         use_normalized_form=use_normalized_form,
         disable_sentencizer=disable_sentencizer,
-        parallel=parallel,
+        parallel_level=parallel,
         files=files,
     )
 

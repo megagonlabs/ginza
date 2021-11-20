@@ -1,11 +1,9 @@
 import json
 import os
 import subprocess as sp
-from multiprocessing import Pool
 from functools import partial
 from pathlib import Path
 from typing import Iterable, List
-from unittest.mock import Mock
 
 import pytest
 
@@ -56,27 +54,41 @@ def output_file(tmpdir: Path) -> Path:
     file_path.unlink()
 
 
-@pytest.fixture
-def pool_obj_mock(mocker) -> Mock:
-    pool_obj_mock = mocker.Mock(spec=Pool)
-    pool_obj_mock.map = mocker.MagicMock(side_effect=lambda a, b: [a(c) for c in b])
-    pool_obj_mock.close = mocker.Mock()
-    yield pool_obj_mock
+def _conllu_parsable(result: str):
+    for line in result.split("\n"):
+        if line.startswith("# text = ") or line.strip() == "":
+            continue
+        if not len(line.strip().split("\t")) == 10:
+            raise Exception
 
 
-def _parse_conllu(result: str):
-    # TODO: implement
-    pass
+def _cabocha_parsable(result: str):
+    for line in result.split("\n"):
+        if line.strip() in ("", "EOS") or line.startswith("*"):
+            continue
+        if not len(line.split("\t")) == 3:
+            raise Exception
+        if not len(line.split("\t")[1].split(",")) in [8, 9]:
+            raise Exception
 
 
-def _parse_cabocha(result: str):
-    # TODO: implement
-    pass
+def _mecab_parsable(result: str):
+    for line in result.split("\n"):
+        if line.strip() in ("", "EOS"):
+            continue
+        if not len(line.split("\t")) == 2:
+            raise Exception
+        if not len(line.split("\t")[1].split(",")) == 9:
+            raise Exception
 
 
-def _parse_mecab(result: str):
-    # TODO: implement
-    pass
+def _json_parsable(result: str):
+    data = json.loads(result)
+    for d in data:
+        if not type(d) == dict:
+            raise Exception
+        if not "paragraphs" in d.keys():
+            raise Exception
 
 
 class TestCLIGinza:
@@ -185,26 +197,30 @@ class TestCLIGinza:
         assert _file_output() == _pipe_output()
 
     @pytest.mark.parametrize(
-        "output_format, result_parser",
+        "output_format, result_parsable",
         [
-            ("conllu", _parse_conllu),
-            ("cabocha", _parse_cabocha),
-            ("mecab", _parse_mecab),
-            ("json", json.loads),
+            ("conllu", _conllu_parsable),
+            ("cabocha", _cabocha_parsable),
+            ("mecab", _mecab_parsable),
+            ("json", _json_parsable),
         ],
     )
-    def test_output_format(self, output_format, result_parser, input_file):
-        p = run_cmd(["ginza", "-c", "skip", "-f", output_format, input_file])
+    def test_output_format(self, output_format, result_parsable, input_file):
+        p = run_cmd(["ginza", "-c", "analyze", "-f", output_format, input_file])
         assert p.returncode == 0
-        try:
-            result_parser(p.stdout.strip())
-        except:
-            pytest.fail("invalid output format.")
+        result_parsable(p.stdout.strip())
 
     def test_require_gpu(self, input_file):
         p = run_cmd(["ginza", "-g", input_file])
         gpu_available = int(os.environ.get("CUDA_VISIBLE_DEVICES", -1)) > 0
         assert (p.returncode == 0) is gpu_available
+
+    def test_do_not_use_normalized_form(self, input_file):
+        p = run_cmd(["ginza", input_file])
+        lemmas = [l.split("\t")[2] for l in p.stdout.split("\n") if len(l.split("\t")) > 1]
+        # 'かつ丼' is dictionary_form of 'かつ丼'
+        assert p.returncode == 0
+        assert "かつ丼" in lemmas
 
     def test_use_normalized_form(self, input_file):
         p = run_cmd(["ginza", "-n", input_file])
@@ -230,19 +246,13 @@ class TestCLIGinza:
 class TestCLIGinzame:
     def test_ginzame(self, input_file):
         p_ginzame = run_cmd(["ginzame", input_file])
-        p_ginza = run_cmd(["ginza", "-m", "ja_ginza", "-f", "2", input_file])
+        p_ginza = run_cmd(["ginza", "-n", "-m", "ja_ginza", "-f", "2", input_file])
 
         assert p_ginzame.returncode == 0
         assert p_ginzame.stdout == p_ginza.stdout
 
 
 class TestRun:
-    def test_run_as_single_when_file_is_small(self, mocker, output_file, long_input_file):
-        mocker.patch.object(cli, "MINI_BATCH_SIZE", 50)
-        pool_mock = mocker.patch.object(cli, "Pool")
-        cli.run(parallel=2, output_path=output_file, files=[long_input_file])
-        pool_mock.assert_not_called()
-
     def test_run_as_single_when_input_is_a_tty(self, mocker, output_file, long_input_file):
         i = 0
 
@@ -257,18 +267,10 @@ class TestRun:
         mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
         mocker.patch("ginza.command_line.sys.stdin.isatty", return_value=True)
         input_mock = mocker.patch.object(cli, "input", side_effect=f_mock_input)
-        pool_mock = mocker.patch.object(cli, "Pool")
-        cli.run(parallel=2, output_path=output_file, files=None)
+        analyze_parallel_mock = mocker.patch.object(cli, "_analyze_parallel")
+        cli.run(parallel_level=2, output_path=output_file, files=None)
         assert input_mock.call_count == 2
-        pool_mock.assert_not_called()
-
-    def test_parallel(self, mocker, pool_obj_mock, output_file, long_input_file):
-        mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
-        pool_mock = mocker.patch.object(cli, "Pool", return_value=pool_obj_mock)
-        cli.run(parallel=2, output_path=output_file, files=[long_input_file])
-        pool_mock.assert_called_once_with(2)
-        pool_obj_mock.map.assert_called()
-        pool_obj_mock.close.assert_called_once()
+        analyze_parallel_mock.assert_not_called()
 
     @pytest.mark.parametrize(
         "output_format",
@@ -281,7 +283,7 @@ class TestRun:
         if out_single.exists():
             out_single.unlink()
         cli.run(
-            parallel=1,
+            parallel_level=1,
             output_path=out_single,
             output_format=output_format,
             files=[long_input_file],
@@ -293,7 +295,7 @@ class TestRun:
             out_parallel.unlink()
         try:
             cli.run(
-                parallel=2,
+                parallel_level=2,
                 output_path=out_parallel,
                 output_format=output_format,
                 files=[long_input_file],
@@ -303,7 +305,8 @@ class TestRun:
             pytest.fail("parallel run failed")
 
         def f_len(path):
-            return int(run_cmd(["wc", "-l", path]).stdout.split()[0])
+            with open(path, "r") as f:
+                return sum([1 for _ in f])
 
         assert f_len(out_single) == f_len(out_parallel)
         with open(out_single, "r") as f_s:
