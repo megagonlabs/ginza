@@ -240,7 +240,6 @@ def _main_process_write(out_queue: queue, output: _OutputWrapper, parallel_level
     split_mode=("split mode", "option", "s", str, ["A", "B", "C"]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
-    use_normalized_form=("Use Token.norm_ instead of Token.lemma_", "flag", "n"),
     parallel=("parallel level (default=-1, all_cpus=0)", "option", "p", int),
     files=("input files", "positional"),
 )
@@ -249,7 +248,6 @@ def run_ginzame(
     split_mode="C",
     hash_comment="print",
     output_path=None,
-    use_normalized_form=True,
     parallel=-1,
     *files,
 ):
@@ -261,7 +259,7 @@ def run_ginzame(
         output_path=output_path,
         output_format="mecab",
         require_gpu=False,
-        use_normalized_form=use_normalized_form,
+        use_normalized_form=True,
         parallel_level=parallel,
         disable_sentencizer=False,
         files=files,

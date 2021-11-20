@@ -239,7 +239,7 @@ class TestCLIGinza:
 class TestCLIGinzame:
     def test_ginzame(self, input_file):
         p_ginzame = run_cmd(["ginzame", input_file])
-        p_ginza = run_cmd(["ginza", "-m", "ja_ginza", "-f", "2", input_file])
+        p_ginza = run_cmd(["ginza", "-n", "-m", "ja_ginza", "-f", "2", input_file])
 
         assert p_ginzame.returncode == 0
         assert p_ginzame.stdout == p_ginza.stdout
