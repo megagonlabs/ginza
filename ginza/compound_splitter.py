@@ -1,11 +1,13 @@
 # encoding: utf8
 from collections import OrderedDict
+import re
 
 import srsly
 
 from spacy import util
 from spacy.language import Language
 from spacy.lang.ja import resolve_pos
+from spacy.tokens import Doc, MorphAnalysis
 
 __all__ = [
     "CompoundSplitter",
@@ -49,11 +51,11 @@ def _replace_list_entries(lst, index, inserting_list):
 
 
 class CompoundSplitter:
-    def __init__(self, nlp, split_mode=None):
-        self.nlp = nlp
+    def __init__(self, vocab, split_mode=None):
+        self.vocab = vocab
         self.split_mode = split_mode
 
-    def __call__(self, doc):
+    def __call__(self, doc: Doc):
         if self._split_mode is None:
             return doc
         elif self._split_mode == "C":
@@ -99,7 +101,11 @@ class CompoundSplitter:
                     "POS": tag_to_pos(
                         sub_tokens,
                         doc[token.i + 1].tag_ if token.i < len(doc) - 1 else None
-                    )
+                    ),
+                    "LEMMA": [dtoken.lemma for dtoken in sub_tokens],
+                    "NORM": [dtoken.norm for dtoken in sub_tokens],
+                    "ENT_TYPE": [token_ent_type for dtoken in sub_tokens],
+                    "MORPH": [f'Inflection={dtoken.inf}|Reading={re.sub("[=|]", "_", dtoken.reading)}' for dtoken in sub_tokens],
                 }
                 try:
                     with doc.retokenize() as retokenizer:
@@ -118,29 +124,6 @@ class CompoundSplitter:
                         if t.i < token_i or token_i + len(sub_tokens) <= t.i:
                             if t.head.i == token_i:
                                 t.head = doc[token_i + last]
-
-                for t, dtoken in zip(
-                    doc[token_i:token_i + len(sub_tokens)],
-                    sub_tokens
-                ):
-                    t.lemma_ = dtoken.lemma
-
-                if token_ent_type:  # work-around: _retokenize() sets value for Token.ent_iob but not for ent_type
-                    for t in doc[token_i + 1:token_i + len(sub_tokens)]:
-                        t.ent_type = token_ent_type
-
-                if "inflections" in doc.user_data:
-                    doc.user_data["inflections"] = _replace_list_entries(
-                        doc.user_data["inflections"],
-                        token_i,
-                        tuple(dtoken.inf for dtoken in sub_tokens),
-                    )
-                if "reading_forms" in doc.user_data:
-                    doc.user_data["reading_forms"] = _replace_list_entries(
-                        doc.user_data["reading_forms"],
-                        token_i,
-                        tuple(dtoken.reading for dtoken in sub_tokens),
-                    )
 
         del doc.user_data["sub_tokens"]
         return doc
