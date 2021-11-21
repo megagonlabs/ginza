@@ -95,6 +95,13 @@ class CompoundSplitter:
                 else:
                     heads = [(token, last) for _ in range(last)] + [token.head]
                 surfaces = [dtoken.surface for dtoken in sub_tokens]
+                def morph(dtoken):
+                    m = {}
+                    if dtoken.inf:
+                        m["Inflection"] = dtoken.inf
+                    if dtoken.reading:
+                        m["Reading"] = re.sub("[=|]", "_", dtoken.reading)
+                    return "|".join(f"{k}={v}" for k, v in m.items())
                 attrs = {
                     "TAG": [dtoken.tag for dtoken in sub_tokens],
                     "DEP": deps,
@@ -105,7 +112,7 @@ class CompoundSplitter:
                     "LEMMA": [dtoken.lemma for dtoken in sub_tokens],
                     "NORM": [dtoken.norm for dtoken in sub_tokens],
                     "ENT_TYPE": [token_ent_type for dtoken in sub_tokens],
-                    "MORPH": [f'Inflection={dtoken.inf}|Reading={re.sub("[=|]", "_", dtoken.reading)}' for dtoken in sub_tokens],
+                    "MORPH": [morph(dtoken) for dtoken in sub_tokens],
                 }
                 try:
                     with doc.retokenize() as retokenizer:
