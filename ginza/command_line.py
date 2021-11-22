@@ -51,7 +51,7 @@ class _OutputWrapper:
 def run(
     model_path: Optional[str] = None,
     ensure_model: Optional[str] = None,
-    split_mode: Optional[str] = "C",
+    split_mode: Optional[str] = None,
     hash_comment: str = "print",
     output_path: Optional[Path] = None,
     output_format: str = "0",
