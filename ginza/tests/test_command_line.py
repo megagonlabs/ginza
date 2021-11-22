@@ -56,7 +56,7 @@ def output_file(tmpdir: Path) -> Path:
 
 def _conllu_parsable(result: str):
     for line in result.split("\n"):
-        if line.startswith("# text = ") or line.strip() == "":
+        if line.startswith("#") or line.strip() == "":
             continue
         if not len(line.strip().split("\t")) == 10:
             raise Exception
@@ -64,7 +64,7 @@ def _conllu_parsable(result: str):
 
 def _cabocha_parsable(result: str):
     for line in result.split("\n"):
-        if line.strip() in ("", "EOS") or line.startswith("*"):
+        if line.strip() in ("", "EOS") or line.startswith("*") or line.startswith("#"):
             continue
         if not len(line.split("\t")) == 3:
             raise Exception
@@ -74,7 +74,7 @@ def _cabocha_parsable(result: str):
 
 def _mecab_parsable(result: str):
     for line in result.split("\n"):
-        if line.strip() in ("", "EOS"):
+        if line.strip() in ("", "EOS") or line.startswith("#"):
             continue
         if not len(line.split("\t")) == 2:
             raise Exception
@@ -209,6 +209,13 @@ class TestCLIGinza:
         p = run_cmd(["ginza", "-c", "analyze", "-f", output_format, input_file])
         assert p.returncode == 0
         result_parsable(p.stdout.strip())
+
+    @pytest.mark.parametrize(
+        "hash_comment", ["print", "skip"]
+    )
+    def test_json_cannot_accept_hash_comment_not_analyze(self, hash_comment, input_file):
+        p = run_cmd(["ginza", "-c", hash_comment, "-f", "json", input_file])
+        assert p.returncode != 0
 
     def test_require_gpu(self, input_file):
         p = run_cmd(["ginza", "-g", input_file])
