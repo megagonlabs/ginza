@@ -62,7 +62,7 @@ def run(
     files: List[str] = None,
 ):
     assert model_path is None or ensure_model is None
-    assert not (output_format in ["3", "json"] and hash_comment != "analyze"), "output_format=json only accept hash_comment=analyze"
+    assert not (output_format in ["3", "json"] and hash_comment != "analyze")
 
     if parallel_level <= 0:
         level = max(1, cpu_count() + parallel_level)
