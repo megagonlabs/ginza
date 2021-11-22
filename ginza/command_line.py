@@ -51,7 +51,7 @@ class _OutputWrapper:
 def run(
     model_path: Optional[str] = None,
     ensure_model: Optional[str] = None,
-    split_mode: Optional[str] = "C",
+    split_mode: Optional[str] = None,
     hash_comment: str = "print",
     output_path: Optional[Path] = None,
     output_format: str = "0",
@@ -61,9 +61,25 @@ def run(
     parallel_level: int = 1,
     files: List[str] = None,
 ):
-    if require_gpu:
-        print("GPU enabled", file=sys.stderr)
     assert model_path is None or ensure_model is None
+
+    if parallel_level <= 0:
+        level = max(1, cpu_count() + parallel_level)
+        if output_format in [2, "mecab"]:
+            if require_gpu:
+                print("GPU not used for mecab mode", file=sys.stderr)
+                require_gpu = False
+        elif parallel_level <= 0:
+            if require_gpu:
+                if level < 4:
+                    print("GPU enabled: parallel_level' set to {level}", end="", file=sys.stderr)
+                else:
+                    print("GPU enabled: parallel_level' set to {level} but seems it's too much", end="", file=sys.stderr)
+            else:
+                print(f"'parallel_level' set to {level}", file=sys.stderr)
+        elif require_gpu:
+            print("GPU enabled", file=sys.stderr)
+        parallel_level = level
 
     analyzer = Analyzer(
         model_path,
@@ -75,9 +91,6 @@ def run(
         disable_sentencizer,
         use_normalized_form,
     )
-
-    if parallel_level <= 0:
-        parallel_level = max(1, cpu_count() + parallel_level)
 
     output = _OutputWrapper(output_path, output_format)
     output.open()
@@ -236,7 +249,6 @@ def _main_process_write(out_queue: queue, output: _OutputWrapper, parallel_level
 
 
 @plac.annotations(
-    model_path=("model directory path", "option", "b", str),
     split_mode=("split mode", "option", "s", str, ["A", "B", "C"]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
@@ -244,16 +256,15 @@ def _main_process_write(out_queue: queue, output: _OutputWrapper, parallel_level
     files=("input files", "positional"),
 )
 def run_ginzame(
-    model_path=None,
-    split_mode="C",
+    split_mode=None,
     hash_comment="print",
     output_path=None,
     parallel=-1,
     *files,
 ):
     run(
-        model_path=model_path,
-        ensure_model="ja_ginza",
+        model_path=None,
+        ensure_model=None,
         split_mode=split_mode,
         hash_comment=hash_comment,
         output_path=output_path,
