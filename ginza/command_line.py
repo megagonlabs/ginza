@@ -243,7 +243,7 @@ def _main_process_write(out_queue: queue, output: _OutputWrapper, parallel_level
     files=("input files", "positional"),
 )
 def run_ginzame(
-    split_mode="C",
+    split_mode=None,
     hash_comment="print",
     output_path=None,
     parallel=-1,
