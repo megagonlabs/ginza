@@ -236,7 +236,6 @@ def _main_process_write(out_queue: queue, output: _OutputWrapper, parallel_level
 
 
 @plac.annotations(
-    model_path=("model directory path", "option", "b", str),
     split_mode=("split mode", "option", "s", str, ["A", "B", "C"]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
@@ -244,7 +243,6 @@ def _main_process_write(out_queue: queue, output: _OutputWrapper, parallel_level
     files=("input files", "positional"),
 )
 def run_ginzame(
-    model_path=None,
     split_mode="C",
     hash_comment="print",
     output_path=None,
@@ -252,8 +250,8 @@ def run_ginzame(
     *files,
 ):
     run(
-        model_path=model_path,
-        ensure_model="ja_ginza",
+        model_path=None,
+        ensure_model=None,
         split_mode=split_mode,
         hash_comment=hash_comment,
         output_path=output_path,
