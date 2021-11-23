@@ -64,7 +64,7 @@ def run(
     assert model_path is None or ensure_model is None
     if output_format in ["3", "json"] and hash_comment != "analyze":
         print(
-            f'hash_comment="{hash_comment}" not permitted for JSON output. Forced to use hash_comment="analyzer".',
+            f'hash_comment="{hash_comment}" not permitted for JSON output. Forced to use hash_comment="analyze".',
             file=sys.stderr
         )
 
