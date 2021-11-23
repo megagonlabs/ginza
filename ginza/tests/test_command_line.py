@@ -213,9 +213,14 @@ class TestCLIGinza:
     @pytest.mark.parametrize(
         "hash_comment", ["print", "skip"]
     )
-    def test_json_cannot_accept_hash_comment_not_analyze(self, hash_comment, input_file):
-        p = run_cmd(["ginza", "-c", hash_comment, "-f", "json", input_file])
-        assert p.returncode != 0
+    def test_warn_if_json_hash_comment_not_analyze(self, hash_comment, input_file):
+        p = run_cmd(["ginza", "-c", hash_comment, "-f", "json", input_file], stderr=sp.PIPE)
+        assert p.returncode == 0
+        msg = (
+            f'hash_comment={hash_comment} may break output json if input contains a line starts with "#".\n'
+            'In order to keep the json in proper format, please use hash_comment=analyze or remove the lines start with "#" from input.'
+        )
+        assert msg in p.stderr
 
     def test_require_gpu(self, input_file):
         p = run_cmd(["ginza", "-g", input_file])

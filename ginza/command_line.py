@@ -62,7 +62,12 @@ def run(
     files: List[str] = None,
 ):
     assert model_path is None or ensure_model is None
-    assert not (output_format in ["3", "json"] and hash_comment != "analyze")
+    if output_format in ["3", "json"] and hash_comment != "analyze":
+        print(
+            f'hash_comment={hash_comment} may break output json if input contains a line starts with "#".\n'
+            'In order to keep the json in proper format, please use hash_comment=analyze or remove the lines start with "#" from input.',
+            file=sys.stderr
+        )
 
     if parallel_level <= 0:
         level = max(1, cpu_count() + parallel_level)
