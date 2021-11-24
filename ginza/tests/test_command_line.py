@@ -7,6 +7,7 @@ from typing import Iterable, List
 
 import pytest
 
+import torch
 import ginza.command_line as cli
 
 TEST_TEXT = "#コメント\n今日はかつ丼を食べた。\n明日は東京で蕎麦を食べる。明後日は酒が飲みたい。"
@@ -223,7 +224,7 @@ class TestCLIGinza:
 
     def test_require_gpu(self, input_file):
         p = run_cmd(["ginza", "-g", input_file])
-        gpu_available = int(os.environ.get("CUDA_VISIBLE_DEVICES", -1)) > 0
+        gpu_available = torch.cuda.is_available()
         assert (p.returncode == 0) is gpu_available
 
     def test_do_not_use_normalized_form(self, input_file):
