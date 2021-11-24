@@ -109,8 +109,9 @@ def force_using_normalized_form_as_lemma(force: bool):
 
 
 def set_split_mode(nlp: Language, mode: str):
-    splitter = nlp.get_pipe("compound_splitter")
-    splitter.split_mode = mode
+    if nlp.has_pipe("compound_splitter"):
+        splitter = nlp.get_pipe("compound_splitter")
+        splitter.split_mode = mode
 
 
 # token field getters
