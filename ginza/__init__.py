@@ -219,7 +219,7 @@ def ent_label_ontonotes(token: Token) -> str:
 
 # token field getters for Doc.user_data
 
-def reading_form(token: Token, use_orth_if_none=True) -> str:
+def reading_form(token: Token, use_orth_if_none: bool) -> str:
     reading = token.morph.get("Reading")
     if reading:
         return reading[0]
@@ -454,7 +454,7 @@ def _sub_tokens(
                 token.tag_,
                 inflection(token),
                 token.lemma_,
-                reading_form(token),
+                reading_form(token, True),
                 None,
             )
         ]

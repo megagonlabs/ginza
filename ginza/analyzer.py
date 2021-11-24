@@ -5,6 +5,7 @@ from typing import Iterable, Optional
 import spacy
 from spacy.tokens import Doc, Span
 from spacy.language import Language
+from spacy.lang.ja import Japanese
 
 from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes, bunsetu_bi_label, bunsetu_position_type
 from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
@@ -91,6 +92,7 @@ class Analyzer:
                 set_split_mode(nlp, self.split_mode)
 
         self.nlp = nlp
+        self.use_orth_if_reading_is_none = isinstance(self.nlp, Japanese)
 
     def analyze_batch(self, lines: Iterable[str]) -> str:
         self.set_nlp()
@@ -115,7 +117,7 @@ class Analyzer:
             sep = ",\n"
         else:
             sep = ""
-        return sep.join(format_doc(doc, self.output_format, self.use_normalized_form) if isinstance(doc, Doc) else doc for doc in docs)
+        return sep.join(format_doc(doc, self.output_format, self.use_normalized_form, self.use_orth_if_reading_is_none) if isinstance(doc, Doc) else doc for doc in docs)
 
     def analyze_line(self, input_line: str) -> str:
         line = input_line.rstrip("\n")
@@ -130,14 +132,14 @@ class Analyzer:
             doc = self.nlp.tokenize(line)
         else:
             doc = self.nlp(line)
-        return format_doc(doc, self.output_format, self.use_normalized_form)
+        return format_doc(doc, self.output_format, self.use_normalized_form, self.use_orth_if_reading_is_none)
 
 
 def format_doc(
-   doc: Doc, output_format: str, use_normalized_form: bool,
+   doc: Doc, output_format: str, use_normalized_form: bool, use_orth_if_reading_is_none: bool,
 ) -> str:
     if output_format in ["0", "conllu"]:
-        return "".join(format_conllu(sent, use_normalized_form) for sent in doc.sents)
+        return "".join(format_conllu(sent, use_normalized_form, use_orth_if_reading_is_none) for sent in doc.sents)
     elif output_format in ["1", "cabocha"]:
         return "".join(format_cabocha(sent, use_normalized_form) for sent in doc.sents)
     elif output_format in ["2", "mecab"]:
@@ -190,7 +192,7 @@ def format_json(sent: Span) -> str:
  }}"""
 
 
-def format_conllu(sent: Span, use_normalized_form, print_origin=True) -> str:
+def format_conllu(sent: Span, use_normalized_form, use_orth_if_reading_is_none, print_origin=True) -> str:
     np_labels = [""] * len(sent)
     use_bunsetu = bunsetu_available(sent)
     if use_bunsetu:
@@ -200,18 +202,18 @@ def format_conllu(sent: Span, use_normalized_form, print_origin=True) -> str:
             if phrase.label_ == "NP":
                 for idx in range(phrase.start - sent.start, phrase.end - sent.start):
                     np_labels[idx] = "NP_B" if idx == phrase.start else "NP_I"
-    token_lines = "".join(conllu_token_line(sent, token, np_label, use_bunsetu, use_normalized_form) for token, np_label in zip(sent, np_labels))
+    token_lines = "".join(conllu_token_line(sent, token, np_label, use_bunsetu, use_normalized_form, use_orth_if_reading_is_none) for token, np_label in zip(sent, np_labels))
     if print_origin:
         return f"# text = {sent.text}\n{token_lines}\n"
     else:
         return f"{token_lines}\n"
 
 
-def conllu_token_line(sent, token, np_label, use_bunsetu, use_normalized_form) -> str:
+def conllu_token_line(sent, token, np_label, use_bunsetu, use_normalized_form, use_orth_if_reading_is_none) -> str:
     bunsetu_bi = bunsetu_bi_label(token) if use_bunsetu else None
     position_type = bunsetu_position_type(token) if use_bunsetu else None
     inf = inflection(token)
-    reading = reading_form(token)
+    reading = reading_form(token, use_orth_if_reading_is_none)
     ne = ent_label_ontonotes(token)
     ene = ent_label_ene(token)
     misc = "|".join(
@@ -299,7 +301,7 @@ def cabocha_token_line(token, use_normalized_form) -> str:
     part_of_speech = token.tag_.replace("-", ",")
     inf = inflection(token)
     part_of_speech += ",*" * (3 - part_of_speech.count(",")) + "," + (inf if inf else "*,*")
-    reading = reading_form(token)
+    reading = reading_form(token, True)
     return "{}\t{},{},{},{}\t{}\n".format(
         token.orth_,
         part_of_speech,
