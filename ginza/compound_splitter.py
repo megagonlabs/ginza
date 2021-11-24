@@ -68,6 +68,9 @@ class CompoundSplitter:
         else:
             raise Exception("invalid split_mode: " + self._split_mode)
 
+        if "sub_tokens" not in doc.user_data:
+            return doc
+
         sub_tokens_list = [
             sub_tokens[sub_tokens_index] if sub_tokens else None for sub_tokens in doc.user_data["sub_tokens"]
         ]
