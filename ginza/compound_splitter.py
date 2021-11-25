@@ -56,6 +56,8 @@ class CompoundSplitter:
         self.split_mode = split_mode
 
     def __call__(self, doc: Doc):
+        if "sub_tokens" not in doc.user_data:
+            return doc
         if self._split_mode is None:
             return doc
         elif self._split_mode == "C":

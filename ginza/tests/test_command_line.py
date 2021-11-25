@@ -7,6 +7,7 @@ from typing import Iterable, List
 
 import pytest
 
+import torch
 import ginza.command_line as cli
 
 TEST_TEXT = "#コメント\n今日はかつ丼を食べた。\n明日は東京で蕎麦を食べる。明後日は酒が飲みたい。"
@@ -217,14 +218,13 @@ class TestCLIGinza:
         p = run_cmd(["ginza", "-c", hash_comment, "-f", "json", input_file], stderr=sp.PIPE)
         assert p.returncode == 0
         msg = (
-            f'hash_comment={hash_comment} may break output json if input contains a line starts with "#".\n'
-            'In order to keep the json in proper format, please use hash_comment=analyze or remove the lines start with "#" from input.'
+            f'hash_comment="{hash_comment}" not permitted for JSON output. Forced to use hash_comment="analyze"'
         )
         assert msg in p.stderr
 
     def test_require_gpu(self, input_file):
         p = run_cmd(["ginza", "-g", input_file])
-        gpu_available = int(os.environ.get("CUDA_VISIBLE_DEVICES", -1)) > 0
+        gpu_available = torch.cuda.is_available()
         assert (p.returncode == 0) is gpu_available
 
     def test_do_not_use_normalized_form(self, input_file):
