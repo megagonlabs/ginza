@@ -299,7 +299,7 @@ class TestRun:
             output_path=out_single,
             output_format=output_format,
             files=[long_input_file],
-            model_name_or_path="ja_ginza",
+            ensure_model="ja_ginza",
         )
 
         out_parallel = tmpdir / "parallel_output.txt"
@@ -311,7 +311,7 @@ class TestRun:
                 output_path=out_parallel,
                 output_format=output_format,
                 files=[long_input_file],
-                model_name_or_path="ja_ginza",
+                ensure_model="ja_ginza",
             )
         except:
             pytest.fail("parallel run failed")
