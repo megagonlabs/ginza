@@ -134,7 +134,7 @@ class TestCLIGinza:
             ("ja-ginza", True),
             ("ja-ginza-electra", True),
             ("ja_ginza_electra", True),
-            ("ja-ginza_electra", False),
+            ("ja-ginza_electra", True),
             ("not-exist-model", False),
         ],
     )
