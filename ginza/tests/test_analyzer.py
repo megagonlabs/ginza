@@ -79,15 +79,15 @@ def _tokens_json(result: str):
     return ret
 
 class TestAnalyzer:
-    def test_model_path(self, mocker, analyzer):
+    def test_model_name_or_path_ja_ginza(self, mocker, analyzer):
         spacy_load_mock = mocker.patch("spacy.load")
-        analyzer.model_path = "ja_ginza"
+        analyzer.model_name_or_path = "ja_ginza"
         analyzer.set_nlp()
         spacy_load_mock.assert_called_once_with("ja_ginza")
 
-    def test_ensure_model(self, mocker, analyzer):
+    def test_model_name_or_path_ja_ginza_electra(self, mocker, analyzer):
         spacy_load_mock = mocker.patch("spacy.load")
-        analyzer.ensure_model = "ja_ginza_electra"
+        analyzer.model_name_or_path = "ja_ginza_electra"
         analyzer.set_nlp()
         spacy_load_mock.assert_called_once_with("ja_ginza_electra")
 
