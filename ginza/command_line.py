@@ -2,6 +2,7 @@
 from multiprocessing import Process, Queue, Event, cpu_count
 from pathlib import Path
 import queue
+import re
 import sys
 import traceback
 from typing import Generator, Iterable, Optional, List
@@ -10,6 +11,8 @@ import plac
 from .analyzer import Analyzer
 
 MINI_BATCH_SIZE = 100
+GINZA_MODEL_PATTERN = re.compile(r"^(ja_ginza|ja_ginza_electra)$")
+SPACY_MODEL_PATTERN = re.compile(r"^[a-z]{2}[-_].+[-_].+(sm|md|lg|trf)$")
 
 
 class _OutputWrapper:
@@ -61,7 +64,6 @@ def run(
     parallel_level: int = 1,
     files: List[str] = None,
 ):
-    assert model_path is None or ensure_model is None
     if output_format in ["3", "json"] and hash_comment != "analyze":
         print(
             f'hash_comment="{hash_comment}" not permitted for JSON output. Forced to use hash_comment="analyze".',
@@ -86,9 +88,31 @@ def run(
             print("GPU enabled", file=sys.stderr)
         parallel_level = level
 
+    assert model_path is None or ensure_model is None
+    if ensure_model:
+        ensure_model = ensure_model.replace("-", "_")
+        try:
+            from importlib import import_module
+            import_module(ensure_model)
+        except ModuleNotFoundError:
+            if GINZA_MODEL_PATTERN.match(ensure_model):
+                print("Installing", ensure_model, file=sys.stderr)
+                import pip
+                pip.main(["install", ensure_model])
+                print("Successfully installed", ensure_model, file=sys.stderr)
+            elif SPACY_MODEL_PATTERN.match(ensure_model):
+                print("Installing", ensure_model, file=sys.stderr)
+                from spacy.cli.download import download
+                download(ensure_model)
+                print("Successfully installed", ensure_model, file=sys.stderr)
+            else:
+                raise OSError("E050", f'You need to install "{ensure_model}" before executing ginza.')
+        model_name_or_path = ensure_model
+    else:
+        model_name_or_path = model_path
+
     analyzer = Analyzer(
-        model_path,
-        ensure_model,
+        model_name_or_path,
         split_mode,
         hash_comment,
         output_format,
@@ -288,7 +312,7 @@ def main_ginzame():
 
 @plac.annotations(
     model_path=("model directory path", "option", "b", str),
-    ensure_model=("select model either ja_ginza or ja_ginza_electra", "option", "m", str, ["ja_ginza", "ja-ginza", "ja_ginza_electra", "ja-ginza-electra", None]),
+    ensure_model=("select model package of ginza or spacy", "option", "m", str),
     split_mode=("split mode", "option", "s", str, ["A", "B", "C"]),
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
