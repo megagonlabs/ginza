@@ -64,6 +64,30 @@ def run(
     parallel_level: int = 1,
     files: List[str] = None,
 ):
+    if output_format in ["3", "json"] and hash_comment != "analyze":
+        print(
+            f'hash_comment="{hash_comment}" not permitted for JSON output. Forced to use hash_comment="analyze".',
+            file=sys.stderr
+        )
+
+    if parallel_level <= 0:
+        level = max(1, cpu_count() + parallel_level)
+        if output_format in [2, "mecab"]:
+            if require_gpu:
+                print("GPU not used for mecab mode", file=sys.stderr)
+                require_gpu = False
+        elif parallel_level <= 0:
+            if require_gpu:
+                if level < 4:
+                    print("GPU enabled: parallel_level' set to {level}", end="", file=sys.stderr)
+                else:
+                    print("GPU enabled: parallel_level' set to {level} but seems it's too much", end="", file=sys.stderr)
+            else:
+                print(f"'parallel_level' set to {level}", file=sys.stderr)
+        elif require_gpu:
+            print("GPU enabled", file=sys.stderr)
+        parallel_level = level
+
     assert model_path is None or ensure_model is None
     if ensure_model:
         ensure_model = ensure_model.replace("-", "_")
