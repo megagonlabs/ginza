@@ -66,7 +66,7 @@ def run(
 ):
     assert model_path is None or ensure_model is None
     if ensure_model:
-        model_name_or_path = ensure_model.replace("-", "_")
+        ensure_model = ensure_model.replace("-", "_")
         try:
             from importlib import import_module
             import_module(ensure_model)
