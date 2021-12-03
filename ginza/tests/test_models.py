@@ -25,12 +25,12 @@ TAG_TESTS = [
 ]
 
 POS_TESTS_JA_GINZA = [
-    ("銀座でランチをご一緒しましょう。", ["PROPN", "ADP", "NOUN", "ADP", "NOUN", "NOUN", "AUX", "AUX", "PUNCT"]),
+    ("銀座でランチをご一緒しましょう。", ["PROPN", "ADP", "NOUN", "ADP", "NOUN", "VERB", "AUX", "AUX", "PUNCT"]),
     ("すもももももももものうち", ["NOUN", "ADP", "NOUN", "ADP", "NOUN", "ADP", "NOUN"]),
 ]
 
 POS_TESTS_JA_GINZA_ELECTRA = [
-    ("銀座でランチをご一緒しましょう。", ["PROPN", "ADP", "NOUN", "ADP", "NOUN", "VERB", "AUX", "AUX", "PUNCT"]),
+    ("銀座でランチをご一緒しましょう。", ["PROPN", "ADP", "PROPN", "ADP", "NOUN", "VERB", "AUX", "AUX", "PUNCT"]),
     ("すもももももももものうち", ["NOUN", "ADP", "NOUN", "ADP", "NOUN", "ADP", "NOUN"]),
 ]
 
