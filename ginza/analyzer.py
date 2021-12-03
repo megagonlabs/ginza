@@ -38,8 +38,7 @@ def try_sudachi_import(split_mode: str):
 class Analyzer:
     def __init__(
         self,
-        model_path: str,
-        ensure_model: str,
+        model_name_or_path: str,
         split_mode: str,
         hash_comment: str,
         output_format: str,
@@ -47,8 +46,7 @@ class Analyzer:
         disable_sentencizer: bool,
         use_normalized_form: bool,
     ) -> None:
-        self.model_path = model_path
-        self.ensure_model = ensure_model
+        self.model_name_or_path = model_name_or_path
         self.split_mode = split_mode
         self.hash_comment = hash_comment
         self.output_format = output_format
@@ -68,10 +66,8 @@ class Analyzer:
             nlp = try_sudachi_import(self.split_mode)
         else:
             # Work-around for pickle error. Need to share model data.
-            if self.model_path:
-                nlp = spacy.load(self.model_path)
-            elif self.ensure_model:
-                nlp = spacy.load(self.ensure_model.replace("-", "_"))
+            if self.model_name_or_path:
+                nlp = spacy.load(self.model_name_or_path)
             else:
                 try:
                     nlp = spacy.load("ja_ginza_electra")
@@ -79,11 +75,7 @@ class Analyzer:
                     try:
                         nlp = spacy.load("ja_ginza")
                     except IOError as e:
-                        print(
-                            'Could not find the model. You need to install "ja-ginza-electra" or "ja-ginza" by executing pip like `pip install ja-ginza-electra`.',
-                            file=sys.stderr,
-                        )
-                        raise e
+                        raise OSError("E050", 'You need to install "ja-ginza" or "ja-ginza-electra" by executing `pip install ja-ginza`.')
 
             if self.disable_sentencizer:
                 nlp.add_pipe("disable_sentencizer", before="parser")

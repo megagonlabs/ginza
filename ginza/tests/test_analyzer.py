@@ -30,8 +30,7 @@ BATCH_TESTS = [
 @pytest.fixture
 def analyzer() -> Analyzer:
     default_params = dict(
-        model_path=None,
-        ensure_model=None,
+        model_name_or_path=None,
         split_mode=None,
         hash_comment="print",
         output_format="conllu",
