@@ -49,13 +49,13 @@ EOS
     `spacy.language.Language` 形式の学習済みモデルが保存されたディレクトリを指定します。
     `--ensure-model` オプションと同時に指定することはできません。
 - `--ensure-model <string>`, `-m <string>`
-    ginza が公開している学習済みモデル名を指定します。`--model-path` オプションと同時に指定することはできません。次の値のいずれかを指定できます。
-        - `ja_ginza`
-        - `ja_ginza_electra`
+    ginza および spaCy が公開している学習済みモデル名を指定します。`--model-path` オプションと同時に指定することはできません。次の値のいずれかを指定できます。
+        - `ja_ginza`, `ja_ginza_electra`
+        - [spaCy Models & Languages](https://spacy.io/usage/models)で公開されている日本語以外を含む全ての言語のモデル (例: en_core_web_md)
     使用するモデルに応じて、事前に `pip install ja-ginza-electra` のようにパッケージをダウンロードする必要があります。
     `--model-path`, `--ensure-model` のどちらも指定されない場合には `ja_ginza_electra`、`ja_ginza` の順の優先度でロード可能なモデルを利用します。
 - `--split-mode <string>`, `-s <string>`
-     複合名詞の分割モードを指定します。モードは [sudachi](https://github.com/WorksApplications/Sudachi#the-modes-of-splitting) に準拠し、`A`、`B`、`C`のいずれかを指定できます。デフォルト値は `C` です。
+     複合名詞の分割モードを指定します。モードは [sudachi](https://github.com/WorksApplications/Sudachi#the-modes-of-splitting) に準拠し、`A`、`B`、`C`のいずれかを指定できます。`ginza`コマンドのデフォルト値は `C`、`ginzame`コマンドのデフォルト値はMeCab UniDicに近い `A` です。
      `A`が分割が最も短く複合名詞が UniDic 短単位まで分割され、 `C` では固有名詞が抽出されます。`B` は二つの中間の単位に分割されます。
 - `--hash-comment <string>`, `-c <string>`
     行頭が `#` から始まる行を解析対象とするかのモードを指定します。次の値のいずれかを指定できます。
@@ -64,7 +64,7 @@ EOS
         - `skip`
             解析対象とせず、解析結果にも出力しません。
         - `analyze`
-            `#` から始まる行についても解析を行い、結果を出力します。
+            `#` から始まる行についても解析を行い、結果を出力します。ただし`-f json`が指定されている場合は `-c`の指定に依らず常に`analyze`が適用されます。
     デフォルト値は `print` です。
 - `--output-path <string>`, `-o <string>`
     解析結果を出力するファイルのパスを指定します。指定しない場合には標準出力に解析結果が出力されます。
@@ -78,7 +78,7 @@ EOS
 - `--require-gpu`, `-g`
     gpu を有効にするブールスイッチ。gpu_id=0 の gpu が利用されます。
 - `--use-normalized-form`, `-n`
-    [sudachi](https://github.com/WorksApplications/Sudachi#normalized-form) による lemma の標準化を有効にするブールスイッチ。
+    `-f conllu`のlemmaフィールドに [sudachi](https://github.com/WorksApplications/Sudachi#normalized-form) を使用するためのブールスイッチ。
 - `--disable-sentencizer`, `-d`
     `ja_ginza`、 `ja_ginza_electra` モデル利用時に[disable_sentencizer](https://github.com/megagonlabs/ginza/blob/develop/ginza/disable_sentencizer.py)を有効化するブールスイッチ。
 - `--parallel <int>`, `-p <int>`
@@ -153,4 +153,4 @@ EOS
 
 `ginza -f mecab`とそのエイリアスである`ginzame`以外で`-p NUM_PROCESS`オプションを使用する場合は、
 実行環境の空きメモリ容量が十分あることを事前に確認してください。
-マルチプロセス実行では1プロセスあたり約130MBのメモリが必要です。(今後のリリースで改善予定)
+マルチプロセス実行では1プロセスあたり`ja_ginza`で数百MB、`ja_ginza_electra`で数GBのメモリが必要です。

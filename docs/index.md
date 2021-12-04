@@ -8,23 +8,28 @@
 
 ## What's new!
 
-- `spaCy v3`に対応した`GiNZA v5`をリリースしました。
-- transformersモデルを採用して飛躍的に精度を向上した解析モデルパッケージ`ja-ginza-electra`をリリースしました。
-- 従来型の解析モデルパッケージ`ja-ginza`のpiplelineに`morphologizer`を追加し、UD品詞解析精度を向上しました。
-- `Token.lemma_`にSudachiPyのnormalized_formを強制的にセットするオプション(`ginza -n`)を追加しました。
+- `spaCy v3.2`と`Sudachi.rs`に対応した`GiNZA v5.1`をリリース
+  - バッチ解析処理をGPU環境で50〜60%・CPU環境で10〜40%高速化
+  - ginzaコマンドの並列実行オプション(`ginza -p {n_process}`および`ginzame`)の処理効率を向上
+- ginzaコマンドで日本語以外を含む全てのspaCyモデルが利用可能に
+  - `ginza -m en_core_web_md` の形でモデル名を指定することで[CoNLL-U](https://universaldependencies.org/format.html#syntactic-annotation)出力ツールとして利用可能
+- [ginzaコマンドの解説ページ](https://megagonlabs.github.io/ginza/command_line_tool.html)の記述を拡充
 
 ***GiNZAをアップグレードする際は下記の互換性情報を確認してください。***
 
-## GiNZA v5.0 互換性情報
-- v4以前の`ginza`および`ja-ginza`パケージはGiNZA v5で使用できません（旧バージョン向けパッケージは事前にアンインストールが必要です）
-  - `pip uninstall ginza ja-ginza`
-- transformersモデルの追加に伴いGiNZA v5インストール時は`ginza`パッケージとともに解析モデルパッケージを明示的に指定する必要があります
+## GiNZA v5.1 互換性情報
+- v5.0以前の`ja_ginza`および`ja_ginza_electra`パケージはGiNZA v5.1で使用できません（旧バージョン向けパッケージは事前にアンインストールが必要です）
+  - `pip uninstall ginza ; pip uninstall ja_ginza ; pip uninstall ja_ginza_electra`
+- transformersモデルの追加に伴いGiNZA v5.1インストール時は`ginza`パッケージとともに解析モデルパッケージを明示的に指定する必要があります
   - 解析精度重視モデル (メモリ容量16GB以上を推奨)
-    - `pip install -U ginza ja-ginza-electra`
+    - `pip install -U ginza ja_ginza_electra`
   - 実行速度重視モデル
-    - `pip install -U ginza ja-ginza`
-- `CompoundSplitter`および`BunsetuRecognizer`の名称を`compound_splitter`および`bunsetu_recognizer`に変更しました
-- 併せてspaCy v3の[Backwards Incompatibilities](https://spacy.io/usage/v3#incompat)も確認してください
+    - `pip install -U ginza ja_ginza`
+- トークンの活用/読み/正規形の保存先がTokenクラスのフィールドに変更されました。
+  - `doc.user_data[“reading_forms”][token.i]` -> `token.morph.get(“Reading”)`
+  - `doc.user_data[“inflections”][token.i]` -> `token.morph.get(“Inflection”)`
+  - `force_using_normalized_form_as_lemma(True)` -> `token.norm_`
+- 併せて[GiNZA v5.0.0 重要な変更](#ginza-500)についても確認してください
 
 ## GiNZA v5 新機能
 
@@ -62,17 +67,27 @@ GiNZAをインストールする前に予めPython実行環境を構築してく
 
 ※Transformersモデルの実行には16GB以上のメモリ容量が必要です。メモリ容量が不足する場合は後述の従来型モデルをお試しください。
 
-旧バージョンのGiNZAをインストールしている場合は次のコマンドでアンインストールを実行します。
+旧バージョンのGiNZAをインストールしている場合は次のコマンドでアンインストールします。
 ```console
-$ pip uninstall ginza ja-ginza
+$ pip uninstall ginza ja_ginza_electra
+```
+
+旧バージョンの`ja_ginza`をインストールしている場合は次のコマンドでアンインストールします。
+```console
+$ pip uninstall ja_ginza
+```
+
+旧バージョンの`j_ginza_electra`をインストールしている場合は次のコマンドでアンインストールします。
+```console
+$ pip uninstall ja_ginza_electra
 ```
 
 次のコマンドを実行して最新のGiNZAおよびTransformersモデルをインストールします。
 ```console
-$ pip install -U ginza ja-ginza-electra
+$ pip install -U ginza ja_ginza_electra
 ```
 
-上記コマンドでインストールされる`ja-ginza-electra`パッケージには大容量モデルファイルは含まれていません。大容量モデルファイルは初回実行時に自動的にダウンロードされて、以降の実行時にはローカルにキャッシュされたファイルが使用されます。
+上記コマンドでインストールされる`ja_ginza_electra`パッケージには大容量モデルファイルは含まれていません。大容量モデルファイルは初回実行時に自動的にダウンロードされて、以降の実行時にはローカルにキャッシュされたファイルが使用されます。
 
 大容量モデルファイルを含めたインストールを行うには、次のようにGitHubのリリースアーカイブを指定します。
 ```console
@@ -86,16 +101,18 @@ CUDA 11.0を使用する場合:
 pip install -U "spacy[cuda110]"
 ```
 
+あわせてpytorchもCUDAと整合したバージョンをインストールする必要があります。
+
 #### 2. GiNZA + 従来型モデル
 
-旧バージョンのGiNZAをインストールしている場合は次のコマンドでアンインストールを実行します。
+旧バージョンのGiNZAおよび`ja_ginza`をインストールしている場合は次のコマンドでアンインストールを実行します。
 ```console
-$ pip uninstall ginza ja-ginza
+$ pip uninstall ginza _ginza
 ```
 
 次のコマンドを実行して最新のGiNZAと従来型モデルをインストールします。
 ```console
-$ pip install -U ginza ja-ginza
+$ pip install -U ginza ja_ginza
 ```
 
 ### ginzaコマンドによる解析処理の実行
@@ -121,6 +138,11 @@ $ ginza
 # ginza -m ja_ginza
 ```
 
+また、spaCyが提供している[様々な言語の解析モデル](https://spacy.io/usage/models)の名称を`-m`オプションに指定することで、そのモデルのダウンロードと解析をまとめて実行することができます。
+```console
+# ginza -m en_core_web_trf
+```
+
 ### Pythonコードによる解析処理の実行
 
 次のコードは、Transformersモデルによる依存構造解析結果を文単位で出力します。
@@ -131,7 +153,18 @@ nlp = spacy.load('ja_ginza_electra')
 doc = nlp('銀座でランチをご一緒しましょう。')
 for sent in doc.sents:
     for token in sent:
-        print(token.i, token.orth_, token.lemma_, token.pos_, token.tag_, token.dep_, token.head.i)
+        print(
+          token.i,
+          token.orth_,
+          token.lemma_,
+          token.norm_
+          token.morph.get(“Reading”),
+          token.pos_,
+          token.morph.get(“Inflection”),
+          token.tag_,
+          token.dep_,
+          token.head.i,
+        )
     print('EOS')
 ```
 
@@ -204,7 +237,7 @@ GiNZA v5の固有表現抽出モデルは
 GiNZA v5の固有表現抽出モデルは国立国語研究所とMegagon Labsの共同研究成果です。
 
 ### mC4
-GiNZA v5 Transformersモデル(ja-ginza-electra)は、[mC4](https://huggingface.co/datasets/mc4)から抽出した日本語20億文以上を用いて事前学習した[transformers-ud-japanese-electra-base-discriminator](https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-discriminator)を使用しています。
+GiNZA v5 Transformersモデル(ja_ginza_electra)は、[mC4](https://huggingface.co/datasets/mc4)から抽出した日本語20億文以上を用いて事前学習した[transformers-ud-japanese-electra-base-discriminator](https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-discriminator)を使用しています。
 mC4はODC-BYライセンスの規約に基づいて事前学習データとして利用しています。
 
 Contains information from mC4 which is made available under the ODC Attribution License.
@@ -224,6 +257,24 @@ Contains information from mC4 which is made available under the ODC Attribution 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 
 ### version 5.x
+
+#### ginza-5.1.0
+- 2021-12-07, Euclase
+- 重要な変更
+  - spaCy v3.2 および Sudachi.rs に対応
+  - トークンの活用・読み・正規形の保存先をTokenクラスのフィールドに変更 #208 #209
+    - `doc.user_data[“reading_forms”][token.i]` -> `token.morph.get(“Reading”)`
+    - `doc.user_data[“inflections”][token.i]` -> `token.morph.get(“Inflection”)`
+    - `force_using_normalized_form_as_lemma(True)` -> `token.norm_`
+  - ginzaコマンドで日本語以外を含む全てのspaCyモデルが利用可能に #217
+    - `ginza -m en_core_web_md` の形でモデル名を指定することでモデルのダウンロードと解析をまとめて実行 #219
+  - ginza -f json で -c オプションの指定に関わらず#で始まるはもすべて解析対象とする #215
+- Improvements
+  - バッチ解析処理をGPU環境で50〜60%・CPU環境で10〜40%高速化
+  - ginzaコマンドの並列実行オプション(`ginza -p {n_process}`および`ginzame`)の処理効率を向上 #204
+  - [ginzaコマンドの解説ページ](https://megagonlabs.github.io/ginza/command_line_tool.html)の記述を拡充 #201
+  - add tests #198 #210 #214
+  - add benchmark #207 #220
 
 #### ginza-5.0.3
 - 2021-10-15

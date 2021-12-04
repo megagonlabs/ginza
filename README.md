@@ -7,7 +7,7 @@
 
 An Open Source Japanese NLP Library, based on Universal Dependencies
 
-***Please read the [Important changes](#ginza-500) before you upgrade GiNZA.***
+***Please read the [Important changes](#ginza-510) before you upgrade GiNZA.***
 
 [日本語ページはこちら](https://megagonlabs.github.io/ginza/)
 
@@ -36,14 +36,14 @@ The GiNZA v5 Transformers model (ja_ginza_electra) is trained by using Hugging F
 
 ## Training Datasets
 
-### UD Japanese BCCWJ v2.6
-The parsing model of GiNZA v4 is trained on a part of
-[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) v2.6
+### UD Japanese BCCWJ r2.8
+The parsing model of GiNZA v5 is trained on a part of
+[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) r2.8
 ([Omura and Asahara:2018](https://www.aclweb.org/anthology/W18-6014/)).
 This model is developed by National Institute for Japanese Language and Linguistics, and Megagon Labs.
 
 ### GSK2014-A (2019) BCCWJ edition
-The named entity recognition model of GiNZA v4 is trained on a part of
+The named entity recognition model of GiNZA v5 is trained on a part of
 [GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ edition
 ([Hashimoto, Inui, and Murakami:2008](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf)).
 We use two of the named entity label systems, both
@@ -52,7 +52,7 @@ and extended [OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNote
 This model is developed by National Institute for Japanese Language and Linguistics, and Megagon Labs.
 
 ### mC4
-The GiNZA v5 Transformers model (ja-ginza-electra) is trained by using [transformers-ud-japanese-electra-base-discriminator](https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-discriminator) which is pretrained on more than 200 million Japanese sentences extracted from [mC4](https://huggingface.co/datasets/mc4).
+The GiNZA v5 Transformers model (ja_ginza_electra) is trained by using [transformers-ud-japanese-electra-base-discriminator](https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-discriminator) which is pretrained on more than 200 million Japanese sentences extracted from [mC4](https://huggingface.co/datasets/mc4).
 
 Contains information from mC4 which is made available under the ODC Attribution License.
 ```
@@ -74,19 +74,19 @@ Please also see the Development Environment section below.
 ### Runtime set up
 
 #### 1. Install GiNZA NLP Library with Transformer-based Model
-Uninstall previous version:
+Uninstall previous version of ginza and ja_ginza_electra packages:
 ```console
-$ pip uninstall ginza ja-ginza
+$ pip uninstall ginza ja_ginza_elecrta
 ```
-Then, install the latest version of `ginza` and `ja-ginza-electra`:
+Then, install the latest version of `ginza` and `ja_ginza_electra`:
 ```console
-$ pip install -U ginza ja-ginza-electra
+$ pip install -U ginza ja_ginza_electra
 ```
 
-The package of `ja-ginza-electra` does not include `pytorch_model.bin` due to PyPI's archive size restrictions.
+The package of `ja_ginza_electra` does not include `pytorch_model.bin` due to PyPI's archive size restrictions.
 This large model file will be automatically downloaded at the first run time, and the locally cached file will be used for subsequent runs.
 
-If you need to install `ja-ginza-electra` along with `pytorch_model.bin` at the install time, you can specify direct link for GitHub release archive as follows:
+If you need to install `ja_ginza_electra` along with `pytorch_model.bin` at the install time, you can specify direct link for GitHub release archive as follows:
 ```console
 $ pip install -U ginza https://github.com/megagonlabs/ginza/releases/download/latest/ja_ginza_electra-latest-with-model.tar.gz
 ```
@@ -96,14 +96,16 @@ If you hope to accelarate the transformers-based models by using GPUs with CUDA 
 pip install -U "spacy[cuda110]"
 ```
 
+And you need to install a version of pytorch that is consistent with the CUDA version.
+
 #### 2. Install GiNZA NLP Library with Standard Model
 Uninstall previous version:
 ```console
-$ pip uninstall ginza ja-ginza
+$ pip uninstall ginza ja_ginza
 ```
-Then, install the latest version of `ginza` and `ja-ginza`:
+Then, install the latest version of `ginza` and `ja_ginza`:
 ```console
-$ pip install -U ginza ja-ginza
+$ pip install -U ginza ja_ginza
 ```
 
 ### Execute ginza command
@@ -206,7 +208,18 @@ nlp = spacy.load('ja_ginza_electra')
 doc = nlp('銀座でランチをご一緒しましょう。')
 for sent in doc.sents:
     for token in sent:
-        print(token.i, token.orth_, token.lemma_, token.pos_, token.tag_, token.dep_, token.head.i)
+        print(
+          token.i,
+          token.orth_,
+          token.lemma_,
+          token.norm_
+          token.morph.get(“Reading”),
+          token.pos_,
+          token.morph.get(“Inflection”),
+          token.tag_,
+          token.dep_,
+          token.head.i,
+        )
     print('EOS')
 ```
 
@@ -220,6 +233,24 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 ## Releases
 
 ### version 5.x
+
+#### ginza-5.1.0
+- 2021-12-07, Euclase
+- Impotant changes
+  - Upgrade: spaCy v3.2 and SudachiPy v0.6
+  - Change token information fields #208 #209
+    - `doc.user_data[“reading_forms”][token.i]` -> `token.morph.get(“Reading”)`
+    - `doc.user_data[“inflections”][token.i]` -> `token.morph.get(“Inflection”)`
+    - `force_using_normalized_form_as_lemma(True)` -> `token.norm_`
+  - All spaCy models, including non-Japanese, are now available with the ginza command #217
+    - Download and analyze the model at once by specifying the model name in the following form #219
+    - `ginza -m en_core_web_md`
+  - `ginza -f json` option always analyze the line which starts with `#` regardless the option value of `-c`. #215
+- Improvements
+  - Batch analysis processing speeds up by 50-60% in GPU environment and 10-40% in CPU environment
+  - Improved processing efficiency of parallel execution options (`ginza -p {n_process}` and `ginzame`) of ginza command #204
+  - add tests #198 #210 #214
+  - add benchmark #207 #220
 
 #### ginza-5.0.3
 - 2021-10-15
