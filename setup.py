@@ -19,7 +19,7 @@ setup(
     install_requires=[
         "spacy>=3.2.0,<3.3.0",
         "plac>=1.3.3",
-        "SudachiPy>=0.6.0,<0.7.0",
+        "SudachiPy>=0.5.4,<0.7.0",
         "SudachiDict-core>=20210802",
     ],
     setup_requires=["pytest-runner"],
