@@ -1,7 +1,7 @@
 {
   "lang":"ja",
   "name":"ginza_electra",
-  "version":"5.0.0",
+  "version":"5.1.0",
   "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + transformers-ud-japanese-electra--base. Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
   "author":"Megagon Labs Tokyo.",
   "email":"ginza@megagon.ai",
@@ -64,10 +64,10 @@
     "attribute_ruler"
   ],
   "requirements":[
-    "sudachipy>=0.5.2,<0.6.0",
-    "sudachidict_core>=20210608",
+    "sudachipy>=0.5.4,<0.7.0",
+    "sudachidict_core>=20210802",
     "sudachitra>=0.1.5,<0.2.0",
-    "ginza-transformers>=0.3.1,<1.0.0",
-    "ginza>=5.0.0,<5.1.0"
+    "ginza-transformers>=0.4.0,<0.5.0",
+    "ginza>=5.1.0,<5.2.0"
   ]
 }
