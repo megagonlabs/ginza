@@ -58,7 +58,7 @@ def run(
     hash_comment: str = "print",
     output_path: Optional[Path] = None,
     output_format: str = "0",
-    require_gpu: bool = False,
+    require_gpu: int = -1,
     disable_sentencizer: bool = False,
     use_normalized_form: bool = False,
     parallel_level: int = 1,
@@ -70,22 +70,24 @@ def run(
             file=sys.stderr
         )
 
+    assert parallel_level == 1 or require_gpu == -1, "require_gpu not allowed for multi-processing. https://github.com/explosion/spaCy/issues/5507"
+
     if parallel_level <= 0:
         level = max(1, cpu_count() + parallel_level)
         if output_format in [2, "mecab"]:
-            if require_gpu:
+            if require_gpu >= 0:
                 print("GPU not used for mecab mode", file=sys.stderr)
                 require_gpu = False
         elif parallel_level <= 0:
-            if require_gpu:
+            if require_gpu >= 0:
                 if level < 4:
-                    print("GPU enabled: parallel_level' set to {level}", end="", file=sys.stderr)
+                    print(f"GPU #{require_gpu} enabled: parallel_level' set to {level}", end="", file=sys.stderr)
                 else:
-                    print("GPU enabled: parallel_level' set to {level} but seems it's too much", end="", file=sys.stderr)
+                    print(f"GPU #{require_gpu} enabled: parallel_level' set to {level} but seems it's too much", end="", file=sys.stderr)
             else:
                 print(f"'parallel_level' set to {level}", file=sys.stderr)
         elif require_gpu:
-            print("GPU enabled", file=sys.stderr)
+            print(f"GPU #{require_gpu} enabled", file=sys.stderr)
         parallel_level = level
 
     assert model_path is None or ensure_model is None
@@ -317,7 +319,7 @@ def main_ginzame():
     hash_comment=("hash comment", "option", "c", str, ["print", "skip", "analyze"]),
     output_path=("output path", "option", "o", Path),
     output_format=("output format", "option", "f", str, ["0", "conllu", "1", "cabocha", "2", "mecab", "3", "json"]),
-    require_gpu=("enable require_gpu", "flag", "g"),
+    require_gpu=("enable require_gpu", "option", "g", int),
     use_normalized_form=("Use Token.norm_ instead of Token.lemma_", "flag", "n"),
     disable_sentencizer=("disable spaCy's sentence separator", "flag", "d"),
     parallel=("parallel level (default=1, all_cpus=0)", "option", "p", int),
@@ -330,7 +332,7 @@ def run_ginza(
     hash_comment="print",
     output_path=None,
     output_format="conllu",
-    require_gpu=False,
+    require_gpu=-1,
     use_normalized_form=False,
     disable_sentencizer=False,
     parallel=1,

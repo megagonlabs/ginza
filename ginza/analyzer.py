@@ -2,6 +2,8 @@
 import sys
 from typing import Iterable, Optional
 
+import thinc
+
 import spacy
 from spacy.tokens import Doc, Span
 from spacy.language import Language
@@ -42,7 +44,7 @@ class Analyzer:
         split_mode: str,
         hash_comment: str,
         output_format: str,
-        require_gpu: bool,
+        require_gpu: int,
         disable_sentencizer: bool,
         use_normalized_form: bool,
     ) -> None:
@@ -59,8 +61,8 @@ class Analyzer:
         if self.nlp:
             return
 
-        if self.require_gpu:
-            spacy.require_gpu()
+        if self.require_gpu >= 0:
+            thinc.api.require_gpu(self.require_gpu)
 
         if self.output_format in ["2", "mecab"]:
             nlp = try_sudachi_import(self.split_mode)

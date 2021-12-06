@@ -75,8 +75,8 @@ EOS
         - `2`, `mecab`
         - `3`, `json`
     デフォルト値は `conllu` です。
-- `--require-gpu`, `-g`
-    gpu を有効にするブールスイッチ。gpu_id=0 の gpu が利用されます。
+- `--require-gpu <int>`, `-g <int>`
+    引数で指定されたgpu_idのGPUを使用して解析を行います。引数に-1を指定(デフォルト)するとCPUを使用します。ただし、[spaCyおよびcupyの制約](https://github.com/explosion/spaCy/issues/5507)から、`--require-gpu`は`--parallel`と同時に指定できません。
 - `--use-normalized-form`, `-n`
     `-f conllu`のlemmaフィールドに [sudachi](https://github.com/WorksApplications/Sudachi#normalized-form) を使用するためのブールスイッチ。
 - `--disable-sentencizer`, `-d`

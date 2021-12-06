@@ -245,6 +245,8 @@ Please read the official documents to compile user dictionaries with `sudachipy`
   - All spaCy models, including non-Japanese, are now available with the ginza command #217
     - Download and analyze the model at once by specifying the model name in the following form #219
     - `ginza -m en_core_web_md`
+  - Change `ginza --require_gpu`  and `ginza -g` to take a `gpu_id` argument
+    - The default `gpu_id` value is `-1` which uses only CPUs
   - `ginza -f json` option always analyze the line which starts with `#` regardless the option value of `-c`. #215
 - Improvements
   - Batch analysis processing speeds up by 50-60% in GPU environment and 10-40% in CPU environment
