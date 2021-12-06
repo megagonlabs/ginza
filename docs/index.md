@@ -14,10 +14,13 @@
 - ginzaコマンドで日本語以外を含む全てのspaCyモデルが利用可能に
   - `ginza -m en_core_web_md` の形でモデル名を指定することで[CoNLL-U](https://universaldependencies.org/format.html#syntactic-annotation)出力ツールとして利用可能
 - [ginzaコマンドの解説ページ](https://megagonlabs.github.io/ginza/command_line_tool.html)の記述を拡充
+  - `ginza`コマンドで使用するGPUのgpu_idを`ginza -g 1`の形で指定可能に
 
 ***GiNZAをアップグレードする際は下記の互換性情報を確認してください。***
 
 ## GiNZA v5.1 互換性情報
+- `ginza --require_gpu`および`ginza -g`オプションが引数にgpu_idを取るようになりました
+  - gpu_idに-1を指定(デフォルト)するとCPUのみを使用します
 - v5.0以前の`ja_ginza`および`ja_ginza_electra`パケージはGiNZA v5.1で使用できません（旧バージョン向けパッケージは事前にアンインストールが必要です）
   - `pip uninstall ginza ; pip uninstall ja_ginza ; pip uninstall ja_ginza_electra`
 - transformersモデルの追加に伴いGiNZA v5.1インストール時は`ginza`パッケージとともに解析モデルパッケージを明示的に指定する必要があります
@@ -268,6 +271,8 @@ Contains information from mC4 which is made available under the ODC Attribution 
     - `force_using_normalized_form_as_lemma(True)` -> `token.norm_`
   - ginzaコマンドで日本語以外を含む全てのspaCyモデルが利用可能に #217
     - `ginza -m en_core_web_md` の形でモデル名を指定することでモデルのダウンロードと解析をまとめて実行 #219
+  - `ginza --require_gpu`および`ginza -g`オプションがgpu_idを引数を取る形に変更
+    - -1を指定(デフォルト)するとCPUのみを使用
   - ginza -f json で -c オプションの指定に関わらず#で始まるはもすべて解析対象とする #215
 - Improvements
   - バッチ解析処理をGPU環境で50〜60%・CPU環境で10〜40%高速化
