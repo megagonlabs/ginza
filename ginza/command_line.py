@@ -300,7 +300,7 @@ def run_ginzame(
         hash_comment=hash_comment,
         output_path=output_path,
         output_format="mecab",
-        require_gpu=False,
+        require_gpu=-1,
         use_normalized_form=True,
         parallel_level=parallel,
         disable_sentencizer=False,
