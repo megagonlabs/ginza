@@ -262,7 +262,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
 ### version 5.x
 
 #### ginza-5.1.0
-- 2021-12-07, Euclase
+- 2021-12-10, Euclase
 - 重要な変更
   - spaCy v3.2 および Sudachi.rs(SudachiPy v0.6.2) に対応
   - トークンの活用・読み・正規形の保存先をTokenクラスのフィールドに変更 #208 #209
