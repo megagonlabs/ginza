@@ -34,7 +34,7 @@ def analyzer() -> Analyzer:
         split_mode=None,
         hash_comment="print",
         output_format="conllu",
-        require_gpu=False,
+        require_gpu=-1,
         disable_sentencizer=False,
         use_normalized_form=False,
     )
@@ -93,7 +93,7 @@ class TestAnalyzer:
 
     def test_require_gpu(self, mocker, analyzer):
         require_gpu_mock = mocker.patch("spacy.require_gpu")
-        analyzer.require_gpu = 1
+        analyzer.require_gpu = 0
         analyzer.set_nlp()
         require_gpu_mock.assert_called_once()
 

@@ -223,7 +223,7 @@ class TestCLIGinza:
         assert msg in p.stderr
 
     def test_require_gpu(self, input_file):
-        p = run_cmd(["ginza", "-g", input_file])
+        p = run_cmd(["ginza", "-g", "0", input_file])
         gpu_available = torch.cuda.is_available()
         assert (p.returncode == 0) is gpu_available
 
