@@ -8,7 +8,7 @@
 
 ## What's new!
 
-- `spaCy v3.2`と`Sudachi.rs`に対応した`GiNZA v5.1`をリリース
+- `spaCy v3.2`と`Sudachi.rs(SudachiPy v0.6.2)`に対応した`GiNZA v5.1`をリリース
   - バッチ解析処理をGPU環境で50〜60%・CPU環境で10〜40%高速化
   - ginzaコマンドの並列実行オプション(`ginza -p {n_process}`および`ginzame`)の処理効率を向上
 - ginzaコマンドで日本語以外を含む全てのspaCyモデルが利用可能に
@@ -264,7 +264,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
 #### ginza-5.1.0
 - 2021-12-07, Euclase
 - 重要な変更
-  - spaCy v3.2 および Sudachi.rs に対応
+  - spaCy v3.2 および Sudachi.rs(SudachiPy v0.6.2) に対応
   - トークンの活用・読み・正規形の保存先をTokenクラスのフィールドに変更 #208 #209
     - `doc.user_data[“reading_forms”][token.i]` -> `token.morph.get(“Reading”)`
     - `doc.user_data[“inflections”][token.i]` -> `token.morph.get(“Inflection”)`
