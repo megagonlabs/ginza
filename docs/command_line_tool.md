@@ -23,8 +23,8 @@ $ ginza
 
 `ginzame`コマンドでオープンソース形態素解析エンジン [MeCab](https://taku910.github.io/mecab/) の`mecab`コマンドに近い形式で解析結果を出力することができます。
 `ginzame`コマンドは形態素解析処理のみをマルチプロセスで高速に実行します。
-このコマンドと`mecab`の出力形式の相違点として、 
-最終フィールド（発音）が常に`*`となることに注意して下さい。
+このコマンドと`mecab`の出力形式の相違点として、最終フィールド（発音）が常に`*`となること、
+ginza の split_mode はデフォルトが `C` なので unidic 相当の単語分割を得るためには `-s A` を指定する必要があることに注意して下さい。
 ```console
 $ ginzame
 銀座でランチをご一緒しましょう。
@@ -40,6 +40,49 @@ $ ginzame
 EOS
 
 ```
+
+## OPTIONS
+`ginza`コマンドでは以下のオプションを指定することができます。
+`ginzame`コマンドでは `--split-mode` `--hash-comment` `output-path` `--use-normalized-form` `--parallel` オプションが利用可能です。
+
+- `--model-path <string>`, `-b <string>`
+    `spacy.language.Language` 形式の学習済みモデルが保存されたディレクトリを指定します。
+    `--ensure-model` オプションと同時に指定することはできません。
+- `--ensure-model <string>`, `-m <string>`
+    ginza および spaCy が公開している学習済みモデル名を指定します。`--model-path` オプションと同時に指定することはできません。次の値のいずれかを指定できます。
+        - `ja_ginza`, `ja_ginza_electra`
+        - [spaCy Models & Languages](https://spacy.io/usage/models)で公開されている日本語以外を含む全ての言語のモデル (例: en_core_web_md)
+    使用するモデルに応じて、事前に `pip install ja-ginza-electra` のようにパッケージをダウンロードする必要があります。
+    `--model-path`, `--ensure-model` のどちらも指定されない場合には `ja_ginza_electra`、`ja_ginza` の順の優先度でロード可能なモデルを利用します。
+- `--split-mode <string>`, `-s <string>`
+     複合名詞の分割モードを指定します。モードは [sudachi](https://github.com/WorksApplications/Sudachi#the-modes-of-splitting) に準拠し、`A`、`B`、`C`のいずれかを指定できます。`ginza`コマンドのデフォルト値は `C`、`ginzame`コマンドのデフォルト値はMeCab UniDicに近い `A` です。
+     `A`が分割が最も短く複合名詞が UniDic 短単位まで分割され、 `C` では固有名詞が抽出されます。`B` は二つの中間の単位に分割されます。
+- `--hash-comment <string>`, `-c <string>`
+    行頭が `#` から始まる行を解析対象とするかのモードを指定します。次の値のいずれかを指定できます。
+        - `print`
+            解析対象とはしないが、解析結果には入力をそのまま出力します。
+        - `skip`
+            解析対象とせず、解析結果にも出力しません。
+        - `analyze`
+            `#` から始まる行についても解析を行い、結果を出力します。ただし`-f json`が指定されている場合は `-c`の指定に依らず常に`analyze`が適用されます。
+    デフォルト値は `print` です。
+- `--output-path <string>`, `-o <string>`
+    解析結果を出力するファイルのパスを指定します。指定しない場合には標準出力に解析結果が出力されます。
+- `--output-format <string>`, `-f <string>`
+    [解析結果のフォーマット](#出力形式の指定)を指定します。次の値のいずれかを指定できます。
+        - `0`, `conllu`
+        - `1`, `cabocha`
+        - `2`, `mecab`
+        - `3`, `json`
+    デフォルト値は `conllu` です。
+- `--require-gpu <int>`, `-g <int>`
+    引数で指定されたgpu_idのGPUを使用して解析を行います。引数に-1を指定(デフォルト)するとCPUを使用します。ただし、[spaCyおよびcupyの制約](https://github.com/explosion/spaCy/issues/5507)から、`--require-gpu`は`--parallel`と同時に指定できません。
+- `--use-normalized-form`, `-n`
+    `-f conllu`のlemmaフィールドに [sudachi](https://github.com/WorksApplications/Sudachi#normalized-form) を使用するためのブールスイッチ。
+- `--disable-sentencizer`, `-d`
+    `ja_ginza`、 `ja_ginza_electra` モデル利用時に[disable_sentencizer](https://github.com/megagonlabs/ginza/blob/develop/ginza/disable_sentencizer.py)を有効化するブールスイッチ。
+- `--parallel <int>`, `-p <int>`
+    並列実行するプロセス数を指定します。0 を指定すると cpu コア数分のプロセスを起動します。デフォルト値は1です。
 
 ## 出力形式の指定
 
@@ -79,7 +122,7 @@ $ ginza -f json
 
 日本語係り受け解析器 [CaboCha](https://taku910.github.io/cabocha/) の`cabocha -f1`のラティス形式に近い解析結果を出力する場合は
 `ginza -f 1` または `ginza -f cabocha` を実行して下さい。
-このオプションと`cabocha -f1`の出力形式の相違点として、 
+このオプションと`cabocha -f1`の出力形式の相違点として、
 スラッシュ記号`/`に続く`func_index`フィールドが常に自立語の終了位置（機能語があればその開始位置に一致）を示すこと、
 機能語認定基準が一部異なること、
 に注意して下さい。
@@ -110,4 +153,4 @@ EOS
 
 `ginza -f mecab`とそのエイリアスである`ginzame`以外で`-p NUM_PROCESS`オプションを使用する場合は、
 実行環境の空きメモリ容量が十分あることを事前に確認してください。
-マルチプロセス実行では1プロセスあたり約130MBのメモリが必要です。(今後のリリースで改善予定)
+マルチプロセス実行では1プロセスあたり`ja_ginza`で数百MB、`ja_ginza_electra`で数GBのメモリが必要です。

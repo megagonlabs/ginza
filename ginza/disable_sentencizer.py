@@ -17,7 +17,7 @@ class DisableSentencizer:
         self.nlp = nlp
 
     def __call__(self, doc):
-        for t in doc:
+        for t in doc[1:]:
             t.is_sent_start = False
         return doc
 
