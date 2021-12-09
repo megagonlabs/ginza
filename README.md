@@ -235,8 +235,8 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 ### version 5.x
 
 #### ginza-5.1.0
-- 2021-12-07, Euclase
-- Impotant changes
+- 2021-12-10, Euclase
+- Important changes
   - Upgrade: spaCy v3.2 and Sudachi.rs(SudachiPy v0.6.2)
   - Change token information fields #208 #209
     - `doc.user_data[“reading_forms”][token.i]` -> `token.morph.get(“Reading”)`
