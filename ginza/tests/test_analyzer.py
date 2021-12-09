@@ -92,7 +92,7 @@ class TestAnalyzer:
         spacy_load_mock.assert_called_once_with("ja_ginza_electra")
 
     def test_require_gpu(self, mocker, analyzer):
-        require_gpu_mock = mocker.patch("spacy.require_gpu")
+        require_gpu_mock = mocker.patch("thinc.api.require_gpu")
         analyzer.require_gpu = 0
         analyzer.set_nlp()
         require_gpu_mock.assert_called_once()
