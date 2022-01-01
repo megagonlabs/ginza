@@ -1,7 +1,4 @@
-import sys
 from typing import Iterable, List
-
-import srsly
 
 from spacy import util
 from spacy.language import Language
@@ -24,23 +21,19 @@ class LuwXposTagger:
             if upos_cond:
                 if isinstance(upos_cond, str):
                     t.tag_ = upos_cond
-                    print("tag", t.tag, t.tag_, sep="\t", file=sys.stderr)
                     continue
                 lemma_cond = upos_cond.get(t.pos_)
                 if lemma_cond:
                     if isinstance(lemma_cond, str):
                         t.tag_ = lemma_cond
-                        print("pos", t.tag, t.tag_, sep="\t", file=sys.stderr)
                         continue
                     luw_xpos = lemma_cond.get(t.lemma_)  # omit last_suw
                     if luw_xpos:
                         t.tag_ = luw_xpos
-                        print("lem", t.tag, t.tag_, sep="\t", file=sys.stderr)
                         continue
                     luw_xpos = LUW_UPOS_TO_LUW_XPOS.get(t.pos_)
                     if luw_xpos:
                         t.tag_ = luw_xpos
-                        print("fp", t.tag, t.tag_, sep="\t", file=sys.stderr)
         return doc
 
     def to_bytes(self, **_kwargs):
