@@ -11,7 +11,7 @@ from .bunsetu_recognizer import *
 from .compound_splitter import *
 from .disable_sentencizer import *
 from .ene_ontonotes_mapper import ENE_ONTONOTES_MAPPING
-
+from .luw_xpos_tagger import *
 
 __all__ = [
     "make_compound_splitter", "make_bunsetu_recognizer", "make_disable_sentencizer",
