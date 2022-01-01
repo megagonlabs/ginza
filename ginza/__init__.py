@@ -15,7 +15,7 @@ from .ene_ontonotes_mapper import ENE_ONTONOTES_MAPPING
 
 __all__ = [
     "make_compound_splitter", "make_bunsetu_recognizer", "make_disable_sentencizer",
-    "force_using_normalized_form_as_lemma", "set_split_mode",
+    "set_split_mode",
     "token_i", "text", "text_with_ws", "orth", "orth_",
     "ent_type", "ent_type_", "ent_iob", "ent_iob_",
     "lemma", "lemma_", "norm", "norm_",
@@ -97,15 +97,6 @@ def make_disable_sentencizer(
 
 
 _morpheme_dictionary_form = None
-
-
-def force_using_normalized_form_as_lemma(force: bool):
-    global _morpheme_dictionary_form
-    if force and not _morpheme_dictionary_form:
-        _morpheme_dictionary_form = Morpheme.dictionary_form
-        Morpheme.dictionary_form = Morpheme.normalized_form
-    elif not force and _morpheme_dictionary_form:
-        Morpheme.dictionary_form = _morpheme_dictionary_form
 
 
 def set_split_mode(nlp: Language, mode: str):
