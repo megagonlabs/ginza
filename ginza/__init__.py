@@ -42,6 +42,8 @@ __all__ = [
     # from compound_splitter
     "CompoundSplitter",
     "tag_to_pos",
+    # from luw_xpos_tagger
+    "LuwXposTagger",
 ]
 
 
@@ -92,6 +94,21 @@ def make_disable_sentencizer(
     name: str,
 ):
     return DisableSentencizer(
+        nlp.vocab,
+    )
+
+@Language.factory(
+    "luw_xpos_tagger",
+    requires=["token.tag", "token.pos"],
+    assigns=["token.tag"],
+    retokenizes=False,
+    default_config={},
+)
+def make_luw_xpos_tagger(
+    nlp: Language,
+    name: str,
+):
+    return LuwXposTagger(
         nlp.vocab,
     )
 
