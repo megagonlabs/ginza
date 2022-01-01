@@ -17,7 +17,11 @@ class LuwXposTagger:
 
     def __call__(self, doc: Doc):
         for t in doc:
-            upos_cond = SUW_XPOS_TO_LUW_XPOS.get(t.tag_, LUW_UPOS_TO_LUW_XPOS)
+            inf = t.morph.get("Inflection")
+            if inf:
+                inf_str = inf[0].split(";")[0]
+                t.tag_ =  f"{t.tag_}-{inf_str}"
+            upos_cond = SUW_XPOS_TO_LUW_XPOS.get(t.tag_)
             if upos_cond:
                 if isinstance(upos_cond, str):
                     t.tag_ = upos_cond
@@ -34,6 +38,10 @@ class LuwXposTagger:
                     luw_xpos = LUW_UPOS_TO_LUW_XPOS.get(t.pos_)
                     if luw_xpos:
                         t.tag_ = luw_xpos
+                        continue
+            luw_xpos = LUW_UPOS_TO_LUW_XPOS.get(t.pos_)
+            if luw_xpos:
+                t.tag_ = luw_xpos
         return doc
 
     def to_bytes(self, **_kwargs):
@@ -184,7 +192,7 @@ SUW_XPOS_TO_LUW_XPOS = {
     "動詞-非自立可能-下一段-ラ行": {"VERB": "動詞-一般-下一段-ラ行"},
     "動詞-非自立可能-五段-カ行": {"VERB": "動詞-一般-五段-カ行"},
     "動詞-非自立可能-五段-サ行": {"VERB": "動詞-一般-五段-サ行"},
-    "動詞-非自立可能-五段-ラ行": {"AUX": {"やる": "助動詞-助動詞-ヤ", "なる": "助動詞-文語助動詞-ナリ-断定"}, "VERB": {"ある": "動詞-一般-五段-ワア行", None: "動詞-一般-五段-ラ行"}},
+    "動詞-非自立可能-五段-ラ行": {"AUX": {"やる": "助動詞-助動詞-ヤ", "なる": "助動詞-文語助動詞-ナリ-断定"}, "VERB": "動詞-一般-五段-ラ行"},  # "VERB": {"ある": "動詞-一般-五段-ワア行"
     "動詞-非自立可能-五段-ワア行": {"VERB": "動詞-一般-五段-ワア行"},
     "動詞-非自立可能-文語サ行変格": {"VERB": "動詞-一般-文語サ行変格"},
     "動詞-非自立可能-文語ラ行変格": {"VERB": "動詞-一般-文語ラ行変格"},
@@ -217,7 +225,7 @@ SUW_XPOS_TO_LUW_XPOS = {
     "形状詞-助動詞語幹": {"AUX": "形状詞-助動詞語幹", "NOUN": "形状詞-助動詞語幹"},
     "感動詞-フィラー": {"INTJ": "感動詞-フィラー"},
     #"感動詞-一般": {"INTJ": "感動詞-一般"},
-    "接尾辞-名詞的-一般": {"ADP": "助詞-副助詞", "NOUN": "接尾辞-名詞的-一般"},
+    "接尾辞-名詞的-一般": {"ADP": "助詞-副助詞"},  # "NOUN": "接尾辞-名詞的-一般"},
     #"接尾辞-名詞的-副詞可能": None,
     #"接尾辞-名詞的-助数詞": None,
     "接尾辞-形容詞的-形容詞": {"AUX": "助動詞-助動詞-ラシイ", "NOUN": "接尾辞-形容詞的-形容詞", "PART": "接尾辞-形容詞的-形容詞"},
@@ -235,9 +243,9 @@ SUW_XPOS_TO_LUW_XPOS = {
     #"記号-一般": {"SYM": "補助記号-一般"},
     "記号-文字": {"NOUN": "記号-文字"},
     "連体詞": {"ADJ": {"あんな": "形状詞-一般", "こんな": "形状詞-一般", "そんな": "形状詞-一般", "どんな": "形状詞-一般", None: "連体詞"}, "INTJ": "感動詞-フィラー", "PRON": "連体詞", "VERB": "動詞-一般-五段-ラ行"},
+}
 
-    # LAST_SUW
-
+LAST_SUW_XPOS_TO_LUW_XPOS = {
     "副詞": {"ADJ": {"ごい": "形容詞-一般-形容詞", "たっぷり": "形状詞-一般", "依然": "形状詞-一般", "ど〜": "助詞-副助詞", "より": "助詞-格助詞", None: "形容詞-一般-形容詞"}},
     "助動詞-五段-ワア行": {"VERB": "動詞-一般-五段-ラ行"},
     "助動詞-助動詞-ジャ": {"ADP": "助詞-格助詞", "SCONJ": "助動詞-助動詞-ダ"},
@@ -253,7 +261,7 @@ SUW_XPOS_TO_LUW_XPOS = {
     "助動詞-文語助動詞-ム": {"SCONJ": "助動詞-助動詞-ヌ"},
     "助動詞-文語助動詞-リ": {"ADP": "助詞-格助詞"},
     "助詞-係助詞": {"SCONJ": "助詞-接続助詞"},
-    "助詞-副助詞": {"ADP": {"か": "助詞-副助詞", "て": "助詞-副助詞", "まで": "助詞-格助詞", None: "助詞-副助詞"},"SCONJ": "助詞-接続助詞"},
+    "助詞-副助詞": {"ADP": {"か": "助詞-副助詞", "て": "助詞-副助詞", "まで": "助詞-格助詞", None: "助詞-副助詞"}, "SCONJ": "助詞-接続助詞"},
     "動詞-一般-サ行変格": {"ADP": "助詞-格助詞"},
     "動詞-一般-下一段-ラ行": {"SCONJ": "助詞-接続助詞"},
     "動詞-一般-五段-カ行": {"ADP": "助詞-格助詞"},
@@ -277,9 +285,9 @@ SUW_XPOS_TO_LUW_XPOS = {
     "動詞-非自立可能-文語ラ行変格": {"SCONJ": "助動詞-五段-ラ行"},
     "名詞-普通名詞-サ変可能": {"PART": "助詞-終助詞"},
     "名詞-普通名詞-一般": {"ADP": "助詞-格助詞", "PART": "助詞-終助詞"},
-    "名詞-普通名詞-副詞可能": {"ADP": "助詞-格助詞", "SCONJ": "助詞-接続助詞"},
+    "名詞-普通名詞-副詞可能": {"SCONJ": "助詞-接続助詞"},  # "ADP": "助詞-格助詞", 
     "形容詞-一般-形容詞": {"ADJ": "形容詞-一般-形容詞", "VERB": "動詞-一般-五段-ラ行"},
-    "形容詞-非自立可能-形容詞": {"ADJ": "形容詞-一般-形容詞", "ADP": "助詞-副助詞", "PART": "助詞-副助詞", "SCONJ": "助動詞-形容詞"},
+    "形容詞-非自立可能-形容詞": {"ADJ": "形容詞-一般-形容詞", "ADP": "助詞-副助詞", "PART": "助詞-副助詞"},  # , "SCONJ": "助動詞-形容詞"
     "形容詞-非自立可能-文語形容詞-ク": {"ADJ": "形容詞-一般-文語形容詞-ク", "SCONJ": "助動詞-文語形容詞-ク"},
     "形状詞-一般": {"ADJ": "形状詞-一般", "PRON": "連体詞"},
     "感動詞-一般": {"INTJ": "感動詞-一般", "PART": "助詞-終助詞", "VERB": "動詞-一般-五段-ラ行"},
@@ -289,9 +297,38 @@ SUW_XPOS_TO_LUW_XPOS = {
     "接尾辞-動詞的-五段-サ行": {"VERB": "動詞-一般-五段-サ行"},
     "接尾辞-動詞的-五段-マ行": {"VERB": "動詞-一般-五段-マ行"},
     "接尾辞-動詞的-五段-ラ行": {"VERB": "動詞-一般-五段-ラ行"},
-    "接頭辞": {"NOUN": "名詞-普通名詞-一般"},
+    #"接頭辞": {"NOUN": "名詞-普通名詞-一般"},
     "補助記号-一般": {"PUNCT": "補助記号-句点"},
     "補助記号-句点": {"NOUN": "補助記号-句点", "PUNCT": "補助記号-句点", "SYM": "補助記号-一般"},
     "補助記号-読点": {"NOUN": "補助記号-読点", "PUNCT": "補助記号-読点"},
     "記号-一般": {"PART": "助詞-終助詞"},
 }
+
+for suw_xpos, v in LAST_SUW_XPOS_TO_LUW_XPOS.items():
+    if suw_xpos not in SUW_XPOS_TO_LUW_XPOS:
+        SUW_XPOS_TO_LUW_XPOS[suw_xpos] = v
+        continue
+    upos_cond = SUW_XPOS_TO_LUW_XPOS[suw_xpos]
+    if isinstance(v, str):
+        assert upos_cond == v, (suw_xpos, v, upos_cond)
+        continue
+    for upos, v2 in v.items():
+        if upos not in upos_cond:
+            upos_cond[upos] = v2
+            continue
+        lemma_cond = upos_cond[upos]
+        if isinstance(v2, str):
+            assert lemma_cond == v2, (suw_xpos, v, upos_cond, v2, lemma_cond)
+            continue
+        if isinstance(lemma_cond, str):
+            if None in v2:
+                assert lemma_cond == v2[None], (suw_xpos, v, upos_cond, v2, lemma_cond)
+            else:
+                v2[None] = lemma_cond
+            upos_cond[upos] = v2
+            continue
+        for lemma, v3 in v2.items():
+            if lemma not in lemma_cond:
+                lemma_cond[lemma] = v3
+            else:
+                assert lemma_cond[lemma] == v3, (suw_xpos, v, upos_cond, v2, lemma_cond, lemma, v3)
