@@ -136,6 +136,8 @@ class Stats:
                 ('dep_confusion', self.dep_confusion),
                 ('ent_confusion', self.ent_confusion),
         ):
+            if not matrix:
+                continue
             print(' {}'.format(title), file=file)
             max_label_len = str(max(len(g) for g in matrix.keys()))
             for gold, results in sorted(matrix.items(), key=lambda t: t[0]):
