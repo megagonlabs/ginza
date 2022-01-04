@@ -213,6 +213,8 @@ def is_not_stop(token: Token) -> bool:
 
 
 def ent_label_ene(token: Token) -> str:
+    if not token.ent_iob_:
+        return None
     if token.ent_iob_ in "BI":
         return token.ent_iob_ + "-" + token.ent_type_
     else:
@@ -220,6 +222,8 @@ def ent_label_ene(token: Token) -> str:
 
 
 def ent_label_ontonotes(token: Token) -> str:
+    if not token.ent_iob_:
+        return None
     if token.ent_iob_ in "BI":
         return token.ent_iob_ + "-" + ENE_ONTONOTES_MAPPING.get(token.ent_type_, "OTHERS")
     else:
