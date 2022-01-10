@@ -29,12 +29,12 @@ class LuwXposTagger:
             prev_tag = None
             for rules in (
                 [
-                    #LAST_SUW_XPOS_TO_LUW_XPOS_RECOVERY,
-                    #LAST_SUW_XPOS_TO_LUW_XPOS_BASE,
-                    #SUW_XPOS_TO_LUW_XPOS_RECOVERY,
+                    LAST_SUW_XPOS_TO_LUW_XPOS_RECOVERY,
+                    LAST_SUW_XPOS_TO_LUW_XPOS_BASE,
+                    SUW_XPOS_TO_LUW_XPOS_RECOVERY,
                     SUW_XPOS_TO_LUW_XPOS_BASE,
                 ] if prev_xpos else [
-                    #SUW_XPOS_TO_LUW_XPOS_RECOVERY,
+                    SUW_XPOS_TO_LUW_XPOS_RECOVERY,
                     SUW_XPOS_TO_LUW_XPOS_BASE,
                 ]
             ):
@@ -59,7 +59,7 @@ class LuwXposTagger:
                         t.tag_ = upos_cond[None]
                         break
             else:
-                if t.ent_iob_ in "BILU" and False:
+                if t.ent_iob_ in "BILU":
                     upos_cond = NE_LUW_UPOS_PREV_XPOS_TO_LUW_XPOS.get(t.ent_type_)
                     if upos_cond:
                         if isinstance(upos_cond, str):
