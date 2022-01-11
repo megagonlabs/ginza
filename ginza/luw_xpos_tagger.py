@@ -16,12 +16,43 @@ class LuwXposTagger:
         self.vocab = vocab
 
     def __call__(self, doc: Doc):
+        def lemmatize(t):
+            if t.norm_ in NORMALIZE_MAP:
+                return NORMALIZE_MAP[t.norm_]
+            elif "助数詞" in t.tag_ and t.norm_ in NUM_UNIT_MAP:
+                return NUM_UNIT_MAP[t.norm_]
+            elif t.norm_ in NUM_STR_MAP:
+                return NUM_STR_MAP[t.norm_]
+            lemma = t.norm_
+            for suffix, v in NUM_SUFFIX_MAP.items():
+                if lemma.endswith(suffix):
+                    lemma = lemma[:-len(suffix)] + v
+                    break
+            return "".join(LEMMA_CHAR_MAP.get(c, c) for c in lemma)
+
         prev_tag = None
         for t in doc:
             inf = t.morph.get("Inflection")
             if inf:
                 inf_str = inf[0].split(";")[0]
                 t.tag_ =  f"{t.tag_}-{inf_str}"
+
+            lemma = None
+            if t.dep_ == "subtok":
+                for prefix in DISABLE_SUBTOK_NORMALIZE_XPOS:
+                    if t.tag_.startswith(prefix):
+                        lemma = t.orth_
+                        break
+            else:
+                if prev_tag:
+                    lemma = LAST_SUW_NORMALIZE_MAP.get(t.norm_)
+                else:
+                    lemma = SINGLE_NORMALIZE_MAP.get(t.norm_)
+            if lemma:
+                t.lemma_ = lemma 
+            else:
+                t.lemma_ = lemmatize(t)
+
             if t.dep_ == "subtok":
                 prev_tag = t.tag_
                 continue
@@ -344,3 +375,115 @@ LAST_SUW_XPOS_TO_LUW_XPOS_RECOVERY = {
     "接尾辞-名詞的-助数詞": {"SYM": "補助記号-一般"},
     "接尾辞-形容詞的-形容詞": {"AUX": "助動詞-助動詞-ラシイ"},
 }
+
+NORMALIZE_MAP = {
+    "為る": "する",
+    "こと": "事",
+    "つき": "付き",
+    "いずれ": "何れ",
+    "ただし": "但し",
+}
+
+SINGLE_NORMALIZE_MAP = {
+    "有る": "ある",
+    "居る": "いる",
+    "得る": "える",
+    "成る": "なる",
+    "見る": "みる",
+    "出来る": "できる",
+    "です": "だ",
+    "良い": "よい",
+    "無い": "ない",
+    "ここ": "此処",
+    "そこ": "其処",
+    "どこ": "何処",
+    "あそこ": "彼処",
+    "あれ": "彼れ",
+    "これ": "此れ",
+    "それ": "其れ",
+    "どれ": "何れ",
+    "ため": "為",
+    "とも": "共",
+    "また": "又",
+    "！": "!",
+    "？": "?",
+    "−": "-",
+    "＊": "*",
+}
+
+LAST_SUW_NORMALIZE_MAP = {
+    "よる": "因る",
+    "おる": "居る",
+}
+
+DISABLE_SUBTOK_NORMALIZE_XPOS = [
+    "助動詞",
+    "動詞",
+    "形容詞",
+]
+
+NUM_STR_MAP = {
+    "１００": "百",
+    "２００": "二百",
+    "３００": "三百",
+    "４００": "四百",
+    "５００": "五百",
+    "６００": "六百",
+    "７００": "七百",
+    "８００": "八百",
+    "９００": "九百",
+    "１０": "十",
+    "２０": "二十",
+    "３０": "三十",
+    "４０": "四十",
+    "５０": "五十",
+    "６０": "六十",
+    "７０": "七十",
+    "８０": "八十",
+    "９０": "九十",
+    "100": "百",
+    "200": "二百",
+    "300": "三百",
+    "400": "四百",
+    "500": "五百",
+    "600": "六百",
+    "700": "七百",
+    "800": "八百",
+    "900": "九百",
+    "10": "十",
+    "20": "二十",
+    "30": "三十",
+    "40": "四十",
+    "50": "五十",
+    "60": "六十",
+    "70": "七十",
+    "80": "八十",
+    "90": "九十",
+}
+
+NUM_UNIT_MAP = {
+    "%": "パーセント",
+    "％": "パーセント",
+    "m": "メートル",
+    "ｍ": "メートル",
+    "cm": "センチミリメートル",
+    "ｃｍ": "センチミリメートル",
+    "mm": "ミリメートル",
+    "ｍｍ": "ミリメートル",
+}
+
+NUM_SUFFIX_MAP = {
+    "00000000": "億",
+    "００００００００": "億",
+    "0000": "万",
+    "００００": "万",
+}
+
+LEMMA_CHAR_MAP = {
+    s: d for s, d in zip(
+        "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789１２３４５６７８９",
+        "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ一二三四五六七八九一二三四五六七八九",
+    ) 
+}
+LEMMA_CHAR_MAP["0"] = "ゼロ"
+LEMMA_CHAR_MAP["０"] = "ゼロ"
