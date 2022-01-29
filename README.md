@@ -209,16 +209,16 @@ doc = nlp('銀座でランチをご一緒しましょう。')
 for sent in doc.sents:
     for token in sent:
         print(
-          token.i,
-          token.orth_,
-          token.lemma_,
-          token.norm_
-          token.morph.get(“Reading”),
-          token.pos_,
-          token.morph.get(“Inflection”),
-          token.tag_,
-          token.dep_,
-          token.head.i,
+            token.i,
+            token.orth_,
+            token.lemma_,
+            token.norm_,
+            token.morph.get("Reading"),
+            token.pos_,
+            token.morph.get("Inflection"),
+            token.tag_,
+            token.dep_,
+            token.head.i,
         )
     print('EOS')
 ```
@@ -239,8 +239,8 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 - Important changes
   - Upgrade: spaCy v3.2 and Sudachi.rs(SudachiPy v0.6.2)
   - Change token information fields #208 #209
-    - `doc.user_data[“reading_forms”][token.i]` -> `token.morph.get(“Reading”)`
-    - `doc.user_data[“inflections”][token.i]` -> `token.morph.get(“Inflection”)`
+    - `doc.user_data["reading_forms"][token.i]` -> `token.morph.get("Reading")`
+    - `doc.user_data["inflections"][token.i]` -> `token.morph.get("Inflection")`
     - `force_using_normalized_form_as_lemma(True)` -> `token.norm_`
   - All spaCy models, including non-Japanese, are now available with the ginza command #217
     - Download and analyze the model at once by specifying the model name in the following form #219
