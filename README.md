@@ -76,7 +76,7 @@ Please also see the Development Environment section below.
 #### 1. Install GiNZA NLP Library with Transformer-based Model
 Uninstall previous version of ginza and ja_ginza_electra packages:
 ```console
-$ pip uninstall ginza ja_ginza_elecrta
+$ pip uninstall ginza ja_ginza_electra
 ```
 Then, install the latest version of `ginza` and `ja_ginza_electra`:
 ```console
