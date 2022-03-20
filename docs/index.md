@@ -80,7 +80,7 @@ $ pip uninstall ginza ja_ginza_electra
 $ pip uninstall ja_ginza
 ```
 
-旧バージョンの`j_ginza_electra`をインストールしている場合は次のコマンドでアンインストールします。
+旧バージョンの`ja_ginza_electra`をインストールしている場合は次のコマンドでアンインストールします。
 ```console
 $ pip uninstall ja_ginza_electra
 ```
