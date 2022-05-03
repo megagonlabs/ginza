@@ -534,10 +534,10 @@ Ginza uses the pytest framework for testing, and you can run the tests via `setu
 Some tests depends on the ginza default models (`ja-ginza`, `ja-ginza-electra`), so install them before the tests is needed.
 
 ```console
-pip install ja-ginza ja-ginza-electra
-pip install -e .
+$ pip install ja-ginza ja-ginza-electra
+$ pip install -e .
 # full test
-python setup.py test
+$ python setup.py test
 # test single file
-python setup.py test --addopts ginza/tests/test_analyzer.py
+$ python setup.py test --addopts ginza/tests/test_analyzer.py
 ```
