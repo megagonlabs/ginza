@@ -16,6 +16,7 @@ setup(
             "ginzame = ginza.command_line:main_ginzame",
         ],
     },
+    python_requires=">=3.6",
     install_requires=[
         "spacy>=3.2.0,<3.3.0",
         "plac>=1.3.3",
