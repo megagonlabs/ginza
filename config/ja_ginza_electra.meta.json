@@ -1,7 +1,7 @@
 {
   "lang":"ja",
   "name":"ginza_electra",
-  "version":"5.1.0",
+  "version":"5.1.2",
   "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + transformers-ud-japanese-electra--base. Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
   "author":"Megagon Labs Tokyo.",
   "email":"ginza@megagon.ai",
@@ -41,7 +41,7 @@
     }
   ],
   "parent_package":"spacy",
-  "spacy_version":">=3.2.0,<3.3.0",
+  "spacy_version":">=3.2.0,<3.5.0",
   "pipeline":[
     "transformer",
     "parser",
