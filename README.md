@@ -234,6 +234,16 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 
 ### version 5.x
 
+#### ginza-5.1.2
+- 2022-03-12
+- Migrate to spaCy v3.4
+
+#### ginza-5.1.1
+- 2022-03-12
+- Improvements
+  - auto deploy for pypi by @nimiusrd in #184
+  - modify github actions: trigger by tagging, stop uploading test pypi by @r-terada in #233
+
 #### ginza-5.1.0
 - 2021-12-10, Euclase
 - Important changes
@@ -534,10 +544,10 @@ Ginza uses the pytest framework for testing, and you can run the tests via `setu
 Some tests depends on the ginza default models (`ja-ginza`, `ja-ginza-electra`), so install them before the tests is needed.
 
 ```console
-pip install ja-ginza ja-ginza-electra
-pip install -e .
+$ pip install ja-ginza ja-ginza-electra
+$ pip install -e .
 # full test
-python setup.py test
+$ python setup.py test
 # test single file
-python setup.py test --addopts ginza/tests/test_analyzer.py
+$ python setup.py test --addopts ginza/tests/test_analyzer.py
 ```

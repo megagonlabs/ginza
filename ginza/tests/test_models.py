@@ -176,7 +176,6 @@ def test_tokenize(nlp, text, expected_tokens):
 def test_compound_spliter(nlp, text, len_a, len_b, len_c):
     assert len(nlp(text)) == len_c
     for split_mode, l in zip(["A", "B", "C"], [len_a, len_b, len_c]):
-        nlp = deepcopy(nlp)
         set_split_mode(nlp, split_mode)
         assert len(nlp(text)) == l
 

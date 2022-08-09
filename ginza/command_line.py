@@ -28,7 +28,7 @@ class _OutputWrapper:
 
     def open(self):
         if self.output_path:
-            self.output = open(self.output_path, "w")
+            self.output = open(self.output_path, "w", encoding="utf-8")
         else:
             self.output = sys.stdout
 
@@ -154,10 +154,17 @@ def _analyze_tty(analyzer: Analyzer, output: _OutputWrapper) -> None:
 def _analyze_single(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[str]) -> None:
     try:
         analyzer.set_nlp()
+        batch = []
         for path in files:
-            with open(path, "r") as f:
+            with open(path, "r", encoding="utf-8") as f:
                 for line in f:
-                    output.write(analyzer.analyze_line(line))
+                    batch.append(line)
+                    if len(batch) < MINI_BATCH_SIZE:
+                        continue
+                    output.write(analyzer.analyze_batch(batch))
+                    batch.clear()
+        if batch:
+            output.write(analyzer.analyze_batch(batch))
     except KeyboardInterrupt:
         pass
 
@@ -194,7 +201,7 @@ def _analyze_parallel(analyzer: Analyzer, output: _OutputWrapper, files: Iterabl
 def _data_loader(files: List[str], batch_size: int) -> Generator[List[str], None, None]:
     mini_batch = []
     for path in files:
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 mini_batch.append(line)
                 if len(mini_batch) == batch_size:

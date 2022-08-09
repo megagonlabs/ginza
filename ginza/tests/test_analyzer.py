@@ -144,3 +144,26 @@ class TestAnalyzer:
         analyzer.output_format = output_format
         ret = analyzer.analyze_batch(input_batch)
         assert tokens_func(ret) == sum(tokens_batch, [])
+
+    @pytest.mark.parametrize(
+        "raises_analysis_before_set, tokens_func",
+        [
+            (TypeError, _tokens_conllu)
+        ],
+    )
+    @pytest.mark.parametrize(
+        "split_mode, input_text, tokens",
+        [
+            ("A", "機能性食品", ["機能", "性", "食品"]),
+            ("B", "機能性食品", ["機能性", "食品"]),
+            ("C", "機能性食品", ["機能性食品"]),
+        ],
+    )
+    def test_analyze_split(self, split_mode, input_text, tokens, raises_analysis_before_set, tokens_func, analyzer):
+        analyzer.split_mode = split_mode
+        with pytest.raises(raises_analysis_before_set):
+            analyzer.analyze_line(input_text)
+
+        analyzer.set_nlp()
+        ret = analyzer.analyze_line(input_text)
+        assert tokens_func(ret) == tokens
