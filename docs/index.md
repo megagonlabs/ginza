@@ -261,6 +261,17 @@ Contains information from mC4 which is made available under the ODC Attribution 
 
 ### version 5.x
 
+#### ginza-5.1.2
+- 2022-03-12
+- Migrate to spaCy v3.4
+
+#### ginza-5.1.1
+- 2022-03-12
+- Improvements
+  - auto deploy for pypi by @nimiusrd in #184
+  - modify github actions: trigger by tagging, stop uploading test pypi by @r-terada in #233
+
+
 #### ginza-5.1.0
 - 2021-12-10, Euclase
 - 重要な変更
