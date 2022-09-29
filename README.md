@@ -91,7 +91,7 @@ If you need to install `ja_ginza_electra` along with `pytorch_model.bin` at the 
 $ pip install -U ginza https://github.com/megagonlabs/ginza/releases/download/latest/ja_ginza_electra-latest-with-model.tar.gz
 ```
 
-If you hope to accelarate the transformers-based models by using GPUs with CUDA support, you can install `spacy` by specifying the CUDA version as follows:
+If you hope to accelerate the transformers-based models by using GPUs with CUDA support, you can install `spacy` by specifying the CUDA version as follows:
 ```console
 pip install -U "spacy[cuda110]"
 ```
@@ -287,7 +287,7 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 - Important changes
   - Upgrade spaCy to v3
     - Release transformer-based `ja-ginza-electra` model
-    - Improve UPOS accuracy of the standard `ja-ginza` model by adding `morphologizer` to the tail of spaCy pipleline
+    - Improve UPOS accuracy of the standard `ja-ginza` model by adding `morphologizer` to the tail of spaCy pipeline
   - Need to insrtall analysis model along with `ginza` package
     - High accuracy model (>=16GB memory needed)
       - `pip install -U ginza ja-ginza-electra`
