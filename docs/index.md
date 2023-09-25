@@ -8,7 +8,7 @@
 
 ## What's new!
 
-- `ja_ginza_bert_large`のβ版を公開中
+- [`ja_ginza_bert_large`のβ版を公開中](https://github.com/megagonlabs/ginza/releases/tag/v5.1.3)
   - [cl-tohoku/bert-large-japanese-v2](https://huggingface.co/cl-tohoku/bert-large-japanese-v2)をベースモデルに採用
   - 精度が大幅に向上（LAS=0.938, UAS=0.949, UPOS=0.983, ENE=0.708）
   - CUDAに対応し8GB以上のRAMを搭載したGPU環境、または、M1・M2などApple Silicon環境の利用を推奨
