@@ -1,8 +1,8 @@
 {
   "lang":"ja",
-  "name":"ginza_bert_v2",
-  "version":"5.0.0b1",
-  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + cl-tohoku/bert-base-japanese-char-v2(BasicTokenizer). Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
+  "name":"ginza_bert_large",
+  "version":"5.1.3b1",
+  "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + transformers-ud-japanese-electra--base. Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
   "author":"Megagon Labs Tokyo.",
   "email":"ginza@megagon.ai",
   "url":"https://github.com/megagonlabs/ginza",
@@ -27,18 +27,17 @@
       "author":"Works Applications Enterprise Co., Ltd."
     },
     {
-      "name":"cl-tohoku/bert-base-japanese-char-v2",
-      "url":"https://huggingface.co/cl-tohoku/bert-base-japanese-char-v2",
-      "license":"CC BY-SA 3.0",
-      "author":"Masatoshi Suzuki (Tohoku University)"
+      "name":"cl-tohoku/bert-large-japanese-v2",
+      "url":"https://huggingface.co/cl-tohoku/bert-large-japanese-v2",
+      "license":"Apache License 2.0",
+      "author":"Tohoku University"
     }
   ],
-  "parent_package":"spacy",
-  "spacy_version":">=3.0.6,<3.2.0",
+  "spacy_version":">=3.6.1,<3.7.0",
+  "spacy_git_version":"458bc5f45",
   "pipeline":[
     "transformer",
     "parser",
-    "attribute_ruler",
     "ner",
     "morphologizer",
     "compound_splitter",
@@ -53,13 +52,23 @@
     "compound_splitter",
     "bunsetu_recognizer"
   ],
-  "disabled": [
+  "disabled":[
     "attribute_ruler"
   ],
+  "vectors":{
+    "width":0,
+    "vectors":0,
+    "keys":0,
+    "name":null,
+    "mode":"default"
+  },
   "requirements":[
-    "sudachipy>=0.5.2,<0.6.0",
-    "sudachidict_core>=20210608",
-    "ginza-transformers>=0.3.1,<1.0.0",
-    "ginza>=5.0.0,<5.1.0"
+    "sudachipy>=0.6.7,<0.7.0",
+    "sudachidict_core>=20230711",
+    "spacy>=3.6.1,<3.7.0",
+    "spacy-transformers>=1.2.5,<1.3.0",
+    "fugashi>=1.3.0",
+    "unidic-lite>=1.0.8",
+    "ginza>=5.1.3,<5.2.0"
   ]
 }
