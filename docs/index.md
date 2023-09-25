@@ -276,6 +276,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
 #### ginza-5.1.3
 - 2023-09-25
 - Migrate to spaCy v3.6
+- Beta release of `ja_ginza_bert_large`
 
 #### ginza-5.1.2
 - 2022-03-12
