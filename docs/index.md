@@ -8,7 +8,14 @@
 
 ## What's new!
 
-- `spaCy v3.2`と`Sudachi.rs(SudachiPy v0.6.2)`に対応した`GiNZA v5.1`をリリース
+- `ja_ginza_bert_large`のβ版を公開中
+  - [cl-tohoku/bert-large-japanese-v2](https://huggingface.co/cl-tohoku/bert-large-japanese-v2)をベースモデルに採用
+  - 精度が大幅に向上（LAS=0.938, UAS=0.949, UPOS=0.983, ENE=0.708）
+  - CUDAに対応し8GB以上のRAMを搭載したGPU環境、または、M1・M2などApple Silicon環境の利用を推奨
+- `GiNZA v5.1.3`
+  - `spaCy v3.2 ~ v3.6`に対応
+- `GiNZA v5.1`
+  - `spaCy v3.2`と`Sudachi.rs(SudachiPy v0.6.2)`に対応
   - バッチ解析処理をGPU環境で50〜60%・CPU環境で10〜40%高速化
   - ginzaコマンドの並列実行オプション(`ginza -p {n_process}`および`ginzame`)の処理効率を向上
 - ginzaコマンドで日本語以外を含む全てのspaCyモデルが利用可能に
@@ -47,9 +54,10 @@ GiNZA v5の解析精度は以前のバージョンから飛躍的な向上を遂
 
 | Model | LAS | UAS | UPOS | ENE |
 | --- | --- | --- | --- | --- |
-| ja_ginza_electra | 92.3 | 93.7 | 98.1 | 61.3 |
-| ja_ginza (v5)    | 89.2 | 91.1 | 97.0 | 53.9 |
-| ja_ginza (v4相当) | 89.0 | 91.0 | 95.1 | 53.1 |
+| *ja_ginza_bert_large (β版)* | *93.8* | *94.9* | *98.3* | *70.8* |
+| ja_ginza_electra          | 92.3 | 93.7 | 98.1 | 61.3 |
+| ja_ginza (v5)             | 89.2 | 91.1 | 97.0 | 53.9 |
+| ja_ginza (v4相当)          | 89.0 | 91.0 | 95.1 | 53.1 |
 
 `ja_ginza_electra`は`ja_ginza`に対して、5万ステップ学習時の依存関係ラベリング・単語依存構造解析の誤りを、以前のバージョンと比較して25%以上低減できました。
 
@@ -72,7 +80,7 @@ GiNZAをインストールする前に予めPython実行環境を構築してく
 
 旧バージョンのGiNZAをインストールしている場合は次のコマンドでアンインストールします。
 ```console
-$ pip uninstall ginza ja_ginza_electra
+$ pip uninstall ginza
 ```
 
 旧バージョンの`ja_ginza`をインストールしている場合は次のコマンドでアンインストールします。
@@ -97,14 +105,13 @@ $ pip install -U ginza ja_ginza_electra
 $ pip install -U ginza https://github.com/megagonlabs/ginza/releases/download/latest/ja_ginza_electra-latest-with-model.tar.gz
 ```
 
-GPUを利用してtransformersモデルを高速に実行するには、実行環境のCUDAバージョンを指定してspacyを上書きインストールします。
+GPUを利用してtransformersモデルを高速に実行するには、実行環境に応じたオプションを指定してspacyを上書きインストールします。
 
-CUDA 11.0を使用する場合:
+CUDA 11.7を使用する場合:
 ```console
-pip install -U "spacy[cuda110]"
+$ pip install -U spacy[cuda117]
 ```
-
-あわせてpytorchもCUDAと整合したバージョンをインストールする必要があります。
+※ あわせてpytorchもCUDAと整合したバージョンをインストールする必要があります。
 
 #### 2. GiNZA + 従来型モデル
 
@@ -116,6 +123,11 @@ $ pip uninstall ginza _ginza
 次のコマンドを実行して最新のGiNZAと従来型モデルをインストールします。
 ```console
 $ pip install -U ginza ja_ginza
+```
+
+M1やM2などのMPSに対応したApple Silicon環境では、`thinc-apple-ops`を導入することで解析速度が向上します。
+```console
+$ pip install torch thinc-apple-ops
 ```
 
 ### ginzaコマンドによる解析処理の実行
@@ -260,6 +272,11 @@ Contains information from mC4 which is made available under the ODC Attribution 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 
 ### version 5.x
+
+#### ginza-5.1.3
+- 2023-09-25
+- Migrate to spaCy v3.6
+- Beta release of `ja_ginza_bert_large`
 
 #### ginza-5.1.2
 - 2022-03-12

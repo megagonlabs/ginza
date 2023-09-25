@@ -93,7 +93,7 @@ $ pip install -U ginza https://github.com/megagonlabs/ginza/releases/download/la
 
 If you hope to accelarate the transformers-based models by using GPUs with CUDA support, you can install `spacy` by specifying the CUDA version as follows:
 ```console
-pip install -U "spacy[cuda110]"
+pip install -U "spacy[cuda117]"
 ```
 
 And you need to install a version of pytorch that is consistent with the CUDA version.
@@ -106,6 +106,11 @@ $ pip uninstall ginza ja_ginza
 Then, install the latest version of `ginza` and `ja_ginza`:
 ```console
 $ pip install -U ginza ja_ginza
+```
+
+When using Apple Silicon such as M1 or M2, you can accelerate the analysis process by installing `thinc-apple-ops`:
+```console
+$ pip install torch thinc-apple-ops
 ```
 
 ### Execute ginza command
@@ -233,6 +238,11 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 ## Releases
 
 ### version 5.x
+
+#### ginza-5.1.3
+- 2023-09-25
+- Migrate to spaCy v3.6
+- Beta release of `ja_ginza_bert_large`
 
 #### ginza-5.1.2
 - 2022-03-12

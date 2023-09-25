@@ -1,7 +1,7 @@
 {
   "lang":"ja",
   "name":"ginza_electra",
-  "version":"5.1.2",
+  "version":"5.1.3",
   "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019) + transformers-ud-japanese-electra--base. Components: transformer, parser, atteribute_ruler, ner, morphologizer, compound_splitter, bunsetu_recognizer.",
   "author":"Megagon Labs Tokyo.",
   "email":"ginza@megagon.ai",
@@ -34,14 +34,15 @@
       "author":"Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, & Peter J. Liu"
     },
     {
-      "name":"megagonlabs/transformers-ud-japanese-electra-base-ginza",
-      "url":"https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-ginza",
+      "name":"megagonlabs/transformers-ud-japanese-electra-base-ginza-5.1.0",
+      "url":"https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-ginza-5.1.0",
       "license":"MIT Licence",
       "author":"Hiroshi Matsuda (Megagon Labs Tokyo, Recruit Co., Ltd.)"
     }
   ],
   "parent_package":"spacy",
-  "spacy_version":">=3.2.0,<3.5.0",
+  "spacy_version":">=3.2.0,<3.7.0",
+  "spacy_git_version":"0fc3dee77",
   "pipeline":[
     "transformer",
     "parser",
@@ -63,11 +64,18 @@
   "disabled": [
     "attribute_ruler"
   ],
-  "requirements":[
+  "vectors":{
+    "width":0,
+    "vectors":0,
+    "keys":0,
+    "name":null
+  },
+ "requirements":[
     "sudachipy>=0.6.2,<0.7.0",
     "sudachidict_core>=20210802",
     "sudachitra>=0.1.6,<0.2.0",
     "ginza-transformers>=0.4.0,<0.5.0",
-    "ginza>=5.1.0,<5.2.0"
+    "ginza>=5.1.0,<5.2.0",
+    "spacy-transformers>=1.1.2,<1.2.0"
   ]
 }
