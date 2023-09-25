@@ -11,9 +11,7 @@
 - `ja_ginza_bert_large`のβ版を公開中
   - [cl-tohoku/bert-large-japanese-v2](https://huggingface.co/cl-tohoku/bert-large-japanese-v2)をベースモデルに採用
   - 精度が大幅に向上（LAS=0.938, UAS=0.949, UPOS=0.983, ENE=0.708）
-  - CUDAまたはMPSに対応し8GB以上のRAMを搭載したGPUの利用を推奨
-    - M1, M2などのMPSに対応したApple Silicon環境では`thinc-apple-ops`を導入することで解析を高速化することができます
-    - `$ pip install torch thinc-apple-ops`
+  - CUDAに対応し8GB以上のRAMを搭載したGPU環境、または、M1・M2などApple Silicon環境の利用を推奨
 - `GiNZA v5.1.3`
   - `spaCy v3.2 ~ v3.6`に対応
 - `GiNZA v5.1`
