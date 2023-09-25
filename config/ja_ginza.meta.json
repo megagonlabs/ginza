@@ -1,7 +1,7 @@
 {
   "lang":"ja",
   "name":"ginza",
-  "version":"5.1.2",
+  "version":"5.1.3",
   "description":"Japanese multi-task CNN trained on UD-Japanese BCCWJ r2.8 + GSK2014-A(2019). Assigns word2vec token vectors. Components: tok2vec, parser, ner, morphologizer, atteribute_ruler, compound_splitter, bunsetu_recognizer.",
   "author":"Megagon Labs Tokyo.",
   "email":"ginza@megagon.ai",
@@ -34,7 +34,14 @@
     }
   ],
   "parent_package":"spacy",
-  "spacy_version":">=3.2.0,<3.5.0",
+  "spacy_version":">=3.2.0,<3.7.0",
+  "spacy_git_version":"0fc3dee77",
+  "vectors":{
+    "width":300,
+    "vectors":20000,
+    "keys":480443,
+    "name":"ja_vectors"
+  },
   "pipeline":[
     "tok2vec",
     "parser",
@@ -53,7 +60,7 @@
     "compound_splitter",
     "bunsetu_recognizer"
   ],
-  "disabled": [
+  "disabled":[
     "attribute_ruler"
   ],
   "requirements":[
