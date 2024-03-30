@@ -24,6 +24,7 @@ __all__ = [
     "ent_label_ene", "ent_label_ontonotes",
     "reading_form", "inflection",
     "bunsetu_bi_label", "bunsetu_position_type", "is_bunsetu_head",
+    "clauses","token_clause_head",
     "SEP", "default_join_func",
     "traverse",
     "head", "ancestors", "conjuncts", "children", "lefts", "rights", "subtree",
@@ -38,6 +39,9 @@ __all__ = [
     "bunsetu_head_tokens",
     "bunsetu_bi_labels",
     "bunsetu_position_types",
+    "clauses",
+    "clause_head",
+    "clause_head_i",
     "BunsetuRecognizer",
     # from compound_splitter
     "CompoundSplitter",

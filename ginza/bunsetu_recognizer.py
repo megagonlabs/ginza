@@ -1,4 +1,5 @@
-from typing import Iterable, List
+import re
+from typing import Dict, Iterable, List, Optional, Set
 
 from spacy.language import Language
 from spacy.tokens import Doc, Span, Token
@@ -18,6 +19,11 @@ __all__ = [
     "BUNSETU_HEAD_SUFFIX",
     "PHRASE_RELATIONS",
     "POS_PHRASE_MAP",
+    "clauses",
+    "clause_head",
+    "clause_head_i",
+    "CLAUSE_MARKER_RULES",
+    "MIN_BUNSETU_NUM_IN_CLAUSE",
 ]
 
 
@@ -39,6 +45,14 @@ POS_PHRASE_MAP = {
 
     "CCONJ": "CCONJP",
 }
+
+CLAUSE_MARKER_RULES = [
+    {
+        "tag_": "補助記号-読点",
+    },
+]
+
+MIN_BUNSETU_NUM_IN_CLAUSE = 2
 
 
 def bunsetu_available(span: Span):
@@ -139,10 +153,32 @@ def bunsetu_position_types(span: Span) -> List[str]:
         return position_types[start:end]
 
 
+def clauses(doc: Doc) -> List[Token]:
+    clauses = doc.user_data["clauses"]
+    return [[doc[token] for token in tokens] for tokens in clauses.values()]
+
+
+def clause_head(token: Token) -> Token:
+    return token.doc[token.doc.user_data["clause_heads"][token.i]]
+
+
+def clause_head_i(token: Token) -> int:
+    doc = token.doc
+    return doc.user_data["clause_heads"][token.i] - token.sent.start
+
+
 class BunsetuRecognizer:
-    def __init__(self, nlp: Language, remain_bunsetu_suffix: bool = False) -> None:
+    def __init__(
+            self,
+            nlp: Language,
+            remain_bunsetu_suffix: bool = False,
+            clause_marker_rules: List[Dict[str, str]] = CLAUSE_MARKER_RULES,
+            min_bunsetu_num_in_clause: int = MIN_BUNSETU_NUM_IN_CLAUSE,
+        ) -> None:
         self.nlp = nlp
         self._remain_bunsetu_suffix = remain_bunsetu_suffix
+        self._clause_marker_rules = [{k: re.compile(v) for k, v in rule.items()} for rule in clause_marker_rules]
+        self._min_bunsetu_num_in_clause = min_bunsetu_num_in_clause
 
     @property
     def remain_bunsetu_suffix(self) -> str:
@@ -151,6 +187,22 @@ class BunsetuRecognizer:
     @remain_bunsetu_suffix.setter
     def remain_bunsetu_suffix(self, remain: bool):
         self._remain_bunsetu_suffix = remain
+
+    @property
+    def clause_marker_rules(self) -> List[Dict[str, str]]:
+        return [{k: v.pattern for k, v in rules.items()} for rules in self._clause_marker_rules]
+
+    @clause_marker_rules.setter
+    def clause_marker_rules(self, _clause_marker_rules: List[Dict[str, str]]):
+        self._clause_markers = [{k: re.compile(v) for k, v in rules} for rules in _clause_marker_rules]
+
+    @property
+    def min_bunsetu_num_in_clause(self) -> int:
+        return self._min_bunsetu_num_in_clause
+
+    @min_bunsetu_num_in_clause.setter
+    def min_bunsetu_num_in_clause(self, _min_bunsetu_num_in_clause: int):
+        self._min_bunsetu_num_in_clause = _min_bunsetu_num_in_clause
 
     def __call__(self, doc: Doc) -> Doc:
         debug = False
@@ -244,6 +296,69 @@ class BunsetuRecognizer:
                 else:
                     position_types[t.i] = "CONT"
         doc.user_data["bunsetu_position_types"] = position_types
+
+        bunsetu_heads_set = set(bunsetu_heads)
+        clause_head_candidates = set()
+        roots = set()
+        for t in doc:
+            for rule in self._clause_marker_rules:
+                if t.dep_.lower() == "root":
+                    roots.add(t.i)
+                    continue
+                for attr, pattern in rule.items():
+                    if not pattern.fullmatch(getattr(t, attr)):
+                        break
+                else:
+                    if t.i in bunsetu_heads_set:
+                        clause_head_candidates.add(t.i)
+                    else:
+                        for ancestor in t.ancestors:
+                            if ancestor.i in bunsetu_heads_set:
+                                clause_head_candidates.add(t.head.i)
+                                break
+                    break
+        clause_head_candidates -= roots
+
+        for clause_head in list(sorted(clause_head_candidates)):
+            subtree = set(_.i for _ in doc[clause_head].subtree)
+            if len(subtree & bunsetu_heads_set) < self._min_bunsetu_num_in_clause:
+                clause_head_candidates.remove(clause_head)
+
+        clause_head_candidates |= roots
+        for clause_head in list(sorted(clause_head_candidates)):
+            subtree = set(_.i for _ in doc[clause_head].subtree)
+            subtree_bunsetu = subtree & bunsetu_heads_set
+            descendant_clauses = subtree & clause_head_candidates - {clause_head}
+            for subclause in descendant_clauses:
+                subtree_bunsetu -= set(_.i for _ in doc[subclause].subtree)
+            if len(subtree_bunsetu) < self._min_bunsetu_num_in_clause:
+                if clause_head in roots:
+                    clause_head_candidates -= descendant_clauses
+                else:
+                    clause_head_candidates.remove(clause_head)
+        
+        clause_heads = list(sorted(clause_head_candidates))
+
+        def _children_except_clause_heads(idx):
+            children = []
+            for t in doc[idx].lefts:
+                if t.i in clause_heads:
+                    continue
+                children += _children_except_clause_heads(t.i)
+            children.append(idx)
+            for t in doc[idx].rights:
+                if t.i in clause_heads:
+                    continue
+                children += _children_except_clause_heads(t.i)
+            return children
+
+        clauses = {head: _children_except_clause_heads(head) for head in clause_heads}
+        doc.user_data["clauses"] = clauses
+        clause_heads = [-1] * len(doc)
+        for head, tokens in clauses.items():
+            for token in tokens:
+                clause_heads[token] = head
+        doc.user_data["clause_heads"] = clause_heads
         return doc
 
 
