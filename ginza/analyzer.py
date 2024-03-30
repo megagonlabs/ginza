@@ -9,7 +9,7 @@ from spacy.tokens import Doc, Span
 from spacy.language import Language
 from spacy.lang.ja import Japanese
 
-from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes, bunsetu_bi_label, bunsetu_position_type
+from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes, bunsetu_bi_label, bunsetu_position_type, clause_head_i
 from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
 
 
@@ -213,18 +213,20 @@ def conllu_token_line(sent, token, np_label, use_bunsetu, use_normalized_form, u
     reading = reading_form(token, use_orth_if_reading_is_none)
     ne = ent_label_ontonotes(token)
     ene = ent_label_ene(token)
+    clause_head = clause_head_i(token) + 1
     misc = "|".join(
         filter(
             lambda s: s,
             (
                 "SpaceAfter=Yes" if token.whitespace_ else "SpaceAfter=No",
-                "" if not bunsetu_bi else "BunsetuBILabel={}".format(bunsetu_bi),
-                "" if not position_type else "BunsetuPositionType={}".format(position_type),
+                "" if not bunsetu_bi else f"BunsetuBILabel={bunsetu_bi}",
+                "" if not position_type else f"BunsetuPositionType={position_type}",
                 np_label,
-                "" if not inf else "Inf={}".format(inf),
+                "" if not inf else f"Inf={inf}",
                 "" if not reading else "Reading={}".format(reading.replace("|", "\\|").replace("\\", "\\\\")),
-                "" if not ne or ne == "O" else "NE={}".format(ne),
-                "" if not ene or ene == "O" else "ENE={}".format(ene),
+                "" if not ne or ne == "O" else f"NE={ne}",
+                "" if not ene or ene == "O" else f"ENE={ene}",
+                "" if not clause_head else f"ClauseHead={clause_head}",
             )
         )
     )
