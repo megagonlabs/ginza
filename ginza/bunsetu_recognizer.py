@@ -153,7 +153,7 @@ def bunsetu_position_types(span: Span) -> List[str]:
         return position_types[start:end]
 
 
-def clauses(doc: Doc) -> List[int]:
+def clauses(doc: Doc) -> List[Token]:
     clauses = doc.user_data["clauses"]
     return [[doc[token] for token in tokens] for tokens in clauses.values()]
 
