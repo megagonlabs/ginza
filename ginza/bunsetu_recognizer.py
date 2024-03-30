@@ -158,13 +158,13 @@ def clauses(doc: Doc) -> List[Token]:
     return [[doc[token] for token in tokens] for tokens in clauses.values()]
 
 
+def clause_head(token: Token) -> Token:
+    return token.doc[token.doc.user_data["clause_heads"][token.i]]
+
+
 def clause_head_i(token: Token) -> int:
     doc = token.doc
-    return doc.user_data["clause_heads"][token.i]
-
-
-def clause_head(token: Token) -> Token:
-    return token.doc[clause_head_i(token)]
+    return doc.user_data["clause_heads"][token.i] - token.sent.start
 
 
 class BunsetuRecognizer:
@@ -297,32 +297,47 @@ class BunsetuRecognizer:
                     position_types[t.i] = "CONT"
         doc.user_data["bunsetu_position_types"] = position_types
 
+        bunsetu_heads_set = set(bunsetu_heads)
         clause_head_candidates = set()
+        roots = set()
         for t in doc:
             for rule in self._clause_marker_rules:
                 if t.dep_.lower() == "root":
-                    clause_head_candidates.add(t.i)
+                    roots.add(t.i)
                     continue
                 for attr, pattern in rule.items():
                     if not pattern.fullmatch(getattr(t, attr)):
                         break
                 else:
-                    if t.i in bunsetu_heads:
+                    if t.i in bunsetu_heads_set:
                         clause_head_candidates.add(t.i)
                     else:
                         for ancestor in t.ancestors:
-                            if ancestor.i in bunsetu_heads:
+                            if ancestor.i in bunsetu_heads_set:
                                 clause_head_candidates.add(t.head.i)
                                 break
                     break
+        clause_head_candidates -= roots
+
+        for clause_head in list(sorted(clause_head_candidates)):
+            subtree = set(_.i for _ in doc[clause_head].subtree)
+            if len(subtree & bunsetu_heads_set) < self._min_bunsetu_num_in_clause:
+                clause_head_candidates.remove(clause_head)
+
+        clause_head_candidates |= roots
+        for clause_head in list(sorted(clause_head_candidates)):
+            subtree = set(_.i for _ in doc[clause_head].subtree)
+            subtree_bunsetu = subtree & bunsetu_heads_set
+            descendant_clauses = subtree & clause_head_candidates - {clause_head}
+            for subclause in descendant_clauses:
+                subtree_bunsetu -= set(_.i for _ in doc[subclause].subtree)
+            if len(subtree_bunsetu) < self._min_bunsetu_num_in_clause:
+                if clause_head in roots:
+                    clause_head_candidates -= descendant_clauses
+                else:
+                    clause_head_candidates.remove(clause_head)
         
-        bunsetu_heads_set = set(bunsetu_heads)
-        clause_heads = []
-        for clause_head in sorted(clause_head_candidates):
-            children = set(_.i for _ in doc[clause_head].subtree)
-            if len(children & bunsetu_heads_set) < self._min_bunsetu_num_in_clause:
-                continue
-            clause_heads.append(clause_head)
+        clause_heads = list(sorted(clause_head_candidates))
 
         def _children_except_clause_heads(idx):
             children = []
