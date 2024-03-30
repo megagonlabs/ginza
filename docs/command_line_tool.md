@@ -7,15 +7,15 @@
 $ ginza
 銀座でランチをご一緒しましょう。
 # text = 銀座でランチをご一緒しましょう。
-1	銀座	銀座	PROPN	名詞-固有名詞-地名-一般	_	6	obl	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ギンザ|NE=B-GPE|ENE=B-City
-2	で	で	ADP	助詞-格助詞	_	1	case	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=デ
-3	ランチ	ランチ	NOUN	名詞-普通名詞-一般	_	6	obj	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ランチ
-4	を	を	ADP	助詞-格助詞	_	3	case	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=ヲ
-5	ご	ご	NOUN	接頭辞	_	6	compound	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=CONT|Reading=ゴ
-6	一緒	一緒	VERB	名詞-普通名詞-サ変可能	_	0	root	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=ROOT|Reading=イッショ
-7	し	する	AUX	動詞-非自立可能	_	6	aux	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,連用形-一般|Reading=シ
-8	ましょう	ます	AUX	助動詞	_	6	aux	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=助動詞-マス,意志推量形|Reading=マショウ
-9	。	。	PUNCT	補助記号-句点	_	6	punct	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=CONT|Reading=。
+1       銀座    銀座    PROPN   名詞-固有名詞-地名-一般 _       6       nmod    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ギンザ|NE=B-GPE|ENE=B-City|ClauseHead=6
+2       で      で      ADP     助詞-格助詞     _       1       case    _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=デ|ClauseHead=6
+3       ランチ  ランチ  NOUN    名詞-普通名詞-一般      _       6       obj     _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ランチ|ClauseHead=6
+4       を      を      ADP     助詞-格助詞     _       3       case    _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=ヲ|ClauseHead=6
+5       ご      ご      NOUN    接頭辞  _       6       compound        _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=CONT|NP_B|Reading=ゴ|ClauseHead=6
+6       一緒    一緒    NOUN    名詞-普通名詞-サ変可能  _       0       root    _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=ROOT|NP_I|Reading=イッショ|ClauseHead=6
+7       し      する    AUX     動詞-非自立可能 _       6       aux     _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,連用形-一般|Reading=シ|ClauseHead=6
+8       ましょう        ます    AUX     助動詞  _       6       aux     _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=助動詞-マス,意志推量形|Reading=マショウ|ClauseHead=6
+9       。      。      PUNCT   補助記号-句点   _       6       punct   _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=CONT|Reading=。|ClauseHead=6
 
 ```
 

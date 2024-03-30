@@ -41,7 +41,7 @@ for frame, count in sorted(frames.items(), key=lambda t: -t[1]):
   print(count, *frame, sep="\t")  # 出現頻度の高い順に表示
 ```
 
-#### 表1 GiNZA v4で追加された文節APIの一覧
+#### 表1 GiNZAの文節APIの一覧
 
 | category | func or variable | description |
 | --- | --- | --- |
@@ -72,6 +72,10 @@ for frame, count in sorted(frames.items(), key=lambda t: -t[1]):
 | Subtoken | | |
 | | sub_tokens()              | トークンの分割情報。 |
 | | set_split_mode()          | デフォルトの分割モードの変更。 |
+| Clause | | |
+| | clauses()                | 節単位に分割されたトークン列。(experimental) |
+| | clause_head()            | トークンが属する節のヘッドとなるトークン。(experimental) |
+| | clause_head_i()          | トークンが属する節のヘッドとなるトークン番号。(experimental) |
 
 ## 解説資料
 

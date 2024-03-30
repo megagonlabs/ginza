@@ -8,22 +8,23 @@
 
 ## What's new!
 
-- [`ja_ginza_bert_large`のβ版を公開中](https://github.com/megagonlabs/ginza/releases/tag/v5.1.3)
+- `GiNZA v5.2.0`をリリースしました (2024.03.31)
+  - 日本語の節認定のためのAPIを追加 (experimental)
+- [`ja_ginza_bert_large`のβ版を公開中](https://github.com/megagonlabs/ginza/releases/tag/v5.2.0)
   - [cl-tohoku/bert-large-japanese-v2](https://huggingface.co/cl-tohoku/bert-large-japanese-v2)をベースモデルに採用
   - 精度が大幅に向上（LAS=0.938, UAS=0.949, UPOS=0.983, ENE=0.708）
   - CUDAに対応し8GB以上のRAMを搭載したGPU環境、または、M1・M2などApple Silicon環境の利用を推奨
-- `GiNZA v5.1.3`
-  - `spaCy v3.2 ~ v3.6`に対応
-- `GiNZA v5.1`
-  - `spaCy v3.2`と`Sudachi.rs(SudachiPy v0.6.2)`に対応
-  - バッチ解析処理をGPU環境で50〜60%・CPU環境で10〜40%高速化
-  - ginzaコマンドの並列実行オプション(`ginza -p {n_process}`および`ginzame`)の処理効率を向上
 - ginzaコマンドで日本語以外を含む全てのspaCyモデルが利用可能に
   - `ginza -m en_core_web_md` の形でモデル名を指定することで[CoNLL-U](https://universaldependencies.org/format.html#syntactic-annotation)出力ツールとして利用可能
 - [ginzaコマンドの解説ページ](https://megagonlabs.github.io/ginza/command_line_tool.html)の記述を拡充
   - `ginza`コマンドで使用するGPUのgpu_idを`ginza -g 1`の形で指定可能に
 
 ***GiNZAをアップグレードする際は下記の互換性情報を確認してください。***
+
+## GiNZA v5.2 互換性情報
+- Pythonの対応バージョンが3.8以上に変更されました
+- spaCyの対応バージョンがv3.4.4に変更されました
+- コマンドラインのconllu出力のmisc列にClauseHeadフィールドが追加されました
 
 ## GiNZA v5.1 互換性情報
 - `ginza --require_gpu`および`ginza -g`オプションが引数にgpu_idを取るようになりました
@@ -69,7 +70,7 @@ GiNZA v5の解析精度は以前のバージョンから飛躍的な向上を遂
 
 ## 実行環境
 
-GiNZAは Python 3.6以上（および対応するpip）で動作検証を行っています。
+GiNZAは Python 3.8以上（および対応するpip）で動作検証を行っています。
 GiNZAをインストールする前に予めPython実行環境を構築してください。
 
 ### 実行環境のセットアップ
@@ -137,15 +138,15 @@ $ pip install torch thinc-apple-ops
 $ ginza
 銀座でランチをご一緒しましょう。
 # text = 銀座でランチをご一緒しましょう。
-1	銀座	銀座	PROPN	名詞-固有名詞-地名-一般	_	6	obl	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ギンザ|NE=B-GPE|ENE=B-City
-2	で	で	ADP	助詞-格助詞	_	1	case	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=デ
-3	ランチ	ランチ	NOUN	名詞-普通名詞-一般	_	6	obj	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ランチ
-4	を	を	ADP	助詞-格助詞	_	3	case	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=ヲ
-5	ご	ご	NOUN	接頭辞	_	6	compound	_	SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=CONT|Reading=ゴ
-6	一緒	一緒	VERB	名詞-普通名詞-サ変可能	_	0	root	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=ROOT|Reading=イッショ
-7	し	する	AUX	動詞-非自立可能	_	6	aux	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,連用形-一般|Reading=シ
-8	ましょう	ます	AUX	助動詞	_	6	aux	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=助動詞-マス,意志推量形|Reading=マショウ
-9	。	。	PUNCT	補助記号-句点	_	6	punct	_	SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=CONT|Reading=。
+1       銀座    銀座    PROPN   名詞-固有名詞-地名-一般 _       6       nmod    _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ギンザ|NE=B-GPE|ENE=B-City|ClauseHead=6
+2       で      で      ADP     助詞-格助詞     _       1       case    _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=デ|ClauseHead=6
+3       ランチ  ランチ  NOUN    名詞-普通名詞-一般      _       6       obj     _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=SEM_HEAD|NP_B|Reading=ランチ|ClauseHead=6
+4       を      を      ADP     助詞-格助詞     _       3       case    _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Reading=ヲ|ClauseHead=6
+5       ご      ご      NOUN    接頭辞  _       6       compound        _       SpaceAfter=No|BunsetuBILabel=B|BunsetuPositionType=CONT|NP_B|Reading=ゴ|ClauseHead=6
+6       一緒    一緒    NOUN    名詞-普通名詞-サ変可能  _       0       root    _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=ROOT|NP_I|Reading=イッショ|ClauseHead=6
+7       し      する    AUX     動詞-非自立可能 _       6       aux     _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=サ行変格,連用形-一般|Reading=シ|ClauseHead=6
+8       ましょう        ます    AUX     助動詞  _       6       aux     _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=SYN_HEAD|Inf=助動詞-マス,意志推量形|Reading=マショウ|ClauseHead=6
+9       。      。      PUNCT   補助記号-句点   _       6       punct   _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=CONT|Reading=。|ClauseHead=6
 
 ```
 実行環境に`ja_ginza_electra`と`ja_ginza`の両方のモデルがインストールされている場合、`ginza`コマンドは`ja_ginza_electra`を優先して使用します。同じ状況で`ja_ginza`を使用するには`ginza -m`オプションでモデル名を指定します。
@@ -272,6 +273,13 @@ Contains information from mC4 which is made available under the ODC Attribution 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 
 ### version 5.x
+
+#### ginza-5.2.0
+- 2024-03-31
+- Require python>=3.8 
+- Migrate to spaCy v3.7
+- New functionality
+  - add Japanese clause recognition API (experimental)
 
 #### ginza-5.1.3
 - 2023-09-25
