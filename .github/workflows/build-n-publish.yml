@@ -9,11 +9,11 @@ on:
 jobs:
   build:
     name: Build Python 🐍 distributions 📦
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@master
       - name: Set up Python 3.9
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v1
         with:
           python-version: 3.9
       - name: Install pypa/build
@@ -31,7 +31,7 @@ jobs:
           --outdir dist/
           .
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
