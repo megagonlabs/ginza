@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build Python 🐍 distributions 📦
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
       - name: Set up Python 3.9
