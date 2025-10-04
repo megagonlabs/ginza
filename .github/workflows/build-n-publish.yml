@@ -1,4 +1,4 @@
-name: Build Python 🐍 distributions 📦
+name: Build and Release Python 🐍 distributions 📦
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
   workflow_dispatch:  # 手動実行も可能にする
 
 jobs:
-  build:
-    name: Build Python 🐍 distributions 📦
+  build-and-release:
+    name: Build and Release Python 🐍 distributions 📦
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -35,3 +35,11 @@ jobs:
         with:
           name: python-package-distributions
           path: dist/
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
