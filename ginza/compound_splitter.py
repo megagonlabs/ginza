@@ -1,6 +1,7 @@
 # encoding: utf8
 from collections import OrderedDict
 import re
+from typing import Union
 
 import srsly
 
@@ -138,11 +139,11 @@ class CompoundSplitter:
         return doc
 
     @property
-    def split_mode(self) -> str:
+    def split_mode(self) -> Union[str, None]:
         return self._split_mode
 
     @split_mode.setter
-    def split_mode(self, mode: str):
+    def split_mode(self, mode: Union[str, None]):
         assert mode in (None, "A", "B", "C"), 'split_mode should be "A", "B", "C", or None'
         self._split_mode = mode
 
