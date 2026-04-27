@@ -59,7 +59,7 @@ __all__ = [
 def make_compound_splitter(
     nlp: Language,
     name: str,
-    split_mode: str = None,
+    split_mode: Union[str, None] = None,
 ):
     return CompoundSplitter(
         nlp.vocab,
