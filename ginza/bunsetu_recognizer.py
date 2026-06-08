@@ -194,7 +194,10 @@ class BunsetuRecognizer:
 
     @clause_marker_rules.setter
     def clause_marker_rules(self, _clause_marker_rules: List[Dict[str, str]]):
-        self._clause_markers = [{k: re.compile(v) for k, v in rules} for rules in _clause_marker_rules]
+        self._clause_marker_rules = [
+            {k: re.compile(v) for k, v in rules.items()}
+            for rules in _clause_marker_rules
+        ]
 
     @property
     def min_bunsetu_num_in_clause(self) -> int:
