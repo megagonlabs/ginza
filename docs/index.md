@@ -358,7 +358,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
 - 重要な変更
   - プラットフォームをspaCy v3に変更
   - transformersモデルを採用して飛躍的に精度を向上した解析モデルパッケージ`ja-ginza-electra`をリリースしました。
-  - 従来型の解析モデルパッケージ`ja-ginza`のpiplelineに`morphologizer`を追加し、UD品詞解析精度を向上しました。
+  - 従来型の解析モデルパッケージ`ja-ginza`のpipelineに`morphologizer`を追加し、UD品詞解析精度を向上しました。
   - transformersモデルの追加に伴いGiNZA v5インストール時は`ginza`パッケージとともに解析モデルパッケージを明示的に指定する必要があります
     - 解析精度重視モデル (メモリ容量16GB以上を推奨)
       - `pip install -U ginza ja-ginza-electra`
