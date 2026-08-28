@@ -4,6 +4,9 @@
 [default.extend-identifiers]
 
 [default.extend-words]
+pn = "pn"
+longtitude = "longtitude"
+goe = "goe"
 
 [files]
 extend-exclude = ["requirements.txt"]
