@@ -142,7 +142,7 @@ class TestCLIGinza:
         p = run_cmd(["ginza", "-m", ensure_model, input_file])
         assert (p.returncode == 0) is exit_ok
 
-    def test_double_model_spcification(self, input_file):
+    def test_double_model_specification(self, input_file):
         p = run_cmd(["ginza", "-b", "ja_ginza", "-m", "ja_ginza", input_file])
         assert p.returncode != 0
 
@@ -237,7 +237,7 @@ class TestCLIGinza:
     def test_use_normalized_form(self, input_file):
         p = run_cmd(["ginza", "-n", input_file])
         lemmas = [l.split("\t")[2] for l in p.stdout.split("\n") if len(l.split("\t")) > 1]
-        # 'カツ丼' is normlized_form of 'かつ丼'
+        # 'カツ丼' is normalized_form of 'かつ丼'
         assert p.returncode == 0
         assert "カツ丼" in lemmas
 
