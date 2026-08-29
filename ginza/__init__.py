@@ -120,6 +120,20 @@ def set_split_mode(nlp: Language, mode: Optional[str]):
 
 # token field getters
 
+def _safe_norm_(token: Token) -> str:
+    try:
+        return token.norm_
+    except Exception:
+        return token.orth_
+
+
+def _safe_lemma_(token: Token) -> str:
+    try:
+        return token.lemma_
+    except Exception:
+        return token.orth_
+
+
 def token_i(token: Token) -> int:
     return token.i
 

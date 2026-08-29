@@ -9,7 +9,7 @@ from spacy.tokens import Doc, Span
 from spacy.language import Language
 from spacy.lang.ja import Japanese
 
-from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes, bunsetu_bi_label, bunsetu_position_type, clause_head_i
+from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes, bunsetu_bi_label, bunsetu_position_type, clause_head_i, _safe_lemma_, _safe_norm_
 from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
 
 
@@ -158,9 +158,9 @@ def format_json(sent: Span) -> str:
         }","pos":"{
             token.pos_
         }","lemma":"{
-            token.lemma_
+            _safe_lemma_(token)
         }","norm":"{
-            token.norm_
+            _safe_norm_(token)
         }","head":{
             token.head.i - token.i
         },"dep":"{
@@ -235,7 +235,7 @@ def conllu_token_line(sent, token, np_label, use_bunsetu, use_normalized_form, u
         [
             str(token.i - sent.start + 1),
             token.orth_,
-            token.norm_ if use_normalized_form else token.lemma_,
+            _safe_norm_(token) if use_normalized_form else _safe_lemma_(token),
             token.pos_,
             token.tag_.replace(",*", "").replace(",", "-"),
             "NumType=Card" if token.pos_ == "NUM" else "_",
@@ -304,7 +304,7 @@ def cabocha_token_line(token, use_normalized_form) -> str:
     return "{}\t{},{},{},{}\t{}\n".format(
         token.orth_,
         part_of_speech,
-        token.norm_ if use_normalized_form else token.lemma_,
+        _safe_norm_(token) if use_normalized_form else _safe_lemma_(token),
         reading if reading else token.orth_,
         "*",
         "O" if token.ent_iob_ == "O" else "{}-{}".format(token.ent_iob_, token.ent_type_),
