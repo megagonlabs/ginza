@@ -1,5 +1,5 @@
 from functools import singledispatch
-from typing import Callable, Iterable, Union, Tuple, TypeVar
+from typing import Callable, Iterable, Optional, Union, Tuple, TypeVar
 
 from sudachipy.morpheme import Morpheme
 
@@ -59,7 +59,7 @@ __all__ = [
 def make_compound_splitter(
     nlp: Language,
     name: str,
-    split_mode: Union[str, None] = None,
+    split_mode: Optional[str] = None,
 ):
     return CompoundSplitter(
         nlp.vocab,
@@ -112,7 +112,7 @@ def force_using_normalized_form_as_lemma(force: bool):
         Morpheme.dictionary_form = _morpheme_dictionary_form
 
 
-def set_split_mode(nlp: Language, mode: str):
+def set_split_mode(nlp: Language, mode: Optional[str]):
     if nlp.has_pipe("compound_splitter"):
         splitter = nlp.get_pipe("compound_splitter")
         splitter.split_mode = mode
