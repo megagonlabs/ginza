@@ -13,7 +13,7 @@ from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label
 from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
 
 
-def try_sudachi_import(split_mode: str):
+def try_sudachi_import(split_mode: Optional[str]):
     """SudachiPy is required for Japanese support, so check for it.
     It it's not available blow up and explain how to fix it.
     split_mode should be one of these values: "A", "B", "C", None->"A"."""
@@ -41,7 +41,7 @@ class Analyzer:
     def __init__(
         self,
         model_name_or_path: str,
-        split_mode: str,
+        split_mode: Optional[str],
         hash_comment: str,
         output_format: str,
         require_gpu: int,
