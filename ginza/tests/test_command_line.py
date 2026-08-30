@@ -11,6 +11,10 @@ import torch
 import ginza.command_line as cli
 
 TEST_TEXT = "#コメント\n今日はかつ丼を食べた。\n明日は東京で蕎麦を食べる。明後日は酒が飲みたい。"
+LONG_TEST_TEXTS = [
+    "０１２３４５６７８９ＡＢＣＤＥＦあいうえおかきくけこサシスセソ田" * 512,
+    "０１２３４５６７８９ＡＢＣＤＥＦあいうえおかきくけこサシスセソ田" * 513,
+]
 
 run_cmd = partial(sp.run, encoding="utf-8", stdout=sp.PIPE)
 
@@ -38,13 +42,16 @@ def input_files(tmpdir: Path) -> Iterable[Path]:
 
 
 @pytest.fixture(scope="module")
-def long_input_file(tmpdir: Path) -> Iterable[Path]:
-    file_path = (tmpdir / "test_long_input.txt").resolve()
-    with open(file_path, "w") as fp:
-        for _ in range(10):
-            print(TEST_TEXT, file=fp)
-    yield file_path
-    file_path.unlink()
+def long_input_files(tmpdir: Path) -> Iterable[Path]:
+    paths = []
+    for i, text in enumerate(LONG_TEST_TEXTS):
+        file_path = (tmpdir / f"test_long_input_{i}.txt").resolve()
+        with open(file_path, "w") as fp:
+            print(text, file=fp)
+        paths.append(file_path)
+    yield paths
+    for file_path in paths:
+        file_path.unlink()
 
 
 @pytest.fixture
@@ -263,9 +270,16 @@ class TestCLIGinzame:
         assert p_ginzame.returncode == 0
         assert p_ginzame.stdout == p_ginza.stdout
 
+    def test_ginzame_long(self, long_input_files):
+        p_ginzame = run_cmd(["ginzame", *long_input_files])
+        p_ginza = run_cmd(["ginza", "-n", "-m", "ja_ginza", "-f", "2", "-s", "A", *long_input_files])
+
+        assert p_ginzame.returncode == 0
+        assert p_ginzame.stdout == p_ginza.stdout
+
 
 class TestRun:
-    def test_run_as_single_when_input_is_a_tty(self, mocker, output_file, long_input_file):
+    def test_run_as_single_when_input_is_a_tty(self, mocker, output_file, long_input_files):
         i = 0
 
         def f_mock_input():
@@ -288,7 +302,7 @@ class TestRun:
         "output_format",
         ["conllu", "cabocha", "mecab", "json"],
     )
-    def test_parallel_output_same_as_single(self, output_format, mocker, tmpdir, long_input_file):
+    def test_parallel_output_same_as_single(self, output_format, mocker, tmpdir, long_input_files):
         mocker.patch.object(cli, "MINI_BATCH_SIZE", 5)
 
         out_single = tmpdir / "single_output.txt"
@@ -298,7 +312,7 @@ class TestRun:
             parallel_level=1,
             output_path=out_single,
             output_format=output_format,
-            files=[long_input_file],
+            files=long_input_files,
             ensure_model="ja_ginza",
         )
 
@@ -310,7 +324,7 @@ class TestRun:
                 parallel_level=2,
                 output_path=out_parallel,
                 output_format=output_format,
-                files=[long_input_file],
+                files=long_input_files,
                 ensure_model="ja_ginza",
             )
         except:
