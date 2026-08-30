@@ -11,6 +11,7 @@ import plac
 from .analyzer import Analyzer
 
 MINI_BATCH_SIZE = 100
+MAX_BYTE_LENGTH = 49149  # defined in sudachi.rs https://github.com/megagonlabs/ginza/issues/242
 GINZA_MODEL_PATTERN = re.compile(r"^(ja_ginza|ja_ginza_electra)$")
 SPACY_MODEL_PATTERN = re.compile(r"^[a-z]{2}[-_].+[-_].+(sm|md|lg|trf)$")
 
@@ -139,12 +140,37 @@ def run(
         output.close()
 
 
+def split_text_in_bytes(text: str, max_byte_length: int = MAX_BYTE_LENGTH) -> list[str]:
+    assert max_byte_length >= 4
+    max_char_length = max_byte_length // 4
+    if len(text) <= max_char_length:
+        return [text]
+    texts = []
+    utf_bytes = text.encode("utf8")
+    while utf_bytes:
+        if len(utf_bytes) <= max_byte_length:
+            texts.append(utf_bytes.decode("utf8"))
+            break
+        for offset in range(0, 4):
+            if utf_bytes[max_byte_length - offset] & 0xc0 != 0x80:
+                texts.append(utf_bytes[:max_byte_length - offset].decode("utf8"))
+                utf_bytes = utf_bytes[max_byte_length - offset:]
+                break
+        else:
+            # go ahead even an invalid UTF-8 string.
+            texts.append(utf_bytes[:max_byte_length].decode("utf8"))
+            utf_bytes = utf_bytes[max_byte_length:]
+    return texts
+
+
 def _analyze_tty(analyzer: Analyzer, output: _OutputWrapper) -> None:
     try:
         analyzer.set_nlp()
         while True:
             line = input()
-            output.write(analyzer.analyze_line(line))
+            lines = split_text_in_bytes(line)
+            for _ in lines:
+                output.write(analyzer.analyze_line(_))
     except EOFError:
         pass
     except KeyboardInterrupt:
@@ -158,11 +184,11 @@ def _analyze_single(analyzer: Analyzer, output: _OutputWrapper, files: Iterable[
         for path in files:
             with open(path, "r", encoding="utf-8") as f:
                 for line in f:
-                    batch.append(line)
+                    batch += split_text_in_bytes(line)
                     if len(batch) < MINI_BATCH_SIZE:
                         continue
-                    output.write(analyzer.analyze_batch(batch))
-                    batch.clear()
+                    output.write(analyzer.analyze_batch(batch[:MINI_BATCH_SIZE]))
+                    batch = batch[MINI_BATCH_SIZE:]
         if batch:
             output.write(analyzer.analyze_batch(batch))
     except KeyboardInterrupt:
@@ -203,10 +229,11 @@ def _data_loader(files: List[str], batch_size: int) -> Generator[List[str], None
     for path in files:
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
-                mini_batch.append(line)
-                if len(mini_batch) == batch_size:
-                    yield mini_batch
-                    mini_batch = []
+                lines = split_text_in_bytes(line)
+                mini_batch += lines
+                if len(mini_batch) >= batch_size:
+                    yield mini_batch[:batch_size]
+                    mini_batch = mini_batch[batch_size:]
     if mini_batch:
         yield mini_batch
 
