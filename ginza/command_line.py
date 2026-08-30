@@ -140,7 +140,7 @@ def run(
         output.close()
 
 
-def split_text_in_bytes(text: str, max_byte_length=MAX_BYTE_LENGTH: int) -> list(str):
+def split_text_in_bytes(text: str, max_byte_length: int = MAX_BYTE_LENGTH) -> list[str]:
     assert max_byte_length >= 4
     max_char_length = max_byte_length // 4
     if len(text) <= max_char_length:
@@ -233,7 +233,7 @@ def _data_loader(files: List[str], batch_size: int) -> Generator[List[str], None
                 mini_batch += lines
                 if len(mini_batch) >= batch_size:
                     yield mini_batch[:batch_size]
-                    mini_batch = [batch_size:]
+                    mini_batch = mini_batch[batch_size:]
     if mini_batch:
         yield mini_batch
 
