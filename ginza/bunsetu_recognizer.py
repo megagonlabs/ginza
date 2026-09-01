@@ -1,4 +1,5 @@
 import re
+from collections import deque
 from typing import Dict, Iterable, List, Optional, Set
 
 from spacy.language import Language
@@ -117,29 +118,20 @@ def bunsetu_phrase_spans(span: Span, phrase_relations: Iterable[str] = PHRASE_RE
 
 
 def bunsetu_phrase_span(token: Token, phrase_relations: Iterable[str] = PHRASE_RELATIONS) -> Span:
-    def _traverse(root_head, _bunsetu, result):
-        # Iterative equivalent of the natural post-order recursion below
-        # (visit qualifying children, then append head). Written iteratively
-        # because a long run of same-dependency tokens (e.g. a repeated
-        # phrase) can build a dependency chain deep enough to exceed
-        # Python's recursion limit (GH#261). Only the caller's min()/max()
-        # over `result` matter, so traversal order doesn't need to match the
-        # recursive version, only the *set* of appended indices does.
-        #
-        #   def _traverse(head, _bunsetu, result):
-        #       for t in head.children:
-        #           if _bunsetu.start <= t.i < _bunsetu.end:
-        #               if t.dep_ in phrase_relations:
-        #                   _traverse(t, _bunsetu, result)
-        #       result.append(head.i)
-        stack = [root_head]
-        while stack:
-            head = stack.pop()
-            for t in head.children:
+    def _traverse(head, _bunsetu, result):
+        queue = deque([head])
+        while queue:
+            node = queue.popleft()
+            if isinstance(node, int):
+                result.append(node)
+                continue
+            subnodes = []
+            for t in node.children:
                 if _bunsetu.start <= t.i < _bunsetu.end:
                     if t.dep_ in phrase_relations:
-                        stack.append(t)
-            result.append(head.i)
+                        subnodes.append(t)
+            subnodes.append(node.i)
+            queue.extendleft(reversed(subnodes))
 
     bunsetu = bunsetu_span(token)
     phrase_tokens = []
@@ -357,62 +349,23 @@ class BunsetuRecognizer:
         
         clause_heads = list(sorted(clause_head_candidates))
 
-        def _children_except_clause_heads(root_idx):
-            # Iterative equivalent of the natural recursive in-order walk
-            # (lefts, self, rights) below, skipping clause-head subtrees.
-            # Written iteratively because a long run of same-dependency
-            # tokens (e.g. a repeated phrase) can build a dependency chain
-            # deep enough to exceed Python's recursion limit (GH#261).
-            #
-            #   def _children_except_clause_heads(idx):
-            #       children = []
-            #       for t in doc[idx].lefts:
-            #           if t.i in clause_heads:
-            #               continue
-            #           children += _children_except_clause_heads(t.i)
-            #       children.append(idx)
-            #       for t in doc[idx].rights:
-            #           if t.i in clause_heads:
-            #               continue
-            #           children += _children_except_clause_heads(t.i)
-            #       return children
+        def _children_except_clause_heads(idx):
             children = []
-            # Each stack frame is [idx, lefts_iter, appended_self, rights_iter].
-            # lefts_iter/rights_iter are None once that phase is done;
-            # appended_self tracks whether idx itself has been appended yet.
-            stack = [[root_idx, iter(doc[root_idx].lefts), False, None]]
-            while stack:
-                frame = stack[-1]
-                idx, lefts_iter, appended_self, rights_iter = frame
-                if lefts_iter is not None:
-                    pushed = False
-                    for t in lefts_iter:
-                        if t.i in clause_heads:
-                            continue
-                        stack.append([t.i, iter(doc[t.i].lefts), False, None])
-                        pushed = True
-                        break
-                    if pushed:
-                        continue
-                    frame[1] = None
+            queue = deque([doc[idx]])
+            while queue:
+                node = queue.popleft()
+                if isinstance(node, int):
+                    children.append(node)
                     continue
-                if not appended_self:
-                    children.append(idx)
-                    frame[2] = True
-                    frame[3] = iter(doc[idx].rights)
-                    continue
-                if rights_iter is not None:
-                    pushed = False
-                    for t in rights_iter:
-                        if t.i in clause_heads:
-                            continue
-                        stack.append([t.i, iter(doc[t.i].lefts), False, None])
-                        pushed = True
-                        break
-                    if pushed:
-                        continue
-                    frame[3] = None
-                stack.pop()
+                subnodes = []
+                for t in node.lefts:
+                    if t.i not in clause_heads:
+                        subnodes.append(t)
+                subnodes.append(t.i)
+                for t in node.rights:
+                    if t.i not in clause_heads:
+                        subnodes.append(t)
+                queue.extendleft(reversed(subnodes))
             return children
 
         clauses = {head: _children_except_clause_heads(head) for head in clause_heads}
