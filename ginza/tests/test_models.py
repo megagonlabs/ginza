@@ -12,11 +12,12 @@ TOKENIZER_TESTS = [
     ("すもももももももものうち", ["すもも", "も", "もも", "も", "もも", "の", "うち"]),
 ]
 
-COMPOUND_SPLITER_TESTS = [
+COMPOUND_SPLITTER_TESTS = [
     ("選挙管理委員会", 4, 3, 1),
     ("客室乗務員", 3, 2, 1),
     ("労働者協同組合", 4, 3, 1),
     ("機能性食品", 3, 2, 1),
+    ("待ちわびて", 3, 2, 2),
 ]
 
 TAG_TESTS = [
@@ -56,6 +57,8 @@ EMPTYISH_TESTS = [
 ]
 
 NAUGHTY_STRINGS = [
+    # Regression test for deeply nested dependency trees (#261)
+    "漢字" * 1000,
     # ASCII punctuation
     r",./;'[]\-=",
     r'<>?:"{}|_+',
@@ -172,8 +175,8 @@ def test_tokenize(nlp, text, expected_tokens):
 
 
 @pytest.mark.parametrize("nlp", MODELS, indirect=True)
-@pytest.mark.parametrize("text, len_a, len_b, len_c", COMPOUND_SPLITER_TESTS)
-def test_compound_spliter(nlp, text, len_a, len_b, len_c):
+@pytest.mark.parametrize("text, len_a, len_b, len_c", COMPOUND_SPLITTER_TESTS)
+def test_compound_splitter(nlp, text, len_a, len_b, len_c):
     assert len(nlp(text)) == len_c
     for split_mode, l in zip(["A", "B", "C"], [len_a, len_b, len_c]):
         set_split_mode(nlp, split_mode)

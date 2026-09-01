@@ -1,4 +1,5 @@
 import re
+from collections import deque
 from typing import Dict, Iterable, List, Optional, Set
 
 from spacy.language import Language
@@ -118,11 +119,20 @@ def bunsetu_phrase_spans(span: Span, phrase_relations: Iterable[str] = PHRASE_RE
 
 def bunsetu_phrase_span(token: Token, phrase_relations: Iterable[str] = PHRASE_RELATIONS) -> Span:
     def _traverse(head, _bunsetu, result):
-        for t in head.children:
-            if _bunsetu.start <= t.i < _bunsetu.end:
-                if t.dep_ in phrase_relations:
-                    _traverse(t, _bunsetu, result)
-        result.append(head.i)
+        queue = deque([head])
+        while queue:
+            node = queue.popleft()
+            if isinstance(node, int):
+                result.append(node)
+                continue
+            subnodes = []
+            for t in node.children:
+                if _bunsetu.start <= t.i < _bunsetu.end:
+                    if t.dep_ in phrase_relations:
+                        subnodes.append(t)
+            subnodes.append(node.i)
+            queue.extendleft(reversed(subnodes))
+
     bunsetu = bunsetu_span(token)
     phrase_tokens = []
     _traverse(bunsetu.root, bunsetu, phrase_tokens)
@@ -194,7 +204,10 @@ class BunsetuRecognizer:
 
     @clause_marker_rules.setter
     def clause_marker_rules(self, _clause_marker_rules: List[Dict[str, str]]):
-        self._clause_markers = [{k: re.compile(v) for k, v in rules} for rules in _clause_marker_rules]
+        self._clause_marker_rules = [
+            {k: re.compile(v) for k, v in rules.items()}
+            for rules in _clause_marker_rules
+        ]
 
     @property
     def min_bunsetu_num_in_clause(self) -> int:
@@ -341,15 +354,21 @@ class BunsetuRecognizer:
 
         def _children_except_clause_heads(idx):
             children = []
-            for t in doc[idx].lefts:
-                if t.i in clause_heads:
+            queue = deque([doc[idx]])
+            while queue:
+                node = queue.popleft()
+                if isinstance(node, int):
+                    children.append(node)
                     continue
-                children += _children_except_clause_heads(t.i)
-            children.append(idx)
-            for t in doc[idx].rights:
-                if t.i in clause_heads:
-                    continue
-                children += _children_except_clause_heads(t.i)
+                subnodes = []
+                for t in node.lefts:
+                    if t.i not in clause_heads:
+                        subnodes.append(t)
+                subnodes.append(node.i)
+                for t in node.rights:
+                    if t.i not in clause_heads:
+                        subnodes.append(t)
+                queue.extendleft(reversed(subnodes))
             return children
 
         clauses = {head: _children_except_clause_heads(head) for head in clause_heads}

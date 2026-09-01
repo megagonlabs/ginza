@@ -8,6 +8,9 @@
 
 ## What's new!
 
+- `GiNZA v5.2.1`をリリースしました (2026.09.01)
+  - バグ改修を行いました。
+  - このリリースがPython 3.9以前で動作する最後のバージョンとなります。
 - `GiNZA v5.2.0`をリリースしました (2024.03.31)
   - 日本語の節認定のためのAPIを追加 (experimental)
 - [`ja_ginza_bert_large`のβ版を公開中](https://github.com/megagonlabs/ginza/releases/tag/v5.2.0)
@@ -292,6 +295,20 @@ Contains information from mC4 which is made available under the ODC Attribution 
 
 ### version 5.x
 
+#### ginza-5.2.1
+- 2026-09-01
+- このリリースがPython 3.9以前で動作する最後のバージョンとなります。
+- Support for strict type check of pipeline_component in spacy>=3.8.12
+  - [#274](https://github.com/megagonlabs/ginza/pull/266)
+- fix RecursionError on repeated phrases in bunsetu recognition
+  - [#261](https://github.com/megagonlabs/ginza/issues/261), [#265](https://github.com/megagonlabs/ginza/pull/265)
+- A work around for unregistered lemma_ and norm_
+  - [#248](https://github.com/megagonlabs/ginza/issues/248), [#275](https://github.com/megagonlabs/ginza/pull/275)
+- GiNZA >= 5.1 cannot process long (over 49149 bytes) texts
+  - [#242](https://github.com/megagonlabs/ginza/issues/242), [#276](https://github.com/megagonlabs/ginza/pull/276)
+- Modernize GitHub Actions Environments which support Python 3.10 and 3.11
+  - [#266](https://github.com/megagonlabs/ginza/pull/266) - [#273](https://github.com/megagonlabs/ginza/pull/273)
+
 #### ginza-5.2.0
 - 2024-03-31
 - Require python>=3.8 
@@ -358,7 +375,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
 - 重要な変更
   - プラットフォームをspaCy v3に変更
   - transformersモデルを採用して飛躍的に精度を向上した解析モデルパッケージ`ja-ginza-electra`をリリースしました。
-  - 従来型の解析モデルパッケージ`ja-ginza`のpiplelineに`morphologizer`を追加し、UD品詞解析精度を向上しました。
+  - 従来型の解析モデルパッケージ`ja-ginza`のpipelineに`morphologizer`を追加し、UD品詞解析精度を向上しました。
   - transformersモデルの追加に伴いGiNZA v5インストール時は`ginza`パッケージとともに解析モデルパッケージを明示的に指定する必要があります
     - 解析精度重視モデル (メモリ容量16GB以上を推奨)
       - `pip install -U ginza ja-ginza-electra`

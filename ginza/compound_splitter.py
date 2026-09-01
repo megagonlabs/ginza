@@ -1,6 +1,7 @@
 # encoding: utf8
 from collections import OrderedDict
 import re
+from typing import Optional
 
 import srsly
 
@@ -127,7 +128,7 @@ class CompoundSplitter:
                     print(list(enumerate(doc.user_data["sub_tokens"])), file=sys.stderr)
                     raise e
 
-                # work-around: retokenize() does not consider the head of the splitted tokens
+                # work-around: retokenize() does not consider the head of the split tokens
                 if not compounds:
                     for t in doc:
                         if t.i < token_i or token_i + len(sub_tokens) <= t.i:
@@ -138,11 +139,11 @@ class CompoundSplitter:
         return doc
 
     @property
-    def split_mode(self) -> str:
+    def split_mode(self) -> Optional[str]:
         return self._split_mode
 
     @split_mode.setter
-    def split_mode(self, mode: str):
+    def split_mode(self, mode: Optional[str]):
         assert mode in (None, "A", "B", "C"), 'split_mode should be "A", "B", "C", or None'
         self._split_mode = mode
 

@@ -91,7 +91,7 @@ If you need to install `ja_ginza_electra` along with `pytorch_model.bin` at the 
 $ pip install -U ginza https://github.com/megagonlabs/ginza/releases/download/latest/ja_ginza_electra-latest-with-model.tar.gz
 ```
 
-If you hope to accelarate the transformers-based models by using GPUs with CUDA support, you can install `spacy` by specifying the CUDA version as follows:
+If you hope to accelerate the transformers-based models by using GPUs with CUDA support, you can install `spacy` by specifying the CUDA version as follows:
 ```console
 pip install -U "spacy[cuda117]"
 ```
@@ -239,6 +239,20 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 
 ### version 5.x
 
+#### ginza-5.2.1
+- 2026-09-01
+- This release is the final version that will work with Python 3.9 or earlier.
+- Support for strict type check of pipeline_component in spacy>=3.8.12
+  - [#274](https://github.com/megagonlabs/ginza/pull/266)
+- fix RecursionError on repeated phrases in bunsetu recognition
+  - [#261](https://github.com/megagonlabs/ginza/issues/261), [#265](https://github.com/megagonlabs/ginza/pull/265)
+- A work around for unregistered lemma_ and norm_
+  - [#248](https://github.com/megagonlabs/ginza/issues/248), [#275](https://github.com/megagonlabs/ginza/pull/275)
+- GiNZA >= 5.1 cannot process long (over 49149 bytes) texts
+  - [#242](https://github.com/megagonlabs/ginza/issues/242), [#276](https://github.com/megagonlabs/ginza/pull/276)
+- Modernize GitHub Actions Environments which support Python 3.10 and 3.11
+  - [#266](https://github.com/megagonlabs/ginza/pull/266) - [#273](https://github.com/megagonlabs/ginza/pull/273)
+
 #### ginza-5.2.0
 - 2024-03-31
 - Require python>=3.8 
@@ -304,7 +318,7 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 - Important changes
   - Upgrade spaCy to v3
     - Release transformer-based `ja-ginza-electra` model
-    - Improve UPOS accuracy of the standard `ja-ginza` model by adding `morphologizer` to the tail of spaCy pipleline
+    - Improve UPOS accuracy of the standard `ja-ginza` model by adding `morphologizer` to the tail of spaCy pipeline
   - Need to insrtall analysis model along with `ginza` package
     - High accuracy model (>=16GB memory needed)
       - `pip install -U ginza ja-ginza-electra`

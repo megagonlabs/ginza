@@ -1,0 +1,12 @@
+# Files for typos
+# Instruction:  https://github.com/marketplace/actions/typos-action#getting-started
+
+[default.extend-identifiers]
+
+[default.extend-words]
+pn = "pn"
+longtitude = "longtitude"
+goe = "goe"
+
+[files]
+extend-exclude = ["requirements.txt"]
