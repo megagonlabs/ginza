@@ -361,7 +361,7 @@ class BunsetuRecognizer:
                 for t in node.lefts:
                     if t.i not in clause_heads:
                         subnodes.append(t)
-                subnodes.append(t.i)
+                subnodes.append(node.i)
                 for t in node.rights:
                     if t.i not in clause_heads:
                         subnodes.append(t)
