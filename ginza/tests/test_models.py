@@ -56,6 +56,8 @@ EMPTYISH_TESTS = [
 ]
 
 NAUGHTY_STRINGS = [
+    # Regression test for deeply nested dependency trees (#261)
+    "漢字" * 1000,
     # ASCII punctuation
     r",./;'[]\-=",
     r'<>?:"{}|_+',
