@@ -25,8 +25,8 @@ setup(
     ],
     extras_require={
         "apple": ["thinc[apple]"],
-        "cuda11x": ["thinc[cuda11x]"],
-        "cuda12x": ["thinc[cuda12x]"],
+        "cuda11x": ["thinc[cuda11x]", "cython>=3.3.0"],
+        "cuda12x": ["thinc[cuda12x]", "cython>=3.3.0"],
     }, 
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "pytest-cov", "pytest-mock"],
