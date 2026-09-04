@@ -24,9 +24,9 @@ setup(
         "SudachiDict-core>=20210802",
     ],
     extras_require={
-        "apple": ["thinc[apple]"],
-        "cuda11x": ["thinc[cuda11x]", "cython>=3.3.0"],
-        "cuda12x": ["thinc[cuda12x]", "cython>=3.3.0"],
+        "apple": ["thinc-apple-ops"],
+        "cuda11x": ["cupy-cuda11x"],
+        "cuda12x": ["cupy-cuda12x"],
     }, 
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "pytest-cov", "pytest-mock"],
