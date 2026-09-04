@@ -23,6 +23,11 @@ setup(
         "SudachiPy>=0.6.11,<0.7.0",
         "SudachiDict-core>=20210802",
     ],
+    extras_require={
+        "apple": ["thinc[apple]"],
+        "cuda11x": ["thinc[cuda11x]"],
+        "cuda12x": ["thinc[cuda12x]"],
+    }, 
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "pytest-cov", "pytest-mock"],
     license="MIT",
