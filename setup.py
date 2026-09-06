@@ -16,16 +16,15 @@ setup(
             "ginzame = ginza.command_line:main_ginzame",
         ],
     },
-    python_requires=">=3.10,<3.14",
+    python_requires=">=3.10",
     install_requires=[
         "spacy>=3.8.16,<4.0.0",
         "plac>=1.3.3",
         "SudachiPy>=0.6.11,<0.7.0",
         "SudachiDict-core>=20210802",
+        "thinc-apple-ops>=1.0.0 ; sys_platform == 'darwin' and platform_machine == 'arm64'",
     ],
     extras_require={
-        "cpu": [],
-        "apple": ["thinc-apple-ops"],
         "cuda11x": ["cupy-cuda11x"],
         "cuda12x": ["cupy-cuda12x"],
     }, 
