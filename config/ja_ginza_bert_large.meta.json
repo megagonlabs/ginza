@@ -27,8 +27,8 @@
       "author":"Works Applications Enterprise Co., Ltd."
     },
     {
-      "name":"cl-tohoku/bert-large-japanese-v2",
-      "url":"https://huggingface.co/cl-tohoku/bert-large-japanese-v2",
+      "name":"tohoku-nlp/bert-large-japanese-v2",
+      "url":"https://huggingface.co/tohoku-nlp/bert-large-japanese-v2",
       "license":"Apache License 2.0",
       "author":"Tohoku University"
     }
