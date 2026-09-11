@@ -12,7 +12,7 @@ from .analyzer import Analyzer
 
 MINI_BATCH_SIZE = 100
 MAX_BYTE_LENGTH = 49149  # defined in sudachi.rs https://github.com/megagonlabs/ginza/issues/242
-GINZA_MODEL_PATTERN = re.compile(r"^(ja_ginza|ja_ginza_electra)$")
+GINZA_MODEL_PATTERN = re.compile(r"^(ja_ginza|ja_ginza_electra|ja_ginza_bert_large)$")
 SPACY_MODEL_PATTERN = re.compile(r"^[a-z]{2}[-_].+[-_].+(sm|md|lg|trf)$")
 
 

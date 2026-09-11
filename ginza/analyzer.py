@@ -72,15 +72,15 @@ class Analyzer:
                 nlp = spacy.load(self.model_name_or_path)
             else:
                 try:
-                    nlp = spacy.load("ja_ginza_electra")
+                    nlp = spacy.load("ja_ginza_bert_large")
                 except IOError as e:
                     try:
-                        nlp = spacy.load("ja_ginza")
+                        nlp = spacy.load("ja_ginza_electra")
                     except IOError as e:
                         try:
-                            nlp = spacy.load("ja_ginza_bert_large")
+                            nlp = spacy.load("ja_ginza")
                         except IOError as e:
-                            raise OSError("E050", 'You need to install "ja-ginza" or "ja-ginza-electra" by executing `pip install ja-ginza` or `pip install ja-ginza-electra`.')
+                            raise OSError("E050", 'You need to install "ja-ginza", "ja-ginza-electra", or "ja-ginza-bert-large" by executing `pip install`.')
 
             if self.disable_sentencizer:
                 nlp.add_pipe("disable_sentencizer", before="parser")
