@@ -10,11 +10,11 @@ from typing import Generator, Iterable, Optional, List
 import plac
 from thinc.api import get_current_ops
 from thinc.compat import has_cupy_gpu
+from . import default_model_name, GINZA_MODEL_PACKAGES
 from .analyzer import Analyzer
 
 MINI_BATCH_SIZE = 100
 MAX_BYTE_LENGTH = 49149  # defined in sudachi.rs https://github.com/megagonlabs/ginza/issues/242
-GINZA_MODEL_PATTERN = re.compile(r"^(ja_ginza|ja_ginza_electra|ja_ginza_bert_large)$")
 SPACY_MODEL_PATTERN = re.compile(r"^[a-z]{2}[-_].+[-_].+(sm|md|lg|trf)$")
 TRANSFORMERS_MODEL_PATTERN = re.compile(r"^(ja_ginza_electra|ja_ginza_bert_large|.+_trf)$")
 
@@ -80,7 +80,7 @@ def run(
             from importlib import import_module
             import_module(ensure_model)
         except ModuleNotFoundError:
-            if GINZA_MODEL_PATTERN.match(ensure_model):
+            if ensure_model in GINZA_MODEL_PACKAGES:
                 print("Installing", ensure_model, file=sys.stderr)
                 import pip
                 pip.main(["install", ensure_model])
@@ -93,8 +93,10 @@ def run(
             else:
                 raise OSError("E050", f'You need to install "{ensure_model}" before executing ginza.')
         model_name_or_path = ensure_model
-    else:
+    elif model_path:
         model_name_or_path = model_path
+    else:
+        model_name_or_path = default_model_name()
 
     if output_format in [2, "mecab"]:
         if require_gpu is not None and require_gpu >= 0:
@@ -102,7 +104,7 @@ def run(
         require_gpu = -1
     elif require_gpu is None:
         if get_current_ops().name == "apple":
-            if TRANSFORMERS_MODEL_PATTERN.match(model_name_or_path.rstrip("/")):
+            if model_name_or_path and TRANSFORMERS_MODEL_PATTERN.match(model_name_or_path.rstrip("/")):
                 require_gpu = 0
             else:
                 require_gpu = -1
