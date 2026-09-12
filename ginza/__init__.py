@@ -49,6 +49,20 @@ __all__ = [
 ]
 
 
+GINZA_MODEL_PACKAGES = ["ja_ginza_bert_large", "ja_ginza_electra", "ja_ginza"]
+
+
+def default_model_name():
+    from importlib import import_module
+    for model_package in GINZA_MODEL_PACKAGES:
+        try:
+            import_module(model_package)
+            return model_package
+        except ModuleNotFoundError:
+            pass
+    return None
+
+
 @Language.factory(
     "compound_splitter",
     requires=[],
