@@ -8,13 +8,15 @@ import traceback
 from typing import Generator, Iterable, Optional, List
 
 import plac
+from thinc.api import get_current_ops
+from thinc.compat import has_cupy_gpu
 from .analyzer import Analyzer
 
 MINI_BATCH_SIZE = 100
 MAX_BYTE_LENGTH = 49149  # defined in sudachi.rs https://github.com/megagonlabs/ginza/issues/242
 GINZA_MODEL_PATTERN = re.compile(r"^(ja_ginza|ja_ginza_electra|ja_ginza_bert_large)$")
 SPACY_MODEL_PATTERN = re.compile(r"^[a-z]{2}[-_].+[-_].+(sm|md|lg|trf)$")
-
+TRANSFORMERS_MODEL_PATTERN = re.compile(r"^(ja_ginza_electra|ja_ginza_bert_large|.+_trf)$")
 
 class _OutputWrapper:
     def __init__(self, output_path, output_format):
@@ -59,7 +61,7 @@ def run(
     hash_comment: str = "print",
     output_path: Optional[Path] = None,
     output_format: str = "0",
-    require_gpu: int = -1,
+    require_gpu: Optional[int] = None,
     disable_sentencizer: bool = False,
     use_normalized_form: bool = False,
     parallel_level: int = 1,
@@ -70,26 +72,6 @@ def run(
             f'hash_comment="{hash_comment}" not permitted for JSON output. Forced to use hash_comment="analyze".',
             file=sys.stderr
         )
-
-    assert parallel_level == 1 or require_gpu == -1, "require_gpu not allowed for multi-processing. https://github.com/explosion/spaCy/issues/5507"
-
-    if parallel_level <= 0:
-        level = max(1, cpu_count() + parallel_level)
-        if output_format in [2, "mecab"]:
-            if require_gpu >= 0:
-                print("GPU not used for mecab mode", file=sys.stderr)
-                require_gpu = False
-        elif parallel_level <= 0:
-            if require_gpu >= 0:
-                if level < 4:
-                    print(f"GPU #{require_gpu} enabled: parallel_level' set to {level}", end="", file=sys.stderr)
-                else:
-                    print(f"GPU #{require_gpu} enabled: parallel_level' set to {level} but seems it's too much", end="", file=sys.stderr)
-            else:
-                print(f"'parallel_level' set to {level}", file=sys.stderr)
-        elif require_gpu:
-            print(f"GPU #{require_gpu} enabled", file=sys.stderr)
-        parallel_level = level
 
     assert model_path is None or ensure_model is None
     if ensure_model:
@@ -113,6 +95,33 @@ def run(
         model_name_or_path = ensure_model
     else:
         model_name_or_path = model_path
+
+    if output_format in [2, "mecab"]:
+        if require_gpu is not None and require_gpu >= 0:
+            print(f"GPU is disabled in mecab mode.", file=sys.stderr)
+        require_gpu = -1
+    elif require_gpu is None:
+        if get_current_ops().name == "apple":
+            if TRANSFORMERS_MODEL_PATTERN.match(model_name_or_path.rstrip("/")):
+                require_gpu = 0
+            else:
+                require_gpu = -1
+        elif has_cupy_gpu:
+            require_gpu = 0
+        else:
+            require_gpu = -1
+        if require_gpu != -1:
+            if parallel_level == 1:
+                print(f"GPU #{require_gpu} enabled", file=sys.stderr)
+            else:
+                require_gpu = -1
+                print(f"GPU disabled because 'parallel_level' set to {parallel_level}", file=sys.stderr)
+
+    assert parallel_level == 1 or require_gpu == -1, "require_gpu not allowed for multi-processing. https://github.com/explosion/spaCy/issues/5507"
+
+    if parallel_level <= 0:
+        parallel_level = max(1, cpu_count() + parallel_level)
+        print(f"'parallel_level' set to {parallel_level}", file=sys.stderr)
 
     analyzer = Analyzer(
         model_name_or_path,
@@ -366,7 +375,7 @@ def run_ginza(
     hash_comment="print",
     output_path=None,
     output_format="conllu",
-    require_gpu=-1,
+    require_gpu=None,
     use_normalized_form=False,
     disable_sentencizer=False,
     parallel=1,

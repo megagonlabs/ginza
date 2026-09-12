@@ -22,11 +22,12 @@ setup(
         "plac>=1.3.3",
         "SudachiPy>=0.6.11,<0.7.0",
         "SudachiDict-core>=20210802",
-        "thinc-apple-ops>=1.0.0 ; sys_platform == 'darwin' and platform_machine == 'arm64'",
+        "thinc-apple-ops>=1.0.0 ; sys_platform == 'darwin' and platform_machine == 'arm64' and python_version < '3.13'",
     ],
     extras_require={
         "cuda11x": ["cupy-cuda11x"],
         "cuda12x": ["cupy-cuda12x"],
+        "cuda13x": ["cupy-cuda13x"],
     }, 
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "pytest-cov", "pytest-mock"],
