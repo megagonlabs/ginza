@@ -6,44 +6,33 @@
 &emsp;
 [![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza)
 
+***GiNZAをアップグレードする際は下記の互換性情報を確認してください。***
+
+GiNZAの解析モデルは、株式会社リクルートと国立国語研究所の共同研究プロジェクトの成果の一部として公開されています。
+
 ## What's new!
 
+- `GiNZA v5.3.0`をリリースしました (2026.09.30)
+  - 動作環境を Python 3.10 以降に変更（Python 3.10 ~ 3.12 を推奨）
+  - `ja_ginza_bert_large` を正式にリリース
+  - Apple Silicon搭載のMac OS環境で自動的にGPUアクセラレーションを有効化するよう変更
 - `GiNZA v5.2.1`をリリースしました (2026.09.01)
-  - バグ改修を行いました。
-  - このリリースがPython 3.9以前で動作する最後のバージョンとなります。
+  - バグ改修を行いました
+  - このリリースがPython 3.9以前で動作する最後のバージョンとなります
 - `GiNZA v5.2.0`をリリースしました (2024.03.31)
   - 日本語の節認定のためのAPIを追加 (experimental)
-- [`ja_ginza_bert_large`のβ版を公開中](https://github.com/megagonlabs/ginza/releases/tag/v5.2.0)
-  - [cl-tohoku/bert-large-japanese-v2](https://huggingface.co/cl-tohoku/bert-large-japanese-v2)をベースモデルに採用
-  - 精度が大幅に向上（LAS=0.938, UAS=0.949, UPOS=0.983, ENE=0.708）
-  - CUDAに対応し8GB以上のRAMを搭載したGPU環境、または、M1・M2などApple Silicon環境の利用を推奨
-- ginzaコマンドで日本語以外を含む全てのspaCyモデルが利用可能に
-  - `ginza -m en_core_web_md` の形でモデル名を指定することで[CoNLL-U](https://universaldependencies.org/format.html#syntactic-annotation)出力ツールとして利用可能
 - [ginzaコマンドの解説ページ](https://megagonlabs.github.io/ginza/command_line_tool.html)の記述を拡充
   - `ginza`コマンドで使用するGPUのgpu_idを`ginza -g 1`の形で指定可能に
 
-***GiNZAをアップグレードする際は下記の互換性情報を確認してください。***
-
-## GiNZA v5.2 互換性情報
-- Pythonの対応バージョンが3.8以上に変更されました
-- spaCyの対応バージョンがv3.4.4に変更されました
-- コマンドラインのconllu出力のmisc列にClauseHeadフィールドが追加されました
-
-## GiNZA v5.1 互換性情報
-- `ginza --require_gpu`および`ginza -g`オプションが引数にgpu_idを取るようになりました
-  - gpu_idに-1を指定(デフォルト)するとCPUのみを使用します
-- v5.0以前の`ja_ginza`および`ja_ginza_electra`パケージはGiNZA v5.1で使用できません（旧バージョン向けパッケージは事前にアンインストールが必要です）
-  - `pip uninstall ginza ; pip uninstall ja_ginza ; pip uninstall ja_ginza_electra`
-- transformersモデルの追加に伴いGiNZA v5.1インストール時は`ginza`パッケージとともに解析モデルパッケージを明示的に指定する必要があります
-  - 解析精度重視モデル (メモリ容量16GB以上を推奨)
-    - `pip install -U ginza ja_ginza_electra`
-  - 実行速度重視モデル
-    - `pip install -U ginza ja_ginza`
-- トークンの活用/読み/正規形の保存先がTokenクラスのフィールドに変更されました。
-  - `doc.user_data[“reading_forms”][token.i]` -> `token.morph.get(“Reading”)`
-  - `doc.user_data[“inflections”][token.i]` -> `token.morph.get(“Inflection”)`
-  - `force_using_normalized_form_as_lemma(True)` -> `token.norm_`
-- 併せて[GiNZA v5.0.0 重要な変更](#ginza-500)についても確認してください
+## GiNZA v5.3 互換性情報
+- Pythonの対応バージョンが3.10以上に変更されました
+  - 推奨動作環境は Python 3.10 ~ 3.13 です
+  - Python 3.14では一部の依存ライブラリのビルドにRustコンパイラが必要です
+- spaCyの対応バージョンがv3.8.16以上に変更されました
+- GiNZA v5.3.0より前のモデルパケージはv5.3.0で使用できないため更新が必要です
+- モデルの読み込み優先度を `ja_ginza_bert_large`, `ja_ginza_electra`, `ja_ginza` の順に変更しました
+- `ginza`コマンドで一定の条件を満たす場合にデフォルトでGPUアクセラレーションが有効化されるようになりました
+  - GPUアクセラレーションは `ginza -g -1` で無効化できます
 
 ## GiNZA v5 新機能
 
@@ -76,80 +65,82 @@ GiNZA v5の解析精度は以前のバージョンから飛躍的な向上を遂
 
 | Model | LAS | UAS | UPOS | ENE |
 | --- | --- | --- | --- | --- |
-| *ja_ginza_bert_large (β版)* | *93.8* | *94.9* | *98.3* | *70.8* |
+| *ja_ginza_bert_larg* | *93.8* | *94.9* | *98.3* | *70.8* |
 | ja_ginza_electra          | 92.3 | 93.7 | 98.1 | 61.3 |
 | ja_ginza (v5)             | 89.2 | 91.1 | 97.0 | 53.9 |
 | ja_ginza (v4相当)          | 89.0 | 91.0 | 95.1 | 53.1 |
 
-`ja_ginza_electra`は`ja_ginza`に対して、5万ステップ学習時の依存関係ラベリング・単語依存構造解析の誤りを、以前のバージョンと比較して25%以上低減できました。
+`ja_ginza_bert_large`は`ja_ginza`に対して、依存関係ラベリング・単語依存構造解析の誤りを4割以上低減できました。
 
-また従来型モデルの`ja_ginza`においても、処理パイプラインに`morphologizer`を追加することにより、以前のバージョンと比較してUD品詞推定の誤りを4割低減できました。
-
-[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)を用いた拡張固有表現抽出精度(ENE)においても`ja_ginza_electra`は大幅な精度向上が得られています。GiNZAは関根の拡張固有表現階層にもとづく固有表現抽出結果を、spaCyで標準的に用いられる[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)にマッピング(変換表を適用)して出力しています。OntoNotes5は関根の拡張固有表現階層よりカテゴリ数が非常に少ない(粗い)ため、拡張固有表現をOntoNotes5体系にマッピングした場合の固有表現抽出精度は、拡張固有表現での数値より一般に高くなります。
+[関根の拡張固有表現階層](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)を用いた拡張固有表現抽出精度(ENE)においても`ja_ginza_bert_large`は大幅な精度向上が得られています。GiNZAは関根の拡張固有表現階層にもとづく固有表現抽出結果を、spaCyで標準的に用いられる[OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf)にマッピング(変換表を適用)して出力しています。OntoNotes5は関根の拡張固有表現階層よりカテゴリ数が非常に少ない(粗い)ため、拡張固有表現をOntoNotes5体系にマッピングした場合の固有表現抽出精度は、拡張固有表現での数値より一般に高くなります。
 
 ※各モデルの学習と解析精度評価にはUD_Japanese-BCCWJ r2.8から新聞記事系のテキストを除外したものをSudachi辞書mode C(長単位)で再解析(retokenize)した上で、文節主辞情報を依存関係ラベルに組み合わせた状態のコーパスを用いています。
 
 ## 実行環境
 
-GiNZAは Python 3.8以上（および対応するpip）で動作検証を行っています。
+GiNZAは Python 3.10以上で動作検証を行っています。
 GiNZAをインストールする前に予めPython実行環境を構築してください。
 
-### 実行環境のセットアップ
+### GiNZAのセットアップ
 
-#### 1. GiNZA + Transformersモデル
+> [!NOTE]
+> GiNZAによる依存構造解析処理は、GPUで大幅に高速化することができます。
+> Apple Siliconで動作するMac OS環境では、デフォルトでGPUアクセラレーションが有効化されます。
+> 詳細は [3. GPUの有効化](#3.-GPUの有効化) を参照してください。
 
-※Transformersモデルの実行には16GB以上のメモリ容量が必要です。メモリ容量が不足する場合は後述の従来型モデルをお試しください。
+#### 1. Transformersモデル
 
-旧バージョンのGiNZAをインストールしている場合は次のコマンドでアンインストールします。
+> [!NOTE]
+> Transformersモデルの実行は、メモリ容量16GB以上の環境を推奨します。
+> メモリ容量が不足する場合は後述の従来型モデルをお試しください。
+
+次のいずれかのコマンドを実行して、Transformersモデル（`ja_ginza_electra` または `ja_ginza_bert_large`）をインストールします。
+（GiNZAおよびTransformers関連ライブラリも同時にインストールされます。）
 ```console
-$ pip uninstall ginza
+$ pip install -U ja_ginza_electra
+```
+```console
+$ pip install -U ja_ginza_bert_electra
 ```
 
-旧バージョンの`ja_ginza`をインストールしている場合は次のコマンドでアンインストールします。
+> [!NOTE]
+> 上記コマンドでインストールされるモデルパッケージには、容量の大きいtransformerモデルやトークナイザは含まれていません。
+> これらの大容量のファイルは初回実行時に自動的にHugging Face Hubからダウンロードされて、以降の実行時にはローカルにキャッシュされたファイルが使用されます。
+
+#### 2. 従来型モデル
+
+次のコマンドを実行して、従来型モデル（`ja_ginza`）をインストールします。
+（GiNZA関連ライブラリも同時にインストールされます。）
 ```console
-$ pip uninstall ja_ginza
+$ pip install -U ja_ginza
 ```
 
-旧バージョンの`ja_ginza_electra`をインストールしている場合は次のコマンドでアンインストールします。
+#### 3. GPUの有効化
+
+Apple Siliconで動作するMac OS環境では、次の条件を満たす場合に自動でGPUアクセラレーションが有効化されます。
+- `ja_ginza`
+  - Python 3.10 〜 3.12 (3.13以降は`thinc-apple-ops`が非対応)
+- `ja_ginza_electra` および `ja_ginza_large_bert`
+  - Python 3.10 以降 (3.13以降は`thinc-apple-ops`が非対応のため`transformers`のみGPUが有効化される)
+
+Linux OS環境でNVIDIA GPUによるアクセラレーションを有効化するには、LinuxにCUDAをインストールし、`export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH` のように環境変数 `LD_LIBRARY_PATH` にCUDAライブラリのパスを追加した上で、次のようにCUDAバージョンをextrasに指定して`ginza`パッケージのインストールを行います。
+- CUDA 11.x
+  - `$ pip install ginza[cuda11x]`
+- CUDA 12.x
+  - `$ pip install ginza[cuda12x]`
+- CUDA 13.x
+  - `$ pip install ginza[cuda13x]`
+
+`ginza`コマンドは、GPUが利用可能な場合はデフォルトでGPUアクセラレーションを有効化します。
+
+`ginza`コマンドの`-g`オプションで、使用するGPUのデバイス番号を指定することができます（`-1`を指定するとGPUアクセラレーションは無効化されます）。
 ```console
-$ pip uninstall ja_ginza_electra
+$ ginza -g 0
 ```
-
-次のコマンドを実行して最新のGiNZAおよびTransformersモデルをインストールします。
+`ginza`コマンドを`-g`オプションなしで実行する際、GPUアクセラレーションが有効化された場合は次のログが出力されます。
 ```console
-$ pip install -U ginza ja_ginza_electra
-```
-
-上記コマンドでインストールされる`ja_ginza_electra`パッケージには大容量モデルファイルは含まれていません。大容量モデルファイルは初回実行時に自動的にダウンロードされて、以降の実行時にはローカルにキャッシュされたファイルが使用されます。
-
-大容量モデルファイルを含めたインストールを行うには、次のようにGitHubのリリースアーカイブを指定します。
-```console
-$ pip install -U ginza https://github.com/megagonlabs/ginza/releases/download/latest/ja_ginza_electra-latest-with-model.tar.gz
-```
-
-GPUを利用してtransformersモデルを高速に実行するには、実行環境に応じたオプションを指定してspacyを上書きインストールします。
-
-CUDA 11.7を使用する場合:
-```console
-$ pip install -U spacy[cuda117]
-```
-※ あわせてpytorchもCUDAと整合したバージョンをインストールする必要があります。
-
-#### 2. GiNZA + 従来型モデル
-
-旧バージョンのGiNZAおよび`ja_ginza`をインストールしている場合は次のコマンドでアンインストールを実行します。
-```console
-$ pip uninstall ginza _ginza
-```
-
-次のコマンドを実行して最新のGiNZAと従来型モデルをインストールします。
-```console
-$ pip install -U ginza ja_ginza
-```
-
-M1やM2などのMPSに対応したApple Silicon環境では、`thinc-apple-ops`を導入することで解析速度が向上します。
-```console
-$ pip install torch thinc-apple-ops
+$ ginza
+GPU #0 enabled
 ```
 
 ### ginzaコマンドによる解析処理の実行
@@ -170,7 +161,7 @@ $ ginza
 9       。      。      PUNCT   補助記号-句点   _       6       punct   _       SpaceAfter=No|BunsetuBILabel=I|BunsetuPositionType=CONT|Reading=。|ClauseHead=6
 
 ```
-実行環境に`ja_ginza_electra`と`ja_ginza`の両方のモデルがインストールされている場合、`ginza`コマンドは`ja_ginza_electra`を優先して使用します。同じ状況で`ja_ginza`を使用するには`ginza -m`オプションでモデル名を指定します。
+実行環境に複数のモデルパッケージがインストールされている場合、`ginza`コマンドは解析精度が高いものを優先して使用します。モデルパッケージを明示的に指定して使用するには`-m`オプションでモデルパッケージ名を指定します。
 ```console
 # ginza -m ja_ginza
 ```
@@ -183,7 +174,7 @@ $ ginza
 ### Pythonコードによる解析処理の実行
 
 次のコードは、Transformersモデルによる依存構造解析結果を文単位で出力します。
-従来型モデルを用いる場合は`ja_ginza_electra`を`ja_ginza`に置き換えます。
+他のモデルパッケージを用いる場合は`ja_ginza_electra`の部分を目的のモデルに置き換えます。
 ```python
 import spacy
 nlp = spacy.load('ja_ginza_electra')
@@ -227,9 +218,9 @@ for sent in doc.sents:
 
 ### 解説記事
 
-- [GiNZA Version 4.0: Improving Syntactic Structure Analysis Through Japanese Bunsetsu-Phrase Extraction API Integration](https://megagon.ai/blog/ginza-version-4-0-improving-syntactic-structure-analysis-through-japanese-bunsetsu-phrase-extraction-api-integration/) - Megagon Labs Blog (2021.03)
-- [GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合](https://www.megagon.ai/jp/blog/ginza-version-4-0/) - Megagon Labs Blog (2020.09)
-- [GiNZA: 日本語自然言語処理オープンソースライブラリ](https://www.megagon.ai/jp/projects/ginza-install-a-japanese-nlp-library-in-one-step/) - Megagon Labs (2019)
+- [GiNZA Version 4.0: Improving Syntactic Structure Analysis Through Japanese Bunsetsu-Phrase Extraction API Integration](https://megagon.ai/en/ginza-version-4-0/) - Megagon Labs Blog (2021.03)
+- [GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合](https://megagon.ai/jp/ginza-version-4-0/) - Megagon Labs Blog (2020.09)
+- [GiNZA: 日本語自然言語処理オープンソースライブラリ](https://megagon.ai/jp/ginza/) - Megagon Labs (2019)
 
 ## ライセンス
 GiNZA NLPライブラリおよびGiNZA日本語Universal Dependenciesモデルは
@@ -250,7 +241,7 @@ GiNZAはトークン化（形態素解析）処理にSudachiPyを、単語ベク
 [chiVe LICENSE PAGE](https://github.com/WorksApplications/chiVe/blob/master/LICENSE)
 
 ### Hugging Face / transformers
-GiNZA v5 Transformersモデル(ja_ginza_electra)はHugging Face社が提供するtransformersを事前学習フレームワークに用いています。
+GiNZA v5 TransformersモデルはHugging Face社が提供するtransformersを推論フレームワークに用いています。
 
 [transformers LICENSE PAGE](https://github.com/huggingface/transformers/blob/master/LICENSE)
 
@@ -261,7 +252,21 @@ GiNZA v5の依存構造解析モデルは
 [UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) r2.8
 ([Omura and Asahara:2018](https://www.aclweb.org/anthology/W18-6014/))
 から新聞系文書を除外して学習しています。
-GiNZA v5の依存構造解析モデルは国立国語研究所とMegagon Labsの共同研究成果です。
+```
+@inproceedings{omura-asahara-2018-ud,
+    title = "{UD}-{J}apanese {BCCWJ}: {U}niversal {D}ependencies Annotation for the {B}alanced {C}orpus of {C}ontemporary {W}ritten {J}apanese",
+    author = "Omura, Mai  and
+      Asahara, Masayuki",
+    booktitle = "Proceedings of the Second Workshop on Universal Dependencies ({UDW} 2018)",
+    month = nov,
+    year = "2018",
+    address = "Brussels, Belgium",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W18-6014/",
+    doi = "10.18653/v1/W18-6014",
+    pages = "117--125"
+}
+```
 
 ### GSK2014-A (2019) BCCWJ版
 GiNZA v5の固有表現抽出モデルは
@@ -274,7 +279,7 @@ GiNZA v5の固有表現抽出モデルは
 GiNZA v5の固有表現抽出モデルは国立国語研究所とMegagon Labsの共同研究成果です。
 
 ### mC4
-GiNZA v5 Transformersモデル(ja_ginza_electra)は、[mC4](https://huggingface.co/datasets/mc4)から抽出した日本語20億文以上を用いて事前学習した[transformers-ud-japanese-electra-base-discriminator](https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-discriminator)を使用しています。
+`ja_ginza_electra`は、[mC4](https://huggingface.co/datasets/mc4)から抽出した日本語20億文以上を用いて事前学習した[transformers-ud-japanese-electra-base-discriminator](https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-discriminator)を使用しています。
 mC4はODC-BYライセンスの規約に基づいて事前学習データとして利用しています。
 
 Contains information from mC4 which is made available under the ODC Attribution License.
@@ -289,11 +294,26 @@ Contains information from mC4 which is made available under the ODC Attribution 
 }
 ```
 
-
-
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 
 ### version 5.x
+
+#### ginza-5.3.0
+- 2026-09-30
+- 重要な変更
+  - 本リリースからサポート対象のPythonバージョンが3.10以上に、spaCyのバージョンが3.8.16以上に変更されました。
+    - 推奨動作環境は Python 3.10 ~ 3.12 です。
+    - Python 3.14では一部の依存ライブラリのビルドにRustコンパイラが必要です。
+  - GiNZA v5.3.0より前のモデルパケージはGiNZA v5.3.0以降で使用できません。
+  - モデルパッケージの読み込み優先度を `ja_ginza_bert_large`, `ja_ginza_electra`, `ja_ginza` の順に変更しました。
+  - `ginza`コマンドで一定の条件を満たす場合にデフォルトでGPUアクセラレーションが有効化されるようになりました。
+    - GPUアクセラレーションは `ginza -g -1` で無効化できます。
+- 新機能
+  - Apple Silicon搭載のMac OS環境で自動的にGPUアクセラレーションを有効化するよう変更しました。
+  - `ja_ginza_bert_large` を正式にリリースしました。
+  - [`ginza-transformers`](https://github.com/megagonlabs/ginza-transformers) をv1.4.0にアップグレードしました。
+    - transformers componentでmodelとtokenizerの両方をHugging Face Hubから取得する形に変更しました。
+    - [`spacy-transformers`](https://github.com/explosion/spacy-transformers)のrequirementsにより `torch>=1.8.0, transformers<4.53.3` などの制限があります。
 
 #### ginza-5.2.1
 - 2026-09-01
@@ -315,11 +335,15 @@ Contains information from mC4 which is made available under the ODC Attribution 
 - Migrate to spaCy v3.7
 - New functionality
   - add Japanese clause recognition API (experimental)
+  - コマンドラインのconllu出力のmisc列にClauseHeadフィールドが追加されました
 
 #### ginza-5.1.3
 - 2023-09-25
 - Migrate to spaCy v3.6
-- Beta release of `ja_ginza_bert_large`
+- [`ja_ginza_bert_large` β版を公開](https://github.com/megagonlabs/ginza/releases/tag/v5.2.0)
+  - [tohoku-nlp/bert-large-japanese-v2](https://huggingface.co/tohoku-nlp/bert-large-japanese-v2)をベースモデルに採用
+  - 精度が大幅に向上（LAS=0.938, UAS=0.949, UPOS=0.983, ENE=0.708）
+  - CUDAに対応し8GB以上のRAMを搭載したGPU環境、または、M1・M2などApple Silicon環境の利用を推奨
 
 #### ginza-5.1.2
 - 2022-03-12
