@@ -15,7 +15,7 @@ The GiNZA parsing models are released as part of the results of a joint research
 
 ## Runtime Environment
 From GiNZA v5.3.0, the runtime environment has changed to Python 3.10 or later.
-We recommend using Python 3.10–3.12 because installation errors may occur with some dependent libraries.
+We recommend using Python 3.10–3.13 because installation errors may occur with some dependent libraries.
 We do not recommend to use Anaconda environment because the pip install step may not work properly.
 
 Please also see the Development Environment section below.
@@ -44,6 +44,7 @@ $ pip install -U ja_ginza_bert_large
 > [!NOTE]
 > The model package installed by the above command does not include large transformer models or tokenizers.
 > These large files are automatically downloaded from Hugging Face Hub on the first run, and the locally cached files are used for subsequent runs.
+> The first time you run transformers model, it will take several seconds to tens of seconds to start up due to the initialization process.
 
 #### 2. Install GiNZA NLP Library with Standard Model
 
@@ -287,6 +288,7 @@ The mC4 is published under the ODC Attribution License.
     - GPU acceleration can be disabled with `ginza -g -1`.
 - New Features
   - Enabling GPU acceleration by default in Mac OS environments with Apple Silicon
+    - The Python versions that can be used with `thinc-apple-ops` on Mac OS running Apple Silicon are 3.10 through 3.12.
   - Official release of `ja_ginza_bert_large`
   - [`ginza-transformers`](https://github.com/megagonlabs/ginza-transformers) was upgraded to v1.4.0.
     - Changed the transformers component to obtain both model and tokenizer from Hugging Face Hub.

@@ -8,8 +8,7 @@ import traceback
 from typing import Generator, Iterable, Optional, List
 
 import plac
-from thinc.api import get_current_ops
-from thinc.compat import has_cupy_gpu
+from thinc.compat import has_cupy_gpu, has_torch_mps
 from . import default_model_name, GINZA_MODEL_PACKAGES
 from .analyzer import Analyzer
 
@@ -100,14 +99,11 @@ def run(
 
     if output_format in [2, "mecab"]:
         if require_gpu is not None and require_gpu >= 0:
-            print(f"GPU is disabled in mecab mode.", file=sys.stderr)
+            print(f"GPU not used in mecab mode.", file=sys.stderr)
         require_gpu = -1
     elif require_gpu is None:
-        if get_current_ops().name == "apple":
-            if model_name_or_path and TRANSFORMERS_MODEL_PATTERN.match(model_name_or_path.rstrip("/")):
-                require_gpu = 0
-            else:
-                require_gpu = -1
+        if has_torch_mps:
+            require_gpu = 0
         elif has_cupy_gpu:
             require_gpu = 0
         else:
