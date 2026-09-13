@@ -25,7 +25,7 @@ Please also see the Development Environment section below.
 > [!NOTE]
 > The GiNZA dependency parsing can be significantly accelerated with a GPU.
 > GPU acceleration is enabled by default in Mac OS environments running on Apple Silicon.
-> For details, see [3. Enabling the GPU](#3.-Enbling-the-GPU)。
+> For details, see [3. Enabling the GPU](#3.-Enabling-the-GPU)。
 
 #### 1. Install GiNZA NLP Library with Transformer-based Model
 
