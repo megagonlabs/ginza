@@ -8,6 +8,7 @@ import traceback
 from typing import Generator, Iterable, Optional, List
 
 import plac
+from thinc.api import get_current_ops
 from thinc.compat import has_cupy_gpu, has_torch_mps
 from . import default_model_name, GINZA_MODEL_PACKAGES
 from .analyzer import Analyzer
@@ -114,6 +115,8 @@ def run(
             else:
                 require_gpu = -1
                 print(f"GPU disabled because 'parallel_level' set to {parallel_level}", file=sys.stderr)
+        elif get_current_ops().name == "apple":
+            print(f"thinc-apple-ops enabled", file=sys.stderr)
 
     assert parallel_level == 1 or require_gpu == -1, "require_gpu not allowed for multi-processing. https://github.com/explosion/spaCy/issues/5507"
 
