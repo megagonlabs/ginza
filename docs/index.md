@@ -15,7 +15,7 @@ GiNZAの解析モデルは、株式会社リクルートと国立国語研究所
 - `GiNZA v5.3.0 - Grossular Garnet` をリリースしました (2026.09.30)
   - 動作環境を Python 3.10 以降に変更（Python 3.10 ~ 3.13 の使用を推奨）
   - `ja_ginza_bert_large` を正式にリリース
-  - Apple Siliconで動作するMac OS環境で自動的にGPUアクセラレーションを有効化するよう変更
+  - Apple Siliconで動作するMac OS環境で自動的にハードウェアアクセラレーションを有効化するよう変更
     - thinc-apple-ops を適用可能なPythonのバージョンは 3.10 〜 3.12 です
 - `GiNZA v5.2.1`をリリースしました (2026.09.01)
   - バグ改修を行いました
@@ -86,7 +86,7 @@ GiNZAをインストールする前に予めPython実行環境を構築してく
 
 > [!NOTE]
 > GiNZAによる依存構造解析処理は、GPUで大幅に高速化することができます。
-> Apple Siliconで動作するMac OS環境では、デフォルトでGPUアクセラレーションが有効化されます。
+> Apple Siliconで動作するMac OS環境では、デフォルトでハードウェアアクセラレーションが有効化されます。
 > 詳細は [3. GPUの有効化](#3.-GPUの有効化) を参照してください。
 
 #### 1. Transformersモデル
@@ -119,11 +119,11 @@ $ pip install -U ja_ginza
 
 #### 3. GPUの有効化
 
-Apple Siliconで動作するMac OS環境では、次の条件を満たす場合に自動でGPUアクセラレーションが有効化されます。
+Apple Siliconで動作するMac OS環境では、次の条件を満たす場合に自動でハードウェアアクセラレーションが有効化されます。
 - `ja_ginza`
   - Python 3.10 〜 3.12 (3.13以降は`thinc-apple-ops`が非対応)
 - `ja_ginza_electra` および `ja_ginza_large_bert`
-  - Python 3.10 以降 (3.13以降は`thinc-apple-ops`が非対応のため`transformers`のみGPUが有効化される)
+  - Python 3.10 以降 (3.13以降は`thinc-apple-ops`が非対応のため`transformers`のみGPUアクセラレーションが有効化される)
 
 Linux OS環境でNVIDIA GPUによるアクセラレーションを有効化するには、LinuxにCUDAをインストールし、`export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH` のように環境変数 `LD_LIBRARY_PATH` にCUDAライブラリのパスを追加した上で、次のようにCUDAバージョンをextrasに指定して`ginza`パッケージのインストールを行います。
 - CUDA 11.x
@@ -144,9 +144,11 @@ $ ginza -g 0
 $ ginza
 GPU #0 enabled
 ```
-
-> [!NOTE]
-> Apple Siliconで動作するMac OS環境で従来型モデルを実行する場合、最初のログ出力は `thinc-apple-ops enabled` となります。
+Apple Siliconで動作するMac OS環境で従来型モデルを実行する際、ハードウェアアクセラレーションが有効化された場合は次のログが最初に出力されます。
+```console
+$ ginza
+thinc-apple-ops enabled
+```
 
 ### ginzaコマンドによる解析処理の実行
 
@@ -314,7 +316,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
   - `ginza`コマンドで一定の条件を満たす場合にデフォルトでGPUアクセラレーションが有効化されるようになりました。
     - GPUアクセラレーションは `ginza -g -1` で無効化できます。
 - 新機能
-  - Apple Siliconで動作するMac OS環境で自動的にGPUアクセラレーションを有効化するよう変更しました。
+  - Apple Siliconで動作するMac OS環境で自動的にハードウェアアクセラレーションを有効化するよう変更しました。
     - Apple Siliconで動作するMac OSで thinc-apple-ops を適用可能なPythonのバージョンは 3.10 〜 3.12 です。
   - `ja_ginza_bert_large` を正式にリリースしました。
   - [`ginza-transformers`](https://github.com/megagonlabs/ginza-transformers) をv1.4.0にアップグレードしました。

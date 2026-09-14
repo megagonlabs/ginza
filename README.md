@@ -24,7 +24,7 @@ Please also see the Development Environment section below.
 
 > [!NOTE]
 > The GiNZA dependency parsing can be significantly accelerated with a GPU.
-> GPU acceleration is enabled by default in Mac OS environments running on Apple Silicon.
+> The hardware acceleration is enabled by default in Mac OS environments running on Apple Silicon.
 > For details, see [3. Enabling the GPU](#3.-Enabling-the-GPU)。
 
 #### 1. Install GiNZA NLP Library with Transformer-based Model
@@ -56,7 +56,7 @@ $ pip install -U ja_ginza
 
 #### 3. Enabling the GPU
 
-On Mac OS environments running on Apple Silicon, GPU acceleration is automatically enabled under the following conditions:
+On Mac OS environments running on Apple Silicon, the hardware acceleration is automatically enabled under the following conditions:
 - `ja_ginza`
   - Python 3.10 to 3.12 (thinc-apple-ops is not supported in 3.13 and later)
 - `ja_ginza_electra` and `ja_ginza_large_bert`
@@ -81,9 +81,11 @@ When running the `ginza` command without the `-g` option, the following init log
 $ ginza
 GPU #0 enabled
 ```
-
-> [!NOTE]
-> When executing standard model in Mac OS running on Apple Silicon, the init log will be `thinc-apple-ops enabled`.
+When executing standard model in Mac OS running on Apple Silicon, if hardware acceleration is enabled, the init log will be:
+```console
+$ ginza
+thinc-apple-ops enabled
+```
 
 ### Execute ginza command
 Run `ginza` command from the console, then input some Japanese text.
@@ -290,7 +292,7 @@ The mC4 is published under the ODC Attribution License.
   - `ginza` command enables GPU acceleration by default under certain conditions.
     - GPU acceleration can be disabled with `ginza -g -1`.
 - New Features
-  - Enabling GPU acceleration by default in Mac OS environments with Apple Silicon
+  - Enabling hardware acceleration by default in Mac OS environments with Apple Silicon
     - The Python versions that can be used with `thinc-apple-ops` on Mac OS running Apple Silicon are 3.10 through 3.12.
   - Official release of `ja_ginza_bert_large`
   - [`ginza-transformers`](https://github.com/megagonlabs/ginza-transformers) was upgraded to v1.4.0.
