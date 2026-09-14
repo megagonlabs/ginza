@@ -76,11 +76,14 @@ The `-g` option of the `ginza` command allows you to specify the device number o
 ```console
 $ ginza -g 0
 ```
-When running the `ginza` command without the `-g` option, the following log is output if GPU acceleration is enabled:
+When running the `ginza` command without the `-g` option, the following init log is output if GPU acceleration is enabled:
 ```console
 $ ginza
 GPU #0 enabled
 ```
+
+> [!NOTE]
+> When executing standard model in Mac OS running on Apple Silicon, the init log will be `thinc-apple-ops enabled`.
 
 ### Execute ginza command
 Run `ginza` command from the console, then input some Japanese text.
@@ -278,7 +281,7 @@ The mC4 is published under the ODC Attribution License.
 ### version 5.x
 
 #### ginza-5.3.0
-- 2026-09-30
+- 2026-09-30, Grossular Garnet
 - Breaking Changes
   - We changed the supported Python version to 3.10 or later, and the supported spaCy version to 3.8.16 or later.
     - The recommended environment is Python 3.10 to 3.13.
@@ -309,7 +312,7 @@ The mC4 is published under the ODC Attribution License.
   - [#266](https://github.com/megagonlabs/ginza/pull/266) - [#273](https://github.com/megagonlabs/ginza/pull/273)
 
 #### ginza-5.2.0
-- 2024-03-31
+- 2024-03-31, Fluorite
 - Require python>=3.8 
 - Migrate to spaCy v3.7
 - New functionality

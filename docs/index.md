@@ -12,15 +12,15 @@ GiNZAの解析モデルは、株式会社リクルートと国立国語研究所
 
 ## What's new!
 
-- `GiNZA v5.3.0`をリリースしました (2026.09.30)
+- `GiNZA v5.3.0 - Grossular Garnet` をリリースしました (2026.09.30)
   - 動作環境を Python 3.10 以降に変更（Python 3.10 ~ 3.13 の使用を推奨）
   - `ja_ginza_bert_large` を正式にリリース
-  - Apple Silicon搭載のMac OS環境で自動的にGPUアクセラレーションを有効化するよう変更
+  - Apple Siliconで動作するMac OS環境で自動的にGPUアクセラレーションを有効化するよう変更
     - thinc-apple-ops を適用可能なPythonのバージョンは 3.10 〜 3.12 です
 - `GiNZA v5.2.1`をリリースしました (2026.09.01)
   - バグ改修を行いました
   - このリリースがPython 3.9以前で動作する最後のバージョンとなります
-- `GiNZA v5.2.0`をリリースしました (2024.03.31)
+- `GiNZA v5.2.0 - Fluorite`をリリースしました (2024.03.31)
   - 日本語の節認定のためのAPIを追加 (experimental)
 - [ginzaコマンドの解説ページ](https://megagonlabs.github.io/ginza/command_line_tool.html)の記述を拡充
   - `ginza`コマンドで使用するGPUのgpu_idを`ginza -g 1`の形で指定可能に
@@ -86,7 +86,7 @@ GiNZAをインストールする前に予めPython実行環境を構築してく
 
 > [!NOTE]
 > GiNZAによる依存構造解析処理は、GPUで大幅に高速化することができます。
-> Apple Silicon搭載のMac OS環境では、デフォルトでGPUアクセラレーションが有効化されます。
+> Apple Siliconで動作するMac OS環境では、デフォルトでGPUアクセラレーションが有効化されます。
 > 詳細は [3. GPUの有効化](#3.-GPUの有効化) を参照してください。
 
 #### 1. Transformersモデル
@@ -119,7 +119,7 @@ $ pip install -U ja_ginza
 
 #### 3. GPUの有効化
 
-Apple Silicon搭載のMac OS環境では、次の条件を満たす場合に自動でGPUアクセラレーションが有効化されます。
+Apple Siliconで動作するMac OS環境では、次の条件を満たす場合に自動でGPUアクセラレーションが有効化されます。
 - `ja_ginza`
   - Python 3.10 〜 3.12 (3.13以降は`thinc-apple-ops`が非対応)
 - `ja_ginza_electra` および `ja_ginza_large_bert`
@@ -139,11 +139,14 @@ Linux OS環境でNVIDIA GPUによるアクセラレーションを有効化す�
 ```console
 $ ginza -g 0
 ```
-`ginza`コマンドを`-g`オプションなしで実行する際、GPUアクセラレーションが有効化された場合は次のログが出力されます。
+`ginza`コマンドを`-g`オプションなしで実行する際、GPUアクセラレーションが有効化された場合は次のログが最初に出力されます。
 ```console
 $ ginza
 GPU #0 enabled
 ```
+
+> [!NOTE]
+> Apple Siliconで動作するMac OS環境で従来型モデルを実行する場合、最初のログ出力は `thinc-apple-ops enabled` となります。
 
 ### ginzaコマンドによる解析処理の実行
 
@@ -301,7 +304,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
 ### version 5.x
 
 #### ginza-5.3.0
-- 2026-09-30
+- 2026-09-30, Grossular Garnet
 - 重要な変更
   - 本リリースからサポート対象のPythonバージョンが3.10以上に、spaCyのバージョンが3.8.16以上に変更されました。
     - 推奨動作環境は Python 3.10 〜 3.13 です。
@@ -311,8 +314,8 @@ Contains information from mC4 which is made available under the ODC Attribution 
   - `ginza`コマンドで一定の条件を満たす場合にデフォルトでGPUアクセラレーションが有効化されるようになりました。
     - GPUアクセラレーションは `ginza -g -1` で無効化できます。
 - 新機能
-  - Apple Silicon搭載のMac OS環境で自動的にGPUアクセラレーションを有効化するよう変更しました。
-    - Apple Silicon搭載のMac OSで thinc-apple-ops を適用可能なPythonのバージョンは 3.10 〜 3.12 です。
+  - Apple Siliconで動作するMac OS環境で自動的にGPUアクセラレーションを有効化するよう変更しました。
+    - Apple Siliconで動作するMac OSで thinc-apple-ops を適用可能なPythonのバージョンは 3.10 〜 3.12 です。
   - `ja_ginza_bert_large` を正式にリリースしました。
   - [`ginza-transformers`](https://github.com/megagonlabs/ginza-transformers) をv1.4.0にアップグレードしました。
     - transformers componentでmodelとtokenizerの両方をHugging Face Hubから取得する形に変更しました。
@@ -333,7 +336,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
   - [#266](https://github.com/megagonlabs/ginza/pull/266) - [#273](https://github.com/megagonlabs/ginza/pull/273)
 
 #### ginza-5.2.0
-- 2024-03-31
+- 2024-03-31, Fluorite
 - Require python>=3.8 
 - Migrate to spaCy v3.7
 - New functionality
