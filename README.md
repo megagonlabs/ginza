@@ -61,9 +61,13 @@ $ pip install -U ja_ginza
 
 On Mac OS environments running on Apple Silicon, the hardware acceleration is automatically enabled under the following conditions:
 - `ja_ginza`
-  - Python 3.10 to 3.12 (thinc-apple-ops is not supported in 3.13 and later)
+  - Acceleration by `thinc-apple-ops`
+  - Supports Python 3.10 to 3.12 (`thinc-apple-ops` is not supported in 3.13 and later)
+  - The throughput improvement effect from enabling `thinc-apple-ops` on MacBook Pro M4 Max 128GB is 2.6 times for Python 3.10-3.11 and 5.2 times for Python 3.12 in `ja_ginza`.
 - `ja_ginza_electra` and `ja_ginza_large_bert`
-  - Python 3.10 or later (GPU acceleration is only enabled for `transformers` in 3.13 and later)
+  - Acceleration by `torch.backends.mps`
+  - Supports Python 3.10 to 3.13 (some build errors occur when building dependent libraries in version 3.14)
+  - The throughput improvement effect from enabling `torch.backends.mps` on MacBook Pro M4 Max 128GB is 1.3 times for Python 3.10-13 in `ja_ginza_bert_large`.
 
 To enable NVIDIA GPU acceleration in a Linux OS environment, install CUDA on Linux, add the path to the CUDA libraries to the environment variable `LD_LIBRARY_PATH` like `export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH`, and then install the `ginza` package specifying the CUDA version in extras as follows:
 - CUDA 11.x

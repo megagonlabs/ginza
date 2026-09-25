@@ -121,9 +121,13 @@ $ pip install -U ja_ginza
 
 Apple Siliconで動作するMac OS環境では、次の条件を満たす場合に自動でハードウェアアクセラレーションが有効化されます。
 - `ja_ginza`
-  - Python 3.10 〜 3.12 (3.13以降は`thinc-apple-ops`が非対応)
+  - `thinc-apple-ops`によるacceleration
+  - Python 3.10 〜 3.12 に対応 (3.13以降は`thinc-apple-ops`が非対応)
+  - `ja_ginza`の`thinc-apple-ops`によるスループット向上効果は、MacBook Pro M4 Max 128GBにおいて、Python 3.10-3.11で2.6倍、Python 3.12で5.2倍です。
 - `ja_ginza_electra` および `ja_ginza_large_bert`
-  - Python 3.10 以降 (3.13以降は`thinc-apple-ops`が非対応のため`transformers`のみGPUアクセラレーションが有効化される)
+  - `torch.backends.mps`によるacceleration
+  - Python 3.10 〜 3.13 に対応 (3.14では依存ライブラリでビルドエラーが生じる)
+  - `ja_ginza_bert_large`の`torch.backends.mps`によるスループット向上効果は、MacBook Pro M4 Max 128GBにおいて、Python 3.10-3.13で1.3倍です。
 
 Linux OS環境でNVIDIA GPUによるアクセラレーションを有効化するには、LinuxにCUDAをインストールし、`export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH` のように環境変数 `LD_LIBRARY_PATH` にCUDAライブラリのパスを追加した上で、次のようにCUDAバージョンをextrasに指定して`ginza`パッケージのインストールを行います。
 - CUDA 11.x
