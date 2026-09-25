@@ -13,6 +13,9 @@ An Open Source Japanese NLP Library, based on Universal Dependencies
 
 The GiNZA parsing models are released as part of the results of a joint research project between Recruit Co., Ltd. and the National Institute for Japanese Language and Linguistics.
 
+Please also read the English documentation.
+- [GiNZA Version 4.0: Improving Syntactic Structure Analysis Through Japanese Bunsetsu-Phrase Extraction API Integration](https://megagon.ai/ginza-version-4-0-improving-syntactic-structure-analysis-through-japanese-bunsetsu-phrase-extraction-api-integration/) - Megagon Labs Blog (2021.03)
+
 ## Runtime Environment
 From GiNZA v5.3.0, the runtime environment has changed to Python 3.10 or later.
 We recommend using Python 3.10–3.13 because installation errors may occur with some dependent libraries.

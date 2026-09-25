@@ -225,8 +225,8 @@ for sent in doc.sents:
 
 ### 解説記事
 
-- [GiNZA Version 4.0: Improving Syntactic Structure Analysis Through Japanese Bunsetsu-Phrase Extraction API Integration](https://megagon.ai/en/ginza-version-4-0/) - Megagon Labs Blog (2021.03)
 - [GiNZA version 4.0: 多言語依存構造解析技術への文節APIの統合](https://megagon.ai/jp/ginza-version-4-0/) - Megagon Labs Blog (2020.09)
+  - (英語版) [GiNZA Version 4.0: Improving Syntactic Structure Analysis Through Japanese Bunsetsu-Phrase Extraction API Integration](https://megagon.ai/ginza-version-4-0-improving-syntactic-structure-analysis-through-japanese-bunsetsu-phrase-extraction-api-integration/)
 - [GiNZA: 日本語自然言語処理オープンソースライブラリ](https://megagon.ai/jp/ginza/) - Megagon Labs (2019)
 
 ## ライセンス
