@@ -1,5 +1,4 @@
 # coding: utf8
-import sys
 from typing import Iterable, Optional
 
 import thinc
@@ -9,7 +8,7 @@ from spacy.tokens import Doc, Span
 from spacy.language import Language
 from spacy.lang.ja import Japanese
 
-from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes, bunsetu_bi_label, bunsetu_position_type, clause_head_i, _safe_lemma_, _safe_norm_
+from . import set_split_mode, inflection, reading_form, ent_label_ene, ent_label_ontonotes, bunsetu_bi_label, bunsetu_position_type, clause_head_i, _safe_lemma_, _safe_norm_, GINZA_MODEL_PACKAGES
 from .bunsetu_recognizer import bunsetu_available, bunsetu_head_list, bunsetu_phrase_span
 
 
@@ -67,20 +66,10 @@ class Analyzer:
         if self.output_format in ["2", "mecab"]:
             nlp = try_sudachi_import(self.split_mode)
         else:
-            # Work-around for pickle error. Need to share model data.
-            if self.model_name_or_path:
+            try:
                 nlp = spacy.load(self.model_name_or_path)
-            else:
-                try:
-                    nlp = spacy.load("ja_ginza_electra")
-                except IOError as e:
-                    try:
-                        nlp = spacy.load("ja_ginza")
-                    except IOError as e:
-                        try:
-                            nlp = spacy.load("ja_ginza_bert_large")
-                        except IOError as e:
-                            raise OSError("E050", 'You need to install "ja-ginza" or "ja-ginza-electra" by executing `pip install ja-ginza` or `pip install ja-ginza-electra`.')
+            except IOError:
+                raise OSError("E050", f"You need to install on or more model packages in {GINZA_MODEL_PACKAGES} by executing `pip install`.")
 
             if self.disable_sentencizer:
                 nlp.add_pipe("disable_sentencizer", before="parser")

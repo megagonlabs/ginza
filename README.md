@@ -5,112 +5,93 @@
 &emsp;
 [![Downloads](https://pepy.tech/badge/ginza/week)](https://pepy.tech/project/ginza)
 
-An Open Source Japanese NLP Library, based on Universal Dependencies
-
-***Please read the [Important changes](#ginza-520) before you upgrade GiNZA.***
-
 [日本語ページはこちら](https://megagonlabs.github.io/ginza/)
 
-## License
-GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under the
-[MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE).
-You must agree and follow the MIT License to use GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models.
+An Open Source Japanese NLP Library, based on Universal Dependencies
 
-### Explosion / spaCy
-spaCy is the key framework of GiNZA.
+***Please read the [Breaking Changes](#ginza-530) before you upgrade GiNZA.***
 
-[spaCy LICENSE PAGE](https://github.com/explosion/spaCy/blob/master/LICENSE)
+The GiNZA parsing models are released as part of the results of a joint research project between Recruit Co., Ltd. and the National Institute for Japanese Language and Linguistics.
 
-### Works Applications Enterprise / Sudachi/SudachiPy - SudachiDict - chiVe
-SudachiPy provides high accuracies for tokenization and pos tagging.
-
-[Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
-[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE),
-[SudachiDict LEGAL PAGE](https://github.com/WorksApplications/SudachiDict/blob/develop/LEGAL),
-[chiVe LICENSE PAGE](https://github.com/WorksApplications/chiVe/blob/master/LICENSE)
-
-### Hugging Face / transformers
-The GiNZA v5 Transformers model (ja_ginza_electra) is trained by using Hugging Face Transformers as a framework for pretrained models.
-
-[transformers LICENSE PAGE](https://github.com/huggingface/transformers/blob/master/LICENSE)
-
-## Training Datasets
-
-### UD Japanese BCCWJ r2.8
-The parsing model of GiNZA v5 is trained on a part of
-[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) r2.8
-([Omura and Asahara:2018](https://www.aclweb.org/anthology/W18-6014/)).
-This model is developed by National Institute for Japanese Language and Linguistics, and Megagon Labs.
-
-### GSK2014-A (2019) BCCWJ edition
-The named entity recognition model of GiNZA v5 is trained on a part of
-[GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ edition
-([Hashimoto, Inui, and Murakami:2008](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf)).
-We use two of the named entity label systems, both
-[Sekine's Extended Named Entity Hierarchy](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)
-and extended [OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf).
-This model is developed by National Institute for Japanese Language and Linguistics, and Megagon Labs.
-
-### mC4
-The GiNZA v5 Transformers model (ja_ginza_electra) is trained by using [transformers-ud-japanese-electra-base-discriminator](https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-discriminator) which is pretrained on more than 200 million Japanese sentences extracted from [mC4](https://huggingface.co/datasets/mc4).
-
-Contains information from mC4 which is made available under the ODC Attribution License.
-```
-@article{2019t5,
-    author = {Colin Raffel and Noam Shazeer and Adam Roberts and Katherine Lee and Sharan Narang and Michael Matena and Yanqi Zhou and Wei Li and Peter J. Liu},
-    title = {Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer},
-    journal = {arXiv e-prints},
-    year = {2019},
-    archivePrefix = {arXiv},
-    eprint = {1910.10683},
-}
-```
+Please also read the English documentation.
+- [GiNZA Version 4.0: Improving Syntactic Structure Analysis Through Japanese Bunsetsu-Phrase Extraction API Integration](https://megagon.ai/ginza-version-4-0-improving-syntactic-structure-analysis-through-japanese-bunsetsu-phrase-extraction-api-integration/) - Megagon Labs Blog (2021.03)
 
 ## Runtime Environment
-This project is developed with Python>=3.8 and pip for it.
+From GiNZA v5.3.0, the runtime environment has changed to Python 3.10 or later.
+We recommend using Python 3.12 because of simpler dependency installation process and higher throughput.
 We do not recommend to use Anaconda environment because the pip install step may not work properly.
 
 Please also see the Development Environment section below.
+
 ### Runtime set up
 
+> [!NOTE]
+> The GiNZA dependency parsing can be significantly accelerated with a GPU.
+> The hardware acceleration is enabled by default in Mac OS environments running on Apple Silicon.
+> For details, see [3. Enabling the GPU](#3.-Enabling-the-GPU)。
+
 #### 1. Install GiNZA NLP Library with Transformer-based Model
-Uninstall previous version of ginza and ja_ginza_electra packages:
-```console
-$ pip uninstall ginza ja_ginza_electra
-```
-Then, install the latest version of `ginza` and `ja_ginza_electra`:
-```console
-$ pip install -U ginza ja_ginza_electra
-```
 
-The package of `ja_ginza_electra` does not include `pytorch_model.bin` due to PyPI's archive size restrictions.
-This large model file will be automatically downloaded at the first run time, and the locally cached file will be used for subsequent runs.
+> Running the Transformers model requires at least 16GB of memory.
+> If you have insufficient memory, please try the standard model described below.
 
-If you need to install `ja_ginza_electra` along with `pytorch_model.bin` at the install time, you can specify direct link for GitHub release archive as follows:
+Install the Transformers model (`ja_ginza_electra` or `ja_ginza_bert_large`) by running one of the following commands:  
+(This will also install GiNZA and related Transformers libraries.)
 ```console
-$ pip install -U ginza https://github.com/megagonlabs/ginza/releases/download/latest/ja_ginza_electra-latest-with-model.tar.gz
+$ pip install -U ja_ginza_electra
+```
+```console
+$ pip install -U ja_ginza_bert_large
 ```
 
-If you hope to accelerate the transformers-based models by using GPUs with CUDA support, you can install `spacy` by specifying the CUDA version as follows:
-```console
-pip install -U "spacy[cuda117]"
-```
-
-And you need to install a version of pytorch that is consistent with the CUDA version.
+> [!NOTE]
+> The model package installed by the above command does not include large transformer models or tokenizers.
+> These large files are automatically downloaded from Hugging Face Hub on the first run, and the locally cached files are used for subsequent runs.
+> The first time you run transformers model, it will take several seconds to tens of seconds to start up due to the initialization process.
 
 #### 2. Install GiNZA NLP Library with Standard Model
-Uninstall previous version:
+
+Run the following command to install the standard model `ja_ginza`.
+(GiNZA-related libraries will also be installed at the same time.)
 ```console
-$ pip uninstall ginza ja_ginza
-```
-Then, install the latest version of `ginza` and `ja_ginza`:
-```console
-$ pip install -U ginza ja_ginza
+$ pip install -U ja_ginza
 ```
 
-When using Apple Silicon such as M1 or M2, you can accelerate the analysis process by installing `thinc-apple-ops`:
+#### 3. Enabling the GPU
+
+On Mac OS environments running on Apple Silicon, the hardware acceleration is automatically enabled under the following conditions:
+- `ja_ginza`
+  - Acceleration by `thinc-apple-ops`
+  - Supports Python 3.10 to 3.12 (`thinc-apple-ops` is not supported in 3.13 and later)
+  - The throughput improvement effect from enabling `thinc-apple-ops` on MacBook Pro M4 Max 128GB is 2.6 times for Python 3.10-3.11 and 5.2 times for Python 3.12 in `ja_ginza`.
+- `ja_ginza_electra` and `ja_ginza_large_bert`
+  - Acceleration by `torch.backends.mps`
+  - Supports Python 3.10 to 3.13 (some compilation environments required to build dependent libraries in Python 3.14)
+  - The throughput improvement effect from enabling `torch.backends.mps` on MacBook Pro M4 Max 128GB is 1.3 times for Python 3.10-13 in `ja_ginza_bert_large`.
+
+To enable NVIDIA GPU acceleration in a Linux OS environment, install CUDA on Linux, add the path to the CUDA libraries to the environment variable `LD_LIBRARY_PATH` like `export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH`, and then install the `ginza` package specifying the CUDA version in extras as follows:
+- CUDA 11.x
+  - `$ pip install ginza[cuda11x]`
+- CUDA 12.x
+  - `$ pip install ginza[cuda12x]`
+- CUDA 13.x
+  - `$ pip install ginza[cuda13x]`
+
+The `ginza` command enables GPU acceleration by default if a GPU is available.
+
+The `-g` option of the `ginza` command allows you to specify the device number of the GPU to use (specifying `-1` disables GPU acceleration).
 ```console
-$ pip install torch thinc-apple-ops
+$ ginza -g 0
+```
+When running the `ginza` command without the `-g` option, the following init log is output if GPU acceleration is enabled:
+```console
+$ ginza
+GPU #0 enabled
+```
+When executing standard model in Mac OS running on Apple Silicon, if hardware acceleration is enabled, the init log will be:
+```console
+$ ginza
+thinc-apple-ops enabled
 ```
 
 ### Execute ginza command
@@ -235,9 +216,95 @@ Please read the official documents to compile user dictionaries with `sudachipy`
 [SudachiPy - User defined Dictionary](https://github.com/WorksApplications/SudachiPy#user-defined-dictionary)
 [Sudachi User Dictionary Construction (Japanese Only)](https://github.com/WorksApplications/Sudachi/blob/develop/docs/user_dict.md)
 
+## License
+GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models are distributed under the
+[MIT License](https://github.com/megagonlabs/ginza/blob/master/LICENSE).
+You must agree and follow the MIT License to use GiNZA NLP Library and GiNZA Japanese Universal Dependencies Models.
+
+### Explosion / spaCy
+spaCy is the key framework of GiNZA.
+
+[spaCy LICENSE PAGE](https://github.com/explosion/spaCy/blob/master/LICENSE)
+
+### Works Applications Enterprise / Sudachi/SudachiPy - SudachiDict - chiVe
+SudachiPy provides high accuracies for tokenization and pos tagging.
+
+[Sudachi LICENSE PAGE](https://github.com/WorksApplications/Sudachi/blob/develop/LICENSE-2.0.txt),
+[SudachiPy LICENSE PAGE](https://github.com/WorksApplications/SudachiPy/blob/develop/LICENSE),
+[SudachiDict LEGAL PAGE](https://github.com/WorksApplications/SudachiDict/blob/develop/LEGAL),
+[chiVe LICENSE PAGE](https://github.com/WorksApplications/chiVe/blob/master/LICENSE)
+
+### Hugging Face / transformers
+The GiNZA v5 transformer models (`ja_ginza_electra` and `ja_ginza_bert_large`) use Hugging Face Transformers as inference framework.
+
+[transformers LICENSE PAGE](https://github.com/huggingface/transformers/blob/master/LICENSE)
+
+## Training Datasets
+
+### UD Japanese BCCWJ r2.8
+The parsing model of GiNZA v5 is trained on a part of
+[UD Japanese BCCWJ](https://github.com/UniversalDependencies/UD_Japanese-BCCWJ) r2.8
+([Omura and Asahara:2018](https://www.aclweb.org/anthology/W18-6014/)).
+```
+@inproceedings{omura-asahara-2018-ud,
+    title = "{UD}-{J}apanese {BCCWJ}: {U}niversal {D}ependencies Annotation for the {B}alanced {C}orpus of {C}ontemporary {W}ritten {J}apanese",
+    author = "Omura, Mai  and
+      Asahara, Masayuki",
+    booktitle = "Proceedings of the Second Workshop on Universal Dependencies ({UDW} 2018)",
+    month = nov,
+    year = "2018",
+    address = "Brussels, Belgium",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W18-6014/",
+    doi = "10.18653/v1/W18-6014",
+    pages = "117--125"
+}
+```
+
+### GSK2014-A (2019) BCCWJ edition
+The named entity recognition model of GiNZA v5 is trained on a part of
+[GSK2014-A](https://www.gsk.or.jp/catalog/gsk2014-a/) (2019) BCCWJ edition
+([Hashimoto, Inui, and Murakami:2008](https://www.anlp.jp/proceedings/annual_meeting/2010/pdf_dir/C4-4.pdf)).
+We use two of the named entity label systems, both
+[Sekine's Extended Named Entity Hierarchy](http://liat-aip.sakura.ne.jp/ene/ene8/definition_jp/html/enedetail.html)
+and extended [OntoNotes5](https://catalog.ldc.upenn.edu/docs/LDC2013T19/OntoNotes-Release-5.0.pdf).
+This model is developed by National Institute for Japanese Language and Linguistics, and Megagon Labs.
+
+### mC4
+`ja_ginza_electra` is a fine-tuned model of [transformers-ud-japanese-electra-base-discriminator](https://huggingface.co/megagonlabs/transformers-ud-japanese-electra-base-discriminator) which is pretrained on more than 200 million Japanese sentences extracted from [mC4](https://huggingface.co/datasets/mc4).
+
+The mC4 is published under the ODC Attribution License.
+```
+@article{2019t5,
+    author = {Colin Raffel and Noam Shazeer and Adam Roberts and Katherine Lee and Sharan Narang and Michael Matena and Yanqi Zhou and Wei Li and Peter J. Liu},
+    title = {Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer},
+    journal = {arXiv e-prints},
+    year = {2019},
+    archivePrefix = {arXiv},
+    eprint = {1910.10683},
+}
+```
+
 ## Releases
 
 ### version 5.x
+
+#### ginza-5.3.0
+- 2026-09-30, Grossular Garnet
+- Breaking Changes
+  - We changed the supported Python version to 3.10 or later, and the supported spaCy version to 3.8.16 or later.
+    - We recommend using Python 3.12 because of simpler dependency installation process and higher throughput.
+    - Some compilation environments required to build dependent libraries in Python 3.14.
+  - The model package loading priority was changed to `ja_ginza_bert_large`, `ja_ginza_electra`, and `ja_ginza`.
+  - `ginza` command enables GPU acceleration by default under certain conditions.
+    - GPU acceleration can be disabled with `ginza -g -1`.
+- New Features
+  - Enabling hardware acceleration by default in Mac OS environments with Apple Silicon
+    - The Python versions that can be used with `thinc-apple-ops` on Mac OS running Apple Silicon are 3.10 through 3.12.
+  - Official release of `ja_ginza_bert_large`
+  - [`ginza-transformers`](https://github.com/megagonlabs/ginza-transformers) was upgraded to v1.4.0.
+    - Changed the transformers component to obtain both model and tokenizer from Hugging Face Hub.
+    - [`spacy-transformers`](https://github.com/explosion/spacy-transformers) has a requirement of `torch>=1.8.0` and `transformers<4.53.3`.
 
 #### ginza-5.2.1
 - 2026-09-01
@@ -254,7 +321,7 @@ Please read the official documents to compile user dictionaries with `sudachipy`
   - [#266](https://github.com/megagonlabs/ginza/pull/266) - [#273](https://github.com/megagonlabs/ginza/pull/273)
 
 #### ginza-5.2.0
-- 2024-03-31
+- 2024-03-31, Fluorite
 - Require python>=3.8 
 - Migrate to spaCy v3.7
 - New functionality
@@ -571,8 +638,8 @@ $ python -m spacy train ja ja_ginza-4.0.0 corpus/ja_ginza-ud-train.json corpus/j
 ```
 
 ## Run tests
-Ginza uses the pytest framework for testing, and you can run the tests via `setup.py` without install test requirements explicitly.
-Some tests depends on the ginza default models (`ja-ginza`, `ja-ginza-electra`), so install them before the tests is needed.
+GiNZA uses the pytest framework for testing, and you can run the tests via `setup.py` without install test requirements explicitly.
+Some tests depends on the ginza parsing models, so install them before the tests is needed.
 
 ```console
 $ pip install ja-ginza ja-ginza-electra
