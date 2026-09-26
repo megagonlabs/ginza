@@ -13,7 +13,7 @@ GiNZAの解析モデルは、株式会社リクルートと国立国語研究所
 ## What's new!
 
 - `GiNZA v5.3.0 - Grossular Garnet` をリリースしました (2026.09.30)
-  - 動作環境を Python 3.10 以降に変更（Python 3.10 ~ 3.13 の使用を推奨）
+  - 動作環境を Python 3.10 以降に変更（インストールの簡単さと性能が両立する Python 3.12 の使用を推奨）
   - `ja_ginza_bert_large` を正式にリリース
   - Apple Siliconで動作するMac OS環境で自動的にハードウェアアクセラレーションを有効化するよう変更
     - thinc-apple-ops を適用可能なPythonのバージョンは 3.10 〜 3.12 です
@@ -27,10 +27,10 @@ GiNZAの解析モデルは、株式会社リクルートと国立国語研究所
 
 ## GiNZA v5.3 互換性情報
 - Pythonの対応バージョンが3.10以上に変更されました
-  - 推奨動作環境は Python 3.10 ~ 3.13 です
-  - Python 3.14では一部の依存ライブラリのビルドにRustコンパイラが必要です
+  - インストールの簡単さと性能が両立する Python 3.12 の使用を推奨します
+  - Python 3.14では依存ライブラリのビルドのためにコンパイル環境を構築する必要があります
 - spaCyの対応バージョンがv3.8.16以上に変更されました
-- GiNZA v5.3.0より前のモデルパケージはv5.3.0で使用できないため更新が必要です
+- GiNZA v5.3.0より前のモデルパッケージはv5.3.0で使用できないため更新が必要です
 - モデルの読み込み優先度を `ja_ginza_bert_large`, `ja_ginza_electra`, `ja_ginza` の順に変更しました
 - `ginza`コマンドで一定の条件を満たす場合にデフォルトでGPUアクセラレーションが有効化されるようになりました
   - GPUアクセラレーションは `ginza -g -1` で無効化できます
@@ -126,7 +126,7 @@ Apple Siliconで動作するMac OS環境では、次の条件を満たす場合�
   - `ja_ginza`の`thinc-apple-ops`によるスループット向上効果は、MacBook Pro M4 Max 128GBにおいて、Python 3.10-3.11で2.6倍、Python 3.12で5.2倍です。
 - `ja_ginza_electra` および `ja_ginza_large_bert`
   - `torch.backends.mps`によるacceleration
-  - Python 3.10 〜 3.13 に対応 (3.14では依存ライブラリでビルドエラーが生じる)
+  - Python 3.10 〜 3.13 に対応 (3.14では依存ライブラリのビルドのためにコンパイル環境の構築が必要)
   - `ja_ginza_bert_large`の`torch.backends.mps`によるスループット向上効果は、MacBook Pro M4 Max 128GBにおいて、Python 3.10-3.13で1.3倍です。
 
 Linux OS環境でNVIDIA GPUによるアクセラレーションを有効化するには、LinuxにCUDAをインストールし、`export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH` のように環境変数 `LD_LIBRARY_PATH` にCUDAライブラリのパスを追加した上で、次のようにCUDAバージョンをextrasに指定して`ginza`パッケージのインストールを行います。
@@ -313,9 +313,9 @@ Contains information from mC4 which is made available under the ODC Attribution 
 - 2026-09-30, Grossular Garnet
 - 重要な変更
   - 本リリースからサポート対象のPythonバージョンが3.10以上に、spaCyのバージョンが3.8.16以上に変更されました。
-    - 推奨動作環境は Python 3.10 〜 3.13 です。
-    - Python 3.14では一部の依存ライブラリのビルドにRustコンパイラが必要です。
-  - GiNZA v5.3.0より前のモデルパケージはGiNZA v5.3.0以降で使用できません。
+    - インストールの簡単さと性能が両立する Python 3.12 の使用を推奨します。
+    - Python 3.14では依存ライブラリのビルドのためにコンパイル環境を構築する必要があります。
+  - GiNZA v5.3.0より前のモデルパッケージはGiNZA v5.3.0以降で使用できません。
   - モデルパッケージの読み込み優先度を `ja_ginza_bert_large`, `ja_ginza_electra`, `ja_ginza` の順に変更しました。
   - `ginza`コマンドで一定の条件を満たす場合にデフォルトでGPUアクセラレーションが有効化されるようになりました。
     - GPUアクセラレーションは `ginza -g -1` で無効化できます。
