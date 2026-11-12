@@ -18,7 +18,7 @@ Please also read the English documentation.
 
 ## Runtime Environment
 From GiNZA v5.3.0, the runtime environment has changed to Python 3.10 or later.
-We recommend using Python 3.12 because of simpler dependency installation process and higher throughput.
+We recommend using Python 3.12 or 3.13 because of simpler dependency installation process and higher throughput.
 We do not recommend to use Anaconda environment because the pip install step may not work properly.
 
 Please also see the Development Environment section below.
@@ -62,8 +62,8 @@ $ pip install -U ja_ginza
 On Mac OS environments running on Apple Silicon, the hardware acceleration is automatically enabled under the following conditions:
 - `ja_ginza`
   - Acceleration by `thinc-apple-ops`
-  - Supports Python 3.10 to 3.12 (`thinc-apple-ops` is not supported in 3.13 and later)
-  - The throughput improvement effect from enabling `thinc-apple-ops` on MacBook Pro M4 Max 128GB is 2.6 times for Python 3.10-3.11 and 5.2 times for Python 3.12 in `ja_ginza`.
+  - Supports Python 3.10 to 3.14
+  - The throughput improvement effect from enabling `thinc-apple-ops` on MacBook Pro M4 Max 128GB is 2.6 times for Python 3.10-3.11 and 5.2 times for Python 3.12-3.14 in `ja_ginza`.
 - `ja_ginza_electra` and `ja_ginza_large_bert`
   - Acceleration by `torch.backends.mps`
   - Supports Python 3.10 to 3.13 (some compilation environments required to build dependent libraries in Python 3.14)
@@ -293,14 +293,14 @@ The mC4 is published under the ODC Attribution License.
 - 2026-09-30, Grossular Garnet
 - Breaking Changes
   - We changed the supported Python version to 3.10 or later, and the supported spaCy version to 3.8.16 or later.
-    - We recommend using Python 3.12 because of simpler dependency installation process and higher throughput.
-    - Some compilation environments required to build dependent libraries in Python 3.14.
+    - We recommend using Python 3.12 or 3.13 because of simpler dependency installation process and higher throughput.
+    - Some compilation environments required to build Transformers related libraries in Python 3.14.
   - The model package loading priority was changed to `ja_ginza_bert_large`, `ja_ginza_electra`, and `ja_ginza`.
   - `ginza` command enables GPU acceleration by default under certain conditions.
     - GPU acceleration can be disabled with `ginza -g -1`.
 - New Features
   - Enabling hardware acceleration by default in Mac OS environments with Apple Silicon
-    - The Python versions that can be used with `thinc-apple-ops` on Mac OS running Apple Silicon are 3.10 through 3.12.
+    - The Python versions that can be used with `thinc-apple-ops` on Mac OS running Apple Silicon are 3.10 through 3.14.
   - Official release of `ja_ginza_bert_large`
   - [`ginza-transformers`](https://github.com/megagonlabs/ginza-transformers) was upgraded to v1.4.0.
     - Changed the transformers component to obtain both model and tokenizer from Hugging Face Hub.

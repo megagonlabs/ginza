@@ -22,7 +22,7 @@ setup(
         "plac>=1.3.3",
         "SudachiPy>=0.6.11,<0.7.0",
         "SudachiDict-core>=20210802",
-        "thinc-apple-ops>=1.0.0 ; sys_platform == 'darwin' and platform_machine == 'arm64' and python_version < '3.13'",
+        "thinc-apple-ops>=1.0.3 ; sys_platform == 'darwin' and platform_machine == 'arm64' and python_version < '3.15'",
     ],
     extras_require={
         "cuda11x": ["cupy-cuda11x"],
@@ -35,5 +35,5 @@ setup(
     name="ginza",
     packages=find_packages(include=["ginza"]),
     url="https://github.com/megagonlabs/ginza",
-    version='5.3.0',
+    version='5.3.1',
 )
