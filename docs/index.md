@@ -13,10 +13,10 @@ GiNZAの解析モデルは、株式会社リクルートと国立国語研究所
 ## What's new!
 
 - `GiNZA v5.3.0 - Grossular Garnet` をリリースしました (2026.09.30)
-  - 動作環境を Python 3.10 以降に変更（インストールの簡単さと性能が両立する Python 3.12 の使用を推奨）
+  - 動作環境を Python 3.10 以降に変更（インストールの簡単さと性能が両立する Python 3.12 または 3.13 の使用を推奨）
   - `ja_ginza_bert_large` を正式にリリース
   - Apple Siliconで動作するMac OS環境で自動的にハードウェアアクセラレーションを有効化するよう変更
-    - thinc-apple-ops を適用可能なPythonのバージョンは 3.10 〜 3.12 です
+    - thinc-apple-ops を適用可能なPythonのバージョンは 3.10 〜 3.14 です
 - `GiNZA v5.2.1`をリリースしました (2026.09.01)
   - バグ改修を行いました
   - このリリースがPython 3.9以前で動作する最後のバージョンとなります
@@ -27,7 +27,7 @@ GiNZAの解析モデルは、株式会社リクルートと国立国語研究所
 
 ## GiNZA v5.3 互換性情報
 - Pythonの対応バージョンが3.10以上に変更されました
-  - インストールの簡単さと性能が両立する Python 3.12 の使用を推奨します
+  - インストールの簡単さと性能が両立する Python 3.12 または 3.13 の使用を推奨します
   - Python 3.14では依存ライブラリのビルドのためにコンパイル環境を構築する必要があります
 - spaCyの対応バージョンがv3.8.16以上に変更されました
 - GiNZA v5.3.0より前のモデルパッケージはv5.3.0で使用できないため更新が必要です
@@ -122,8 +122,8 @@ $ pip install -U ja_ginza
 Apple Siliconで動作するMac OS環境では、次の条件を満たす場合に自動でハードウェアアクセラレーションが有効化されます。
 - `ja_ginza`
   - `thinc-apple-ops`によるacceleration
-  - Python 3.10 〜 3.12 に対応 (3.13以降は`thinc-apple-ops`が非対応)
-  - `ja_ginza`の`thinc-apple-ops`によるスループット向上効果は、MacBook Pro M4 Max 128GBにおいて、Python 3.10-3.11で2.6倍、Python 3.12で5.2倍です。
+  - Python 3.10 〜 3.14 に対応
+  - `ja_ginza`の`thinc-apple-ops`によるスループット向上効果は、MacBook Pro M4 Max 128GBにおいて、Python 3.10-3.11で2.6倍、Python 3.12-3.14で5.2倍です。
 - `ja_ginza_electra` および `ja_ginza_large_bert`
   - `torch.backends.mps`によるacceleration
   - Python 3.10 〜 3.13 に対応 (3.14では依存ライブラリのビルドのためにコンパイル環境の構築が必要)
@@ -313,7 +313,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
 - 2026-09-30, Grossular Garnet
 - 重要な変更
   - 本リリースからサポート対象のPythonバージョンが3.10以上に、spaCyのバージョンが3.8.16以上に変更されました。
-    - インストールの簡単さと性能が両立する Python 3.12 の使用を推奨します。
+    - インストールの簡単さと性能が両立する Python 3.12 または 3.13 の使用を推奨します。
     - Python 3.14では依存ライブラリのビルドのためにコンパイル環境を構築する必要があります。
   - GiNZA v5.3.0より前のモデルパッケージはGiNZA v5.3.0以降で使用できません。
   - モデルパッケージの読み込み優先度を `ja_ginza_bert_large`, `ja_ginza_electra`, `ja_ginza` の順に変更しました。
@@ -321,7 +321,7 @@ Contains information from mC4 which is made available under the ODC Attribution 
     - GPUアクセラレーションは `ginza -g -1` で無効化できます。
 - 新機能
   - Apple Siliconで動作するMac OS環境で自動的にハードウェアアクセラレーションを有効化するよう変更しました。
-    - Apple Siliconで動作するMac OSで thinc-apple-ops を適用可能なPythonのバージョンは 3.10 〜 3.12 です。
+    - Apple Siliconで動作するMac OSで thinc-apple-ops を適用可能なPythonのバージョンは 3.10 〜 3.14 です。
   - `ja_ginza_bert_large` を正式にリリースしました。
   - [`ginza-transformers`](https://github.com/megagonlabs/ginza-transformers) をv1.4.0にアップグレードしました。
     - transformers componentでmodelとtokenizerの両方をHugging Face Hubから取得する形に変更しました。
