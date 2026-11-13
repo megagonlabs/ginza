@@ -12,6 +12,9 @@ GiNZAの解析モデルは、株式会社リクルートと国立国語研究所
 
 ## What's new!
 
+- `GiNZA v5.3.1` をリリースしました (2026.11.13)
+  - thinc-apple-opsをv1.0.3に更新
+  - Apple Siliconで動作するMac OS環境のPython 3.13 および 3.14 での`ja_ginza`の実行速度が向上
 - `GiNZA v5.3.0 - Grossular Garnet` をリリースしました (2026.09.30)
   - 動作環境を Python 3.10 以降に変更（インストールの簡単さと性能が両立する Python 3.12 または 3.13 の使用を推奨）
   - `ja_ginza_bert_large` を正式にリリース
@@ -308,6 +311,10 @@ Contains information from mC4 which is made available under the ODC Attribution 
 ## [リリース履歴](https://github.com/megagonlabs/ginza/releases)
 
 ### version 5.x
+
+#### ginza-5.3.1
+- 2026-11-13
+- Upgrade thinc-apple-ops to v1.0.3
 
 #### ginza-5.3.0
 - 2026-09-30, Grossular Garnet

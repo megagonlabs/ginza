@@ -289,6 +289,10 @@ The mC4 is published under the ODC Attribution License.
 
 ### version 5.x
 
+#### ginza-5.3.1
+- 2026-11-13
+- Upgrade thinc-apple-ops to v1.0.3
+
 #### ginza-5.3.0
 - 2026-09-30, Grossular Garnet
 - Breaking Changes
